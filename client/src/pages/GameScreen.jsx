@@ -227,29 +227,29 @@ function HostGameView({ question, answerProgress, onNextQuestion, diffBadge, cat
     : 0;
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-5 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col px-4 py-3 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-purple-900/50 to-transparent" />
         <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black/30 to-transparent" />
       </div>
 
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-5 relative z-10">
-        <div className="flex items-center gap-3">
-          <span className={`text-sm font-bold uppercase tracking-wider px-4 py-2 rounded-full border ${catBadge}`}>
+      <div className="flex items-center justify-between mb-2 relative z-10">
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${catBadge}`}>
             {question.category}
           </span>
-          <span className={`text-sm font-bold uppercase px-4 py-2 rounded-full border ${diffBadge[question.difficulty] || 'bg-white/10 text-white/60 border-white/20'}`}>
+          <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-full border ${diffBadge[question.difficulty] || 'bg-white/10 text-white/60 border-white/20'}`}>
             {question.difficulty}
           </span>
         </div>
-        <div className="font-nunito text-2xl font-black text-white/60">
+        <div className="font-nunito text-sm font-black text-white/60">
           {question.index + 1} <span className="text-white/30">/ {question.total}</span>
         </div>
       </div>
 
       {/* Timer */}
-      <div className="mb-6 relative z-10">
+      <div className="mb-3 relative z-10">
         <Timer
           duration={question.timeLimit}
           onTimeUp={() => setTimeUp(true)}
@@ -259,41 +259,41 @@ function HostGameView({ question, answerProgress, onNextQuestion, diffBadge, cat
         />
       </div>
 
-      {/* Question - BIG for projector */}
-      <div className="relative z-10 rounded-3xl p-8 mb-6 text-center"
-        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
-        <p className="text-white text-3xl md:text-5xl font-black leading-tight">
+      {/* Question */}
+      <div className="relative z-10 rounded-2xl px-4 py-3 mb-3 text-center"
+        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+        <p className="text-white text-base md:text-lg font-black leading-tight">
           {question.question}
         </p>
       </div>
 
-      {/* Answer grid - large blocks */}
-      <div className="grid grid-cols-2 gap-4 mb-6 relative z-10">
+      {/* Answer grid */}
+      <div className="grid grid-cols-2 gap-2 mb-3 relative z-10">
         {question.options.map((opt, i) => (
           <div
             key={i}
-            className={`${ANSWERS[i].bg} rounded-2xl px-5 py-4 flex items-center gap-4 text-white font-bold shadow-xl`}
-            style={{ minHeight: '90px' }}
+            className={`${ANSWERS[i].bg} rounded-xl px-3 py-2.5 flex items-center gap-3 text-white font-bold shadow-lg`}
+            style={{ minHeight: '58px' }}
           >
-            <span className="w-10 h-10 rounded-xl bg-black/25 flex items-center justify-center text-xl font-black flex-shrink-0">
+            <span className="w-7 h-7 rounded-lg bg-black/25 flex items-center justify-center text-sm font-black flex-shrink-0">
               {ANSWERS[i].label}
             </span>
-            <span className="text-2xl leading-tight font-black">{opt}</span>
+            <span className="text-sm leading-tight font-black">{opt}</span>
           </div>
         ))}
       </div>
 
       {/* Progress + Next */}
       <div className="relative z-10 mt-auto">
-        <div className="bg-glass-dark rounded-2xl p-5 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-white/50 font-semibold text-sm uppercase tracking-wider">Players Answered</span>
-            <span className="font-nunito text-3xl font-black text-white">
+        <div className="bg-glass-dark rounded-xl p-3 mb-2">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-white/50 font-semibold text-xs uppercase tracking-wider">Players Answered</span>
+            <span className="font-nunito text-lg font-black text-white">
               {answerProgress.answered}
-              <span className="text-white/40 text-xl"> / {answerProgress.total}</span>
+              <span className="text-white/40 text-sm"> / {answerProgress.total}</span>
             </span>
           </div>
-          <div className="bg-white/10 rounded-full h-5 overflow-hidden">
+          <div className="bg-white/10 rounded-full h-3 overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -305,16 +305,16 @@ function HostGameView({ question, answerProgress, onNextQuestion, diffBadge, cat
             />
           </div>
           {pct === 100 && (
-            <p className="text-green-400 text-sm font-bold text-center mt-2 animate-pulse">✅ All players answered!</p>
+            <p className="text-green-400 text-xs font-bold text-center mt-1 animate-pulse">✅ All players answered!</p>
           )}
         </div>
 
         <button
           onClick={onNextQuestion}
-          className="w-full py-5 rounded-2xl font-black text-2xl text-white font-nunito transition-all duration-300 hover:scale-105 hover:brightness-110"
+          className="w-full py-3 rounded-xl font-black text-base text-white font-nunito transition-all duration-300 hover:scale-105 hover:brightness-110"
           style={{
             background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
-            boxShadow: '0 8px 40px rgba(124,58,237,0.5)'
+            boxShadow: '0 6px 24px rgba(124,58,237,0.5)'
           }}
         >
           {question.index + 1 >= question.total ? '🏆 SHOW RESULTS' : '⏭️ NEXT QUESTION'}
