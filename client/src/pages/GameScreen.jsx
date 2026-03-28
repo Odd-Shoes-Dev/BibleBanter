@@ -268,17 +268,17 @@ function HostGameView({ question, answerProgress, onNextQuestion, diffBadge, cat
       </div>
 
       {/* Answer grid */}
-      <div className="grid grid-cols-2 gap-2 mb-3 relative z-10">
+      <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
         {question.options.map((opt, i) => (
           <div
             key={i}
-            className={`${ANSWERS[i].bg} rounded-xl px-3 py-2.5 flex items-center gap-3 text-white font-bold shadow-lg`}
-            style={{ minHeight: '58px' }}
+            className={`${ANSWERS[i].bg} rounded-xl px-4 py-4 flex items-center gap-3 text-white font-bold shadow-lg`}
+            style={{ minHeight: '76px' }}
           >
-            <span className="w-7 h-7 rounded-lg bg-black/25 flex items-center justify-center text-sm font-black flex-shrink-0">
+            <span className="w-8 h-8 rounded-lg bg-black/25 flex items-center justify-center text-sm font-black flex-shrink-0">
               {ANSWERS[i].label}
             </span>
-            <span className="text-sm leading-tight font-black">{opt}</span>
+            <span className="text-base leading-tight font-black">{opt}</span>
           </div>
         ))}
       </div>
