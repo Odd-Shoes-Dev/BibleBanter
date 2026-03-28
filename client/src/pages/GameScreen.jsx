@@ -154,17 +154,17 @@ export default function GameScreen({
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Top bar */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-2 relative z-10">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border ${catBadge}`}>
+      <div className="flex-shrink-0 px-3 pt-3 pb-1 relative z-10">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${catBadge}`}>
               {question.category === 'Old Testament' ? '📜 OT' : '✝️ NT'}
             </span>
-            <span className={`text-xs font-bold uppercase px-3 py-1.5 rounded-full border ${diffBadge[question.difficulty] || 'bg-white/10 text-white/60 border-white/20'}`}>
+            <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full border ${diffBadge[question.difficulty] || 'bg-white/10 text-white/60 border-white/20'}`}>
               {question.difficulty}
             </span>
           </div>
-          <span className="font-cinzel text-sm font-black text-white/50">
+          <span className="font-cinzel text-xs font-black text-white/50">
             {question.index + 1}<span className="text-white/25">/{question.total}</span>
           </span>
         </div>
@@ -176,42 +176,42 @@ export default function GameScreen({
           questionIndex={question.index}
         />
 
-        <div className="mt-3 rounded-2xl px-5 py-4 text-center relative overflow-hidden"
+        <div className="mt-2 rounded-2xl px-4 py-3 text-center relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
             border: '1px solid rgba(255,255,255,0.15)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
           }}>
-          <p className="text-white text-lg sm:text-xl font-bold leading-snug">
+          <p className="text-white text-sm sm:text-base font-bold leading-snug">
             {question.question}
           </p>
         </div>
       </div>
 
       {/* Answer grid */}
-      <div className="flex-1 grid grid-cols-2 gap-3 px-4 pb-4 pt-2 relative z-10">
+      <div className="flex-1 grid grid-cols-2 gap-2 px-3 pb-3 pt-1.5 relative z-10">
         {question.options.map((opt, i) => (
           <button
             key={i}
             onClick={() => handleAnswer(i)}
             disabled={selected !== null || timeUp}
-            className={`${getButtonClass(i)} rounded-3xl font-bold text-white transition-all duration-300 active:scale-95 flex flex-col items-center justify-center gap-2 p-4 animate-slide-up relative overflow-hidden`}
+            className={`${getButtonClass(i)} rounded-2xl font-bold text-white transition-all duration-300 active:scale-95 flex flex-col items-center justify-center gap-1.5 p-3 animate-slide-up relative overflow-hidden`}
             style={{
               animationDelay: `${i * 0.08}s`,
-              minHeight: '90px',
+              minHeight: '72px',
               boxShadow: selected === i
                 ? '0 0 0 4px rgba(255,255,255,0.8), 0 8px 30px rgba(0,0,0,0.4)'
                 : undefined
             }}
           >
             <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-3xl pointer-events-none" />
-            <span className="text-4xl font-black leading-none" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+            <span className="text-3xl font-black leading-none" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
               {ANSWERS[i].shape}
             </span>
-            <span className="text-base sm:text-lg font-black leading-tight text-center px-2">
+            <span className="text-sm font-black leading-tight text-center px-1">
               {opt}
             </span>
-            <span className="absolute bottom-2.5 left-3 w-7 h-7 rounded-lg bg-black/30 flex items-center justify-center text-xs font-black">
+            <span className="absolute bottom-2 left-2.5 w-6 h-6 rounded-md bg-black/30 flex items-center justify-center text-xs font-black">
               {ANSWERS[i].label}
             </span>
           </button>

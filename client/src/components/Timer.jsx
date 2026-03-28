@@ -45,13 +45,13 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
     return (
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-white/40 text-sm font-semibold uppercase tracking-wider">Time Remaining</span>
-          <span className={`font-nunito text-5xl font-black ${textColor} transition-colors ${isUrgent ? 'animate-pulse' : ''}`}
+          <span className="text-white/40 text-xs font-semibold uppercase tracking-wider">Time Remaining</span>
+          <span className={`font-nunito text-3xl font-black ${textColor} transition-colors ${isUrgent ? 'animate-pulse' : ''}`}
             style={isUrgent ? { textShadow: '0 0 20px rgba(239,68,68,0.8)' } : {}}>
             {Math.ceil(timeLeft)}s
           </span>
         </div>
-        <div className="h-6 bg-white/10 rounded-full overflow-hidden shadow-inner">
+        <div className="h-4 bg-white/10 rounded-full overflow-hidden shadow-inner">
           <div
             className={`h-full bg-gradient-to-r ${barColor} rounded-full transition-all duration-100 ease-linear`}
             style={{ width: `${percent}%`, boxShadow: isUrgent ? '0 0 12px rgba(239,68,68,0.6)' : '' }}
@@ -63,13 +63,13 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <span className="text-white/40 text-xs font-semibold uppercase tracking-wider">Time</span>
-        <span className={`font-nunito text-2xl font-black ${textColor} transition-colors ${isUrgent ? 'animate-pulse' : ''}`}>
+        <span className={`font-nunito text-lg font-black ${textColor} transition-colors ${isUrgent ? 'animate-pulse' : ''}`}>
           {Math.ceil(timeLeft)}s
         </span>
       </div>
-      <div className="h-4 bg-white/10 rounded-full overflow-hidden shadow-inner">
+      <div className="h-2.5 bg-white/10 rounded-full overflow-hidden shadow-inner">
         <div
           className={`h-full bg-gradient-to-r ${barColor} rounded-full transition-all duration-100 ease-linear`}
           style={{ width: `${percent}%` }}
