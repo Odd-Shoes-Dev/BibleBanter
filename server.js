@@ -16,7 +16,10 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
+const distPath = path.join(__dirname, 'client', 'dist');
+if (require('fs').existsSync(distPath)) {
+  app.use(express.static(distPath));
+}
 
 // In-memory game store
 const games = {};
@@ -256,9 +259,14 @@ function endGame(pin) {
   io.to(pin).emit('game-over', { leaderboard });
 }
 
-// Serve React app for all other routes
+// Serve React app for all other routes (only in local dev where client/dist exists)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
+  if (require('fs').existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.json({ status: 'Bible Battle API running' });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
