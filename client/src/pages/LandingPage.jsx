@@ -20,11 +20,12 @@ export default function LandingPage({ onHost, onJoin }) {
         </div>
 
         {/* Title */}
-        <h1 className="font-cinzel font-black leading-none tracking-wider mb-4 animate-fade-in"
+        <h1 className="font-anton leading-none tracking-wider mb-4 animate-fade-in"
           style={{
-            fontSize: 'clamp(2.8rem, 10vw, 5.5rem)',
+            fontSize: 'clamp(3rem, 11vw, 6rem)',
             color: '#f5a623',
-            textShadow: '0 0 60px rgba(245,166,35,0.35)',
+            textShadow: '0 0 60px rgba(245,166,35,0.4)',
+            letterSpacing: '0.04em',
           }}>
           BIBLE BATTLE
         </h1>
