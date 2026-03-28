@@ -51,14 +51,11 @@ export default function LandingPage({ onHost, onJoin }) {
       {/* ── HERO ── */}
       <div className="text-center relative z-10">
 
-        {/* Logo — animated entrance */}
+        {/* Sword icon — animated entrance */}
         <div className="animate-bounce-in mb-4">
-          <img
-            src="/kampus-logo.jpeg"
-            alt="Kampus Logo"
-            className="w-20 h-20 object-contain mx-auto"
-            style={{ filter: 'drop-shadow(0 0 24px rgba(249,115,22,0.55))' }}
-          />
+          <span className="text-6xl inline-block" style={{ filter: 'drop-shadow(0 0 24px rgba(249,115,22,0.6))' }}>
+            ⚔️
+          </span>
         </div>
 
         {/* Title */}
@@ -140,7 +137,13 @@ export default function LandingPage({ onHost, onJoin }) {
         </div>
       </div>
 
-      <p className="mt-8 text-white/15 text-xs font-cinzel tracking-[0.3em] uppercase relative z-10">
+      {/* Kampus branding */}
+      <div className="mt-6 flex items-center gap-2 relative z-10 opacity-40 hover:opacity-70 transition-opacity">
+        <span className="text-white/50 text-xs font-medium">A</span>
+        <img src="/kampus-logo.jpeg" alt="Kampus" className="w-6 h-6 object-contain rounded-full" />
+        <span className="text-white/50 text-xs font-medium">Kampus Event</span>
+      </div>
+      <p className="mt-2 mb-1 text-white/15 text-xs font-cinzel tracking-[0.3em] uppercase relative z-10">
         Bible Battle — 2026
       </p>
     </div>
