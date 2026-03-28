@@ -57,6 +57,7 @@ export default function GameScreen({
     easy: 'bg-green-500/30 text-green-300 border-green-500/40',
     medium: 'bg-amber-500/30 text-amber-300 border-amber-500/40',
     hard: 'bg-red-500/30 text-red-300 border-red-500/40',
+    expert: 'bg-purple-500/40 text-purple-200 border-purple-400/60',
   };
   const catBadge = question.category === 'Old Testament'
     ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'

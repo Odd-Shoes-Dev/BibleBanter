@@ -51,11 +51,27 @@ export default function LandingPage({ onHost, onJoin }) {
       {/* ── HERO ── */}
       <div className="text-center relative z-10">
 
-        {/* Sword icon — animated entrance */}
-        <div className="animate-bounce-in mb-4">
-          <span className="text-6xl inline-block" style={{ filter: 'drop-shadow(0 0 24px rgba(249,115,22,0.6))' }}>
-            ⚔️
-          </span>
+        {/* Sword clash — two swords from sides */}
+        <div className="mb-4 flex items-center justify-center gap-0 relative" style={{ height: '72px' }}>
+          {/* Left sword */}
+          <span className="text-5xl inline-block select-none" style={{
+            animation: 'sword-in 0.75s cubic-bezier(0.34,1.56,0.64,1) forwards, sword-hover 2.8s ease-in-out 0.75s infinite',
+            filter: 'drop-shadow(0 0 14px rgba(249,115,22,0.7))'
+          }}>🗡️</span>
+
+          {/* Spark at clash point */}
+          <span className="text-xl absolute select-none" style={{
+            animation: 'clash-spark 0.55s ease-out 0.65s forwards',
+            opacity: 0, zIndex: 10
+          }}>✨</span>
+
+          {/* Right sword (mirrored via parent scaleX) */}
+          <div style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>
+            <span className="text-5xl inline-block select-none" style={{
+              animation: 'sword-in 0.75s cubic-bezier(0.34,1.56,0.64,1) forwards, sword-hover-r 2.8s ease-in-out 0.75s infinite',
+              filter: 'drop-shadow(0 0 14px rgba(37,99,235,0.7))'
+            }}>🗡️</span>
+          </div>
         </div>
 
         {/* Title */}

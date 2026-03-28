@@ -65,6 +65,31 @@
   }
 }
 
+/* Sword clash animations */
+@keyframes sword-in {
+  0%   { transform: translateX(-90px) rotate(-45deg); opacity: 0; }
+  60%  { transform: translateX(10px) rotate(8deg); opacity: 1; }
+  80%  { transform: translateX(-4px) rotate(-3deg); opacity: 1; }
+  100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
+@keyframes clash-spark {
+  0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+  35%  { transform: scale(2) rotate(20deg); opacity: 1; }
+  100% { transform: scale(0.6) rotate(40deg); opacity: 0; }
+}
+@keyframes sword-hover {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-7px) rotate(3deg); }
+}
+@keyframes sword-hover-r {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-7px) rotate(-3deg); }
+}
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(249,115,22,0.5)); }
+  50%       { filter: drop-shadow(0 0 28px rgba(249,115,22,0.9)); }
+}
+
 /* Stars background */
 .stars-bg {
   background: 

@@ -160,6 +160,60 @@ const questions = [
     options: ["Jerusalem", "Nazareth", "Bethlehem", "Jericho"],
     answer: 2,
     scripture: "Luke 2:4-6 — 'He went there to Bethlehem... while they were there, the time came for the baby to be born.'"
+  },
+  {
+    id: 19,
+    category: "New Testament",
+    difficulty: "expert",
+    question: "Who replaced Judas Iscariot as the twelfth apostle?",
+    options: ["Barnabas", "Silas", "Matthias", "Stephen"],
+    answer: 2,
+    scripture: "Acts 1:26 — 'Then they cast lots, and the lot fell to Matthias; so he was added to the eleven apostles.'"
+  },
+  {
+    id: 20,
+    category: "Old Testament",
+    difficulty: "expert",
+    question: "What was the name of Moses' mother?",
+    options: ["Zipporah", "Miriam", "Pharaoh's daughter", "Jochebed"],
+    answer: 3,
+    scripture: "Exodus 6:20 — 'Amram married his father's sister Jochebed, who bore him Aaron and Moses.'"
+  },
+  {
+    id: 21,
+    category: "Old Testament",
+    difficulty: "expert",
+    question: "Who was the first judge of Israel mentioned in the Book of Judges?",
+    options: ["Gideon", "Deborah", "Samson", "Othniel"],
+    answer: 3,
+    scripture: "Judges 3:9 — 'But when they cried out to the LORD, he raised up for them a deliverer, Othniel son of Kenaz.'"
+  },
+  {
+    id: 22,
+    category: "New Testament",
+    difficulty: "expert",
+    question: "What is the place where Jesus was crucified called in Hebrew?",
+    options: ["Gethsemane", "Golgotha", "Bethany", "Emmaus"],
+    answer: 1,
+    scripture: "John 19:17 — 'Carrying his own cross, he went out to the place of the Skull (which in Aramaic is called Golgotha).'"
+  },
+  {
+    id: 23,
+    category: "Old Testament",
+    difficulty: "expert",
+    question: "Which prophet is known as the 'weeping prophet'?",
+    options: ["Isaiah", "Hosea", "Jeremiah", "Ezekiel"],
+    answer: 2,
+    scripture: "Jeremiah 9:1 — 'Oh, that my head were a spring of water and my eyes a fountain of tears! I would weep day and night.'"
+  },
+  {
+    id: 24,
+    category: "New Testament",
+    difficulty: "expert",
+    question: "How many books did the Apostle Paul write in the New Testament?",
+    options: ["9", "11", "13", "7"],
+    answer: 2,
+    scripture: "Romans through Philemon — Paul authored 13 epistles, from Romans to Philemon, making him the most prolific NT author."
   }
 ];
 
