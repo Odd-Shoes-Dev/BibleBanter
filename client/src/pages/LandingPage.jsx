@@ -54,7 +54,7 @@ export default function LandingPage({ onHost, onJoin }) {
         {/* Logo — animated entrance */}
         <div className="animate-bounce-in mb-4">
           <img
-            src="/kampus-logo.png"
+            src="/kampus-logo.jpeg"
             alt="Kampus Logo"
             className="w-20 h-20 object-contain mx-auto"
             style={{ filter: 'drop-shadow(0 0 24px rgba(249,115,22,0.55))' }}
