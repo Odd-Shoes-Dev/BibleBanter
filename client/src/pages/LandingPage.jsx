@@ -1,167 +1,100 @@
-const PARTICLES = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  size: 4 + (i % 4) * 3,
-  x: 5 + (i * 8.3) % 90,
-  y: 10 + (i * 13.7) % 80,
-  delay: (i * 0.4) % 3,
-  dur: 3 + (i % 3),
-}));
-
 export default function LandingPage({ onHost, onJoin }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #0a0a1a 0%, #0d1224 50%, #0a0f1e 100%)' }}>
+      style={{ background: 'linear-gradient(180deg, #0d0e1a 0%, #111228 60%, #0d0e1a 100%)' }}>
 
-      {/* Animated background orbs */}
+      {/* Subtle background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Orange orb */}
-        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full blur-[120px] animate-pulse"
-          style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.2) 0%, transparent 70%)', animationDuration: '4s' }} />
-        {/* Blue orb */}
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full blur-[120px] animate-pulse"
-          style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%)', animationDuration: '5s', animationDelay: '1s' }} />
-        {/* Top center glow */}
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[100px]"
-          style={{ background: 'radial-gradient(ellipse, rgba(249,115,22,0.1) 0%, rgba(37,99,235,0.08) 50%, transparent 70%)' }} />
-
-        {/* Floating particles */}
-        {PARTICLES.map(p => (
-          <div
-            key={p.id}
-            className="absolute rounded-full animate-bounce"
-            style={{
-              width: p.size,
-              height: p.size,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.id % 2 === 0
-                ? `rgba(249,115,22,${0.15 + (p.id % 3) * 0.08})`
-                : `rgba(37,99,235,${0.15 + (p.id % 3) * 0.08})`,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.dur}s`,
-            }}
-          />
-        ))}
-
-        {/* Decorative cross / scripture marks */}
-        <div className="absolute top-10 right-14 text-5xl opacity-[0.04] font-cinzel rotate-12 select-none">✝</div>
-        <div className="absolute bottom-20 left-10 text-7xl opacity-[0.04] font-cinzel -rotate-6 select-none">✝</div>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] blur-[120px] opacity-30"
+          style={{ background: 'radial-gradient(ellipse, rgba(124,58,237,0.3) 0%, rgba(37,99,235,0.15) 50%, transparent 70%)' }} />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[250px] blur-[100px] opacity-20"
+          style={{ background: 'radial-gradient(ellipse, rgba(249,115,22,0.2) 0%, transparent 70%)' }} />
       </div>
 
       {/* ── HERO ── */}
-      <div className="text-center relative z-10">
+      <div className="text-center relative z-10 flex flex-col items-center">
 
-        {/* Sword clash — two swords from sides */}
-        <div className="mb-4 flex items-center justify-center gap-0 relative" style={{ height: '72px' }}>
-          {/* Left sword */}
-          <span className="text-5xl inline-block select-none" style={{
-            animation: 'sword-in 0.75s cubic-bezier(0.34,1.56,0.64,1) forwards, sword-hover 2.8s ease-in-out 0.75s infinite',
-            filter: 'drop-shadow(0 0 14px rgba(249,115,22,0.7))'
-          }}>🗡️</span>
-
-          {/* Spark at clash point */}
-          <span className="text-xl absolute select-none" style={{
-            animation: 'clash-spark 0.55s ease-out 0.65s forwards',
-            opacity: 0, zIndex: 10
-          }}>✨</span>
-
-          {/* Right sword (mirrored via parent scaleX) */}
-          <div style={{ transform: 'scaleX(-1)', display: 'inline-block' }}>
-            <span className="text-5xl inline-block select-none" style={{
-              animation: 'sword-in 0.75s cubic-bezier(0.34,1.56,0.64,1) forwards, sword-hover-r 2.8s ease-in-out 0.75s infinite',
-              filter: 'drop-shadow(0 0 14px rgba(37,99,235,0.7))'
-            }}>🗡️</span>
-          </div>
+        {/* Crossed swords icon */}
+        <div className="mb-3 select-none" style={{ animation: 'sword-hover 3s ease-in-out infinite' }}>
+          <span className="text-5xl" style={{ filter: 'drop-shadow(0 0 18px rgba(139,92,246,0.6))' }}>⚔️</span>
         </div>
 
         {/* Title */}
-        <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <h1 className="font-cinzel font-black leading-none tracking-widest"
-            style={{
-              fontSize: 'clamp(2.4rem, 7vw, 4.5rem)',
-              background: 'linear-gradient(135deg, #fb923c 0%, #f97316 40%, #fdba74 70%, #ea580c 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              filter: 'drop-shadow(0 0 40px rgba(249,115,22,0.5))',
-            }}>
-            BIBLE BATTLE
-          </h1>
-        </div>
+        <h1 className="font-cinzel font-black leading-none tracking-wider mb-4 animate-fade-in"
+          style={{
+            fontSize: 'clamp(2.8rem, 10vw, 5.5rem)',
+            color: '#f5a623',
+            textShadow: '0 0 60px rgba(245,166,35,0.35)',
+          }}>
+          BIBLE BATTLE
+        </h1>
 
         {/* Tagline */}
-        <p className="text-white/50 text-sm mt-3 mb-6 font-medium animate-fade-in"
-          style={{ animationDelay: '0.2s' }}>
+        <p className="text-white/45 text-sm leading-relaxed mb-8 max-w-xs animate-fade-in"
+          style={{ animationDelay: '0.15s' }}>
           The ultimate Bible trivia showdown. Host a game, invite friends, and battle it out!
         </p>
 
-        {/* Feature badges */}
-        <div className="flex flex-wrap gap-2 justify-center mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        {/* Feature badges — only 3, matching reference */}
+        <div className="flex gap-2 justify-center mb-9 flex-wrap animate-fade-in"
+          style={{ animationDelay: '0.25s' }}>
           {[
             { icon: '⚡', label: 'Speed Scoring' },
             { icon: '👥', label: 'Multiplayer' },
             { icon: '🏆', label: 'Leaderboard' },
-            { icon: '🔥', label: 'Streaks' },
-            { icon: '📖', label: 'Scripture' },
-          ].map((f, i) => (
+          ].map(f => (
             <span key={f.label}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold"
               style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'rgba(255,255,255,0.6)',
-                animationDelay: `${0.3 + i * 0.05}s`
+                background: 'rgba(255,255,255,0.07)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.55)',
               }}>
               {f.icon} {f.label}
             </span>
           ))}
         </div>
 
-        {/* Buttons — side by side like reference */}
-        <div className="flex gap-3 justify-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
-          {/* Host — Orange */}
+        {/* Action buttons */}
+        <div className="flex gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.35s' }}>
+          {/* Host — Amber/Orange */}
           <button
             onClick={onHost}
-            className="group relative overflow-hidden rounded-2xl px-8 py-4 font-nunito font-black text-white text-lg transition-all duration-300 hover:scale-105 hover:-translate-y-1 active:scale-95"
+            className="group relative overflow-hidden rounded-2xl px-8 py-4 font-nunito font-black text-white text-base transition-all duration-200 hover:scale-[1.04] hover:brightness-110 active:scale-95"
             style={{
-              background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-              boxShadow: '0 8px 32px rgba(249,115,22,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
-              minWidth: '170px',
+              background: 'linear-gradient(135deg, #f5a623 0%, #e8920d 100%)',
+              boxShadow: '0 6px 32px rgba(245,166,35,0.45)',
+              minWidth: '160px',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-600" />
-            <span className="relative flex items-center justify-center gap-2">
+            <span className="flex items-center justify-center gap-2">
               🎙️ Host a Game
             </span>
           </button>
 
-          {/* Join — Blue */}
+          {/* Join — Dark charcoal */}
           <button
             onClick={onJoin}
-            className="group relative overflow-hidden rounded-2xl px-8 py-4 font-nunito font-black text-white text-lg transition-all duration-300 hover:scale-105 hover:-translate-y-1 active:scale-95"
+            className="group relative overflow-hidden rounded-2xl px-8 py-4 font-nunito font-black text-white text-base transition-all duration-200 hover:scale-[1.04] hover:brightness-125 active:scale-95"
             style={{
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              boxShadow: '0 8px 32px rgba(37,99,235,0.45), inset 0 1px 0 rgba(255,255,255,0.15)',
-              minWidth: '170px',
+              background: '#2a2b3d',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 6px 24px rgba(0,0,0,0.4)',
+              minWidth: '160px',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-600" />
-            <span className="relative flex items-center justify-center gap-2">
+            <span className="flex items-center justify-center gap-2">
               🎮 Join Game
             </span>
           </button>
         </div>
-      </div>
 
-      {/* Kampus branding */}
-      <div className="mt-6 flex items-center gap-2 relative z-10 opacity-40 hover:opacity-70 transition-opacity">
-        <span className="text-white/50 text-xs font-medium">A</span>
-        <img src="/kampus-logo.jpeg" alt="Kampus" className="w-6 h-6 object-contain rounded-full" />
-        <span className="text-white/50 text-xs font-medium">Kampus Event</span>
+        {/* Kampus logo branding */}
+        <div className="mt-10 flex items-center gap-2.5 opacity-50 hover:opacity-80 transition-opacity">
+          <img src="/kampus-logo.jpeg" alt="Kampus" className="w-7 h-7 object-contain rounded-full" />
+          <span className="text-white/60 text-xs font-semibold tracking-wide">A Kampus Event</span>
+        </div>
       </div>
-      <p className="mt-2 mb-1 text-white/15 text-xs font-cinzel tracking-[0.3em] uppercase relative z-10">
-        Bible Battle — 2026
-      </p>
     </div>
   );
 }
