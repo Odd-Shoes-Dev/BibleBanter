@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export default function Timer({ duration, onTimeUp, paused, questionIndex, hostMode = false }) {
+export default function Timer({ duration, onTimeUp, paused, questionIndex, hostMode = false, circular = false }) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const intervalRef = useRef(null);
   const startTimeRef = useRef(Date.now());
@@ -40,6 +40,27 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
     : 'from-green-400 to-emerald-500';
 
   const textColor = isUrgent ? 'text-red-400' : isMid ? 'text-amber-400' : 'text-green-400';
+
+  if (circular) {
+    const R = 38;
+    const circ = 2 * Math.PI * R;
+    const offset = circ * (1 - percent / 100);
+    const strokeColor = isUrgent ? '#ef4444' : isMid ? '#f59e0b' : '#d97706';
+    return (
+      <div className="relative w-24 h-24 mx-auto">
+        <svg className="w-full h-full" style={{ transform: 'rotate(-90deg)' }} viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r={R} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
+          <circle cx="50" cy="50" r={R} fill="none" stroke={strokeColor} strokeWidth="7"
+            strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+            style={{ transition: 'stroke-dashoffset 0.1s linear, stroke 0.3s' }} />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={`font-nunito font-black text-3xl ${isUrgent ? 'animate-pulse' : ''}`}
+            style={{ color: strokeColor }}>{Math.ceil(timeLeft)}</span>
+        </div>
+      </div>
+    );
+  }
 
   if (hostMode) {
     return (

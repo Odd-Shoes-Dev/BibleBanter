@@ -68,8 +68,6 @@ export default function GameScreen({
       question={question}
       answerProgress={answerProgress}
       onNextQuestion={onNextQuestion}
-      diffBadge={diffBadge}
-      catBadge={catBadge}
       timeUp={timeUp}
       setTimeUp={setTimeUp}
     />;
@@ -152,68 +150,54 @@ export default function GameScreen({
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
       {/* Top bar */}
-      <div className="flex-shrink-0 px-3 pt-3 pb-1 relative z-10">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${catBadge}`}>
-              {question.category === 'Old Testament' ? '📜 OT' : '✝️ NT'}
-            </span>
-            <span className={`text-xs font-bold uppercase px-2 py-1 rounded-full border ${diffBadge[question.difficulty] || 'bg-white/10 text-white/60 border-white/20'}`}>
-              {question.difficulty}
-            </span>
-          </div>
-          <span className="font-cinzel text-xs font-black text-white/50">
-            {question.index + 1}<span className="text-white/25">/{question.total}</span>
-          </span>
-        </div>
+      <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
+        <span className="text-white/50 text-sm font-semibold">
+          Question {question.index + 1} / {question.total}
+        </span>
+      </div>
 
+      {/* Timer - centered */}
+      <div className="flex justify-center py-4">
         <Timer
           duration={question.timeLimit}
           onTimeUp={() => setTimeUp(true)}
           paused={selected !== null}
           questionIndex={question.index}
+          circular
         />
+      </div>
 
-        <div className="mt-2 rounded-2xl px-4 py-3 text-center relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
-            border: '1px solid rgba(255,255,255,0.15)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-          }}>
-          <p className="text-white text-sm sm:text-base font-bold leading-snug">
-            {question.question}
-          </p>
-        </div>
+      {/* Question card */}
+      <div className="mx-4 rounded-2xl px-5 py-4 mb-4 text-center"
+        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <p className="text-white/50 text-xs font-semibold mb-2">
+          {question.category} • {question.difficulty}
+        </p>
+        <p className="text-white text-base sm:text-lg font-black leading-snug">
+          {question.question}
+        </p>
       </div>
 
       {/* Answer grid */}
-      <div className="flex-1 grid grid-cols-2 gap-2 px-3 pb-3 pt-1.5 relative z-10">
+      <div className="flex-1 grid grid-cols-2 gap-3 px-4 pb-4">
         {question.options.map((opt, i) => (
           <button
             key={i}
             onClick={() => handleAnswer(i)}
             disabled={selected !== null || timeUp}
-            className={`${getButtonClass(i)} rounded-2xl font-bold text-white transition-all duration-300 active:scale-95 flex flex-col items-center justify-center gap-1.5 p-3 animate-slide-up relative overflow-hidden`}
+            className={`${getButtonClass(i)} rounded-2xl font-black text-white transition-all duration-200 active:scale-95 flex items-center justify-center gap-2.5 px-4 animate-slide-up`}
             style={{
-              animationDelay: `${i * 0.08}s`,
-              minHeight: '72px',
+              animationDelay: `${i * 0.07}s`,
+              minHeight: '80px',
               boxShadow: selected === i
-                ? '0 0 0 4px rgba(255,255,255,0.8), 0 8px 30px rgba(0,0,0,0.4)'
+                ? '0 0 0 4px rgba(255,255,255,0.85), 0 8px 30px rgba(0,0,0,0.5)'
                 : undefined
             }}
           >
-            <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-3xl pointer-events-none" />
-            <span className="text-3xl font-black leading-none" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
-              {ANSWERS[i].shape}
-            </span>
-            <span className="text-sm font-black leading-tight text-center px-1">
-              {opt}
-            </span>
-            <span className="absolute bottom-2 left-2.5 w-6 h-6 rounded-md bg-black/30 flex items-center justify-center text-xs font-black">
-              {ANSWERS[i].label}
-            </span>
+            <span className="text-xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
+            <span className="text-base font-black leading-tight text-center">{opt}</span>
           </button>
         ))}
       </div>
@@ -221,100 +205,71 @@ export default function GameScreen({
   );
 }
 
-function HostGameView({ question, answerProgress, onNextQuestion, diffBadge, catBadge, timeUp, setTimeUp }) {
+function HostGameView({ question, answerProgress, onNextQuestion, timeUp, setTimeUp }) {
   const pct = answerProgress.total > 0
     ? Math.round((answerProgress.answered / answerProgress.total) * 100)
     : 0;
 
   return (
-    <div className="min-h-screen flex flex-col px-4 py-3 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 w-full h-64 bg-gradient-to-b from-purple-900/50 to-transparent" />
-        <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black/30 to-transparent" />
-      </div>
+    <div className="min-h-screen flex flex-col px-4 py-3" style={{ background: '#0d0918' }}>
 
       {/* Top bar */}
-      <div className="flex items-center justify-between mb-2 relative z-10">
-        <div className="flex items-center gap-2">
-          <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${catBadge}`}>
-            {question.category}
-          </span>
-          <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-full border ${diffBadge[question.difficulty] || 'bg-white/10 text-white/60 border-white/20'}`}>
-            {question.difficulty}
-          </span>
-        </div>
-        <div className="font-nunito text-sm font-black text-white/60">
-          {question.index + 1} <span className="text-white/30">/ {question.total}</span>
-        </div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-white/50 text-sm font-semibold">
+          Question {question.index + 1} / {question.total}
+        </span>
+        <span className="text-white/50 text-sm font-semibold">
+          {answerProgress.answered}/{answerProgress.total} answered
+        </span>
       </div>
 
-      {/* Timer */}
-      <div className="mb-3 relative z-10">
+      {/* Circular timer — centered */}
+      <div className="flex justify-center py-3">
         <Timer
           duration={question.timeLimit}
           onTimeUp={() => setTimeUp(true)}
           paused={false}
           questionIndex={question.index}
-          hostMode
+          circular
         />
       </div>
 
-      {/* Question */}
-      <div className="relative z-10 rounded-2xl px-4 py-3 mb-3 text-center"
-        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-        <p className="text-white text-base md:text-lg font-black leading-tight">
+      {/* Question card */}
+      <div className="rounded-2xl px-5 py-5 mb-5 text-center"
+        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <p className="text-white/50 text-sm font-semibold mb-2">
+          {question.category} • {question.difficulty}
+        </p>
+        <p className="text-white text-xl md:text-2xl font-black leading-snug">
           {question.question}
         </p>
       </div>
 
       {/* Answer grid */}
-      <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
+      <div className="grid grid-cols-2 gap-3 flex-1">
         {question.options.map((opt, i) => (
           <div
             key={i}
-            className={`${ANSWERS[i].bg} rounded-xl px-4 py-4 flex items-center gap-3 text-white font-bold shadow-lg`}
-            style={{ minHeight: '76px' }}
+            className={`${ANSWERS[i].bg} rounded-2xl flex items-center justify-center gap-3 px-4 font-black text-white shadow-lg`}
+            style={{ minHeight: '90px' }}
           >
-            <span className="w-8 h-8 rounded-lg bg-black/25 flex items-center justify-center text-sm font-black flex-shrink-0">
-              {ANSWERS[i].label}
-            </span>
-            <span className="text-base leading-tight font-black">{opt}</span>
+            <span className="text-2xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
+            <span className="text-lg leading-tight">{opt}</span>
           </div>
         ))}
       </div>
 
-      {/* Progress + Next */}
-      <div className="relative z-10 mt-auto">
-        <div className="bg-glass-dark rounded-xl p-3 mb-2">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-white/50 font-semibold text-xs uppercase tracking-wider">Players Answered</span>
-            <span className="font-nunito text-lg font-black text-white">
-              {answerProgress.answered}
-              <span className="text-white/40 text-sm"> / {answerProgress.total}</span>
-            </span>
-          </div>
-          <div className="bg-white/10 rounded-full h-3 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${pct}%`,
-                background: pct === 100
-                  ? 'linear-gradient(90deg, #22c55e, #16a34a)'
-                  : 'linear-gradient(90deg, #8b5cf6, #7c3aed)'
-              }}
-            />
-          </div>
-          {pct === 100 && (
-            <p className="text-green-400 text-xs font-bold text-center mt-1 animate-pulse">✅ All players answered!</p>
-          )}
-        </div>
-
+      {/* Next button */}
+      <div className="mt-4">
+        {pct === 100 && (
+          <p className="text-green-400 text-xs font-semibold text-center mb-2">✓ All players answered</p>
+        )}
         <button
           onClick={onNextQuestion}
-          className="w-full py-3 rounded-xl font-black text-base text-white font-nunito transition-all duration-300 hover:scale-105 hover:brightness-110"
+          className="w-full py-3 rounded-xl font-black text-base text-white font-nunito tracking-wide transition-all duration-200 hover:brightness-110"
           style={{
             background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
-            boxShadow: '0 6px 24px rgba(124,58,237,0.5)'
+            boxShadow: '0 6px 24px rgba(124,58,237,0.4)'
           }}
         >
           {question.index + 1 >= question.total ? '🏆 SHOW RESULTS' : '⏭️ NEXT QUESTION'}
