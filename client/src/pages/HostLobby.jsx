@@ -19,7 +19,7 @@ export default function HostLobby({ pin, players, onStart }) {
       <div className="flex items-center justify-between px-6 py-3 flex-shrink-0"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-2">
-          <span className="text-xl">⚔️</span>
+          <img src="/kampus-logo.png" alt="logo" className="w-8 h-8 object-contain" />
           <span className="font-cinzel font-black text-base gradient-text tracking-wider">BIBLE BATTLE</span>
         </div>
         <div className="flex items-center gap-2">

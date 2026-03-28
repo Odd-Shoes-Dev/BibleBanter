@@ -51,11 +51,14 @@ export default function LandingPage({ onHost, onJoin }) {
       {/* ── HERO ── */}
       <div className="text-center relative z-10">
 
-        {/* Sword icon — animated entrance */}
+        {/* Logo — animated entrance */}
         <div className="animate-bounce-in mb-4">
-          <span className="text-6xl inline-block" style={{ filter: 'drop-shadow(0 0 20px rgba(249,115,22,0.6))' }}>
-            ⚔️
-          </span>
+          <img
+            src="/kampus-logo.png"
+            alt="Kampus Logo"
+            className="w-20 h-20 object-contain mx-auto"
+            style={{ filter: 'drop-shadow(0 0 24px rgba(249,115,22,0.55))' }}
+          />
         </div>
 
         {/* Title */}
