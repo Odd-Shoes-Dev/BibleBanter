@@ -11,7 +11,10 @@ import GameOver from './pages/GameOver';
 import Confetti from './components/Confetti';
 
 export default function App() {
-  const [screen, setScreen] = useState('landing');
+  const [screen, setScreen] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('pin') ? 'join' : 'landing';
+  });
   const [gamePin, setGamePin] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [role, setRole] = useState(null);

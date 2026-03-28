@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function JoinPage({ onJoin, onBack }) {
-  const [pin, setPin] = useState('');
+  const [pin, setPin] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('pin') || '';
+  });
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

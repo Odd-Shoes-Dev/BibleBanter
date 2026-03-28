@@ -1,3 +1,5 @@
+import { QRCodeSVG } from 'qrcode.react';
+
 const AVATAR_COLORS = [
   'linear-gradient(135deg, #7c3aed, #5b21b6)',
   'linear-gradient(135deg, #d97706, #b45309)',
@@ -10,7 +12,7 @@ const AVATAR_COLORS = [
 ];
 
 export default function HostLobby({ pin, players, onStart }) {
-  const joinUrl = `${window.location.origin}`;
+  const joinUrl = `${window.location.origin}/?pin=${pin}`;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
@@ -55,8 +57,23 @@ export default function HostLobby({ pin, players, onStart }) {
               Share the PIN <span className="text-amber-300 font-black text-2xl md:text-3xl tracking-widest">{pin}</span> with your players
             </p>
             <p className="text-white/30 text-sm md:text-base">
-              Join at <span className="text-purple-300">{joinUrl}</span>
+              Join at <span className="text-purple-300">{window.location.origin}</span>
             </p>
+
+            {/* QR code */}
+            <div className="rounded-2xl p-4 flex flex-col items-center gap-3 animate-fade-in"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className="rounded-xl p-3 bg-white">
+                <QRCodeSVG
+                  value={joinUrl}
+                  size={160}
+                  bgColor="#ffffff"
+                  fgColor="#0d0918"
+                  level="M"
+                />
+              </div>
+              <p className="text-white/40 text-xs text-center">Scan to join instantly</p>
+            </div>
           </>
         ) : (
           <>
