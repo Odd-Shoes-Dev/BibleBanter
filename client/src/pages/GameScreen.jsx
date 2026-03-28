@@ -82,68 +82,72 @@ export default function GameScreen({
 
     return (
       <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
-        {/* Top mini bar */}
+        {/* Top bar */}
         <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-2">
-            <img src="/kampus-logo.jpeg" alt="logo" className="w-7 h-7 object-contain" />
-            <span className="font-cinzel font-black text-sm gradient-text tracking-wider">BIBLE BATTLE</span>
+            <img src="/kampus-logo.jpeg" alt="logo" className="w-6 h-6 object-contain opacity-80" />
+            <span className="font-cinzel font-black text-sm tracking-widest" style={{ color: '#d4a843' }}>BIBLE BATTLE</span>
           </div>
           {playerName && (
-            <div className="text-white/60 text-sm font-semibold bg-white/8 px-3 py-1.5 rounded-full"
-              style={{ background: 'rgba(255,255,255,0.08)' }}>
-              {playerName} • <span className="text-amber-300 font-black">{answerResult?.totalScore?.toLocaleString() ?? 0} pts</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <span className="text-white/70 font-semibold">{playerName}</span>
+              <span className="text-white/30">•</span>
+              <span className="font-black text-amber-300">{answerResult?.totalScore?.toLocaleString() ?? 0} pts</span>
             </div>
           )}
         </div>
 
         {/* Center result */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-5 animate-fade-in">
-          {/* Big emoji */}
-          <div className="text-8xl animate-bounce-in">
-            {isTimeout ? '⏰' : isCorrect ? '🌟' : '😅'}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-4">
+          {/* Emoji */}
+          <div className="text-7xl animate-bounce-in select-none">
+            {isTimeout ? '⏰' : isCorrect ? '🌟' : '�'}
           </div>
 
           {/* Result label */}
-          <p className="font-nunito font-black text-4xl"
+          <p className="font-nunito font-black text-4xl animate-fade-in"
             style={{
               color: isTimeout ? '#94a3b8' : isCorrect ? '#4ade80' : '#f87171',
-              textShadow: isCorrect
-                ? '0 0 30px rgba(74,222,128,0.5)'
-                : isTimeout ? 'none'
-                : '0 0 30px rgba(248,113,113,0.5)'
             }}>
             {isTimeout ? "Time's Up!" : isCorrect ? 'Correct!' : 'Wrong!'}
           </p>
 
           {/* Correct answer */}
           {correctText && (
-            <p className="text-white/70 text-lg font-semibold text-center">
-              Answer: <span className="text-amber-300 font-black">{correctText}</span>
-            </p>
-          )}
-
-          {/* Points earned (correct only) */}
-          {isCorrect && answerResult.pointsEarned > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-300 font-nunito font-black text-2xl">+{answerResult.pointsEarned}</span>
-              <span className="text-white/50 font-semibold">points</span>
-              {answerResult.streak >= 3 && (
-                <span className="text-orange-300 font-black text-base ml-1">🔥 {answerResult.streak}x streak!</span>
+            <div className="text-center animate-fade-in">
+              <p className="text-white font-semibold text-lg">
+                Answer: <span className="font-black" style={{ color: '#d4a843' }}>{correctText}</span>
+              </p>
+              {question.scripture && (
+                <p className="text-white/40 text-sm mt-1">
+                  📖 {question.scripture}
+                </p>
               )}
             </div>
           )}
 
+          {/* Points (correct only) */}
+          {isCorrect && answerResult.pointsEarned > 0 && (
+            <p className="text-amber-300 font-nunito font-black text-xl animate-fade-in">
+              +{answerResult.pointsEarned} pts
+              {answerResult.streak >= 3 && (
+                <span className="text-orange-400 text-base ml-2">🔥 {answerResult.streak}x</span>
+              )}
+            </p>
+          )}
+
           {/* Score card */}
-          <div className="rounded-2xl px-10 py-5 text-center mt-2"
-            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <p className="text-white/50 text-sm font-semibold mb-1">Your score</p>
-            <p className="font-nunito font-black text-4xl text-amber-300">
+          <div className="rounded-2xl px-14 py-5 text-center mt-1 animate-slide-up"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}>
+            <p className="text-white/45 text-sm font-medium mb-1">Your score</p>
+            <p className="font-nunito font-black text-4xl" style={{ color: '#d4a843' }}>
               {answerResult?.totalScore?.toLocaleString() ?? 0}
             </p>
           </div>
 
-          <p className="text-white/25 text-sm mt-2">Waiting for host...</p>
+          <p className="text-white/20 text-xs uppercase tracking-widest mt-2">Waiting for host...</p>
         </div>
       </div>
     );
