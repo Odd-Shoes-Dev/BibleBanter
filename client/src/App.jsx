@@ -21,6 +21,7 @@ export default function App() {
   const [questionResults, setQuestionResults] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [answerProgress, setAnswerProgress] = useState({ answered: 0, total: 0 });
+  const [liveLeaderboard, setLiveLeaderboard] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -46,6 +47,7 @@ export default function App() {
       setAnswerResult(null);
       setQuestionResults(null);
       setAnswerProgress({ answered: 0, total: 0 });
+      setLiveLeaderboard([]);
       setScreen('game');
     });
 
@@ -59,6 +61,7 @@ export default function App() {
 
     socket.on('answer-progress', (progress) => {
       setAnswerProgress(progress);
+      if (progress.leaderboard) setLiveLeaderboard(progress.leaderboard);
     });
 
     socket.on('question-results', (results) => {
@@ -190,6 +193,7 @@ export default function App() {
           onSubmitAnswer={handleSubmitAnswer}
           answerResult={answerResult}
           answerProgress={answerProgress}
+          liveLeaderboard={liveLeaderboard}
           players={players}
           onNextQuestion={handleNextQuestion}
           playerName={playerName}

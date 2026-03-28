@@ -10,7 +10,7 @@ const ANSWERS = [
 
 export default function GameScreen({
   question, role, onSubmitAnswer, answerResult,
-  answerProgress, players, onNextQuestion, playerName
+  answerProgress, liveLeaderboard = [], players, onNextQuestion, playerName
 }) {
   const [selected, setSelected] = useState(null);
   const [timeUp, setTimeUp] = useState(false);
@@ -67,6 +67,7 @@ export default function GameScreen({
     return <HostGameView
       question={question}
       answerProgress={answerProgress}
+      liveLeaderboard={liveLeaderboard}
       onNextQuestion={onNextQuestion}
       timeUp={timeUp}
       setTimeUp={setTimeUp}
@@ -163,6 +164,16 @@ export default function GameScreen({
         <span className="text-white/50 text-sm font-semibold">
           Question {question.index + 1} / {question.total}
         </span>
+        {/* Live rank badge */}
+        {liveLeaderboard.length > 0 && playerName && (() => {
+          const myRank = liveLeaderboard.findIndex(p => p.name === playerName) + 1;
+          return myRank > 0 ? (
+            <span className="text-xs font-black px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(251,191,36,0.15)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.3)' }}>
+              #{myRank} of {liveLeaderboard.length}
+            </span>
+          ) : null;
+        })()}
       </div>
 
       {/* Timer - centered */}
@@ -213,75 +224,117 @@ export default function GameScreen({
   );
 }
 
-function HostGameView({ question, answerProgress, onNextQuestion, timeUp, setTimeUp }) {
+function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQuestion, timeUp, setTimeUp }) {
   const pct = answerProgress.total > 0
     ? Math.round((answerProgress.answered / answerProgress.total) * 100)
     : 0;
 
   return (
-    <div className="min-h-screen flex flex-col px-4 py-3 md:px-8 lg:px-16" style={{ background: '#0d0918' }}>
+    <div className="min-h-screen flex" style={{ background: '#0d0918' }}>
 
-      {/* Top bar */}
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-white/50 text-sm md:text-base font-semibold">
-          Question {question.index + 1} / {question.total}
-        </span>
-        <span className="text-white/50 text-sm md:text-base font-semibold">
-          {answerProgress.answered}/{answerProgress.total} answered
-        </span>
-      </div>
+      {/* Main question area */}
+      <div className="flex-1 flex flex-col px-4 py-3 md:px-8 min-w-0">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-white/50 text-sm md:text-base font-semibold">
+            Question {question.index + 1} / {question.total}
+          </span>
+          <span className="text-white/50 text-sm md:text-base font-semibold">
+            {answerProgress.answered}/{answerProgress.total} answered
+          </span>
+        </div>
 
-      {/* Circular timer — centered */}
-      <div className="flex justify-center py-3">
-        <Timer
-          duration={question.timeLimit}
-          onTimeUp={() => setTimeUp(true)}
-          paused={false}
-          questionIndex={question.index}
-          circular
-        />
-      </div>
+        {/* Circular timer — centered */}
+        <div className="flex justify-center py-3">
+          <Timer
+            duration={question.timeLimit}
+            onTimeUp={() => setTimeUp(true)}
+            paused={false}
+            questionIndex={question.index}
+            circular
+          />
+        </div>
 
-      {/* Question card */}
-      <div className="rounded-2xl px-5 py-5 mb-5 text-center max-w-4xl mx-auto w-full"
-        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
-        <p className="text-white/50 text-sm font-semibold mb-2">
-          {question.category} • {question.difficulty}
-        </p>
-        <p className="text-white text-xl md:text-2xl lg:text-3xl font-black leading-snug">
-          {question.question}
-        </p>
-      </div>
+        {/* Question card */}
+        <div className="rounded-2xl px-5 py-5 mb-5 text-center w-full"
+          style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <p className="text-white/50 text-sm font-semibold mb-2">
+            {question.category} • {question.difficulty}
+          </p>
+          <p className="text-white text-xl md:text-2xl lg:text-3xl font-black leading-snug">
+            {question.question}
+          </p>
+        </div>
 
-      {/* Answer grid */}
-      <div className="grid grid-cols-2 gap-3 md:gap-5 flex-1 max-w-4xl mx-auto w-full">
-        {question.options.map((opt, i) => (
-          <div
-            key={i}
-            className={`${ANSWERS[i].bg} rounded-2xl flex items-center justify-center gap-3 px-4 md:px-6 font-black text-white shadow-lg`}
-            style={{ minHeight: 'clamp(80px, 12vh, 160px)' }}
+        {/* Answer grid */}
+        <div className="grid grid-cols-2 gap-3 md:gap-5 flex-1">
+          {question.options.map((opt, i) => (
+            <div
+              key={i}
+              className={`${ANSWERS[i].bg} rounded-2xl flex items-center justify-center gap-3 px-4 md:px-6 font-black text-white shadow-lg`}
+              style={{ minHeight: 'clamp(80px, 12vh, 160px)' }}
+            >
+              <span className="text-2xl md:text-3xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
+              <span className="text-lg md:text-xl lg:text-2xl leading-tight">{opt}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Next button */}
+        <div className="mt-4">
+          {pct === 100 && (
+            <p className="text-green-400 text-xs font-semibold text-center mb-2">✓ All players answered</p>
+          )}
+          <button
+            onClick={onNextQuestion}
+            className="w-full py-3 md:py-4 rounded-xl font-black text-base md:text-lg text-white font-nunito tracking-wide transition-all duration-200 hover:brightness-110"
+            style={{
+              background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
+              boxShadow: '0 6px 24px rgba(124,58,237,0.4)'
+            }}
           >
-            <span className="text-2xl md:text-3xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
-            <span className="text-lg md:text-xl lg:text-2xl leading-tight">{opt}</span>
-          </div>
-        ))}
+            {question.index + 1 >= question.total ? '🏆 SHOW RESULTS' : '⏭️ NEXT QUESTION'}
+          </button>
+        </div>
       </div>
 
-      {/* Next button */}
-      <div className="mt-4 max-w-4xl mx-auto w-full">
-        {pct === 100 && (
-          <p className="text-green-400 text-xs font-semibold text-center mb-2">✓ All players answered</p>
-        )}
-        <button
-          onClick={onNextQuestion}
-          className="w-full py-3 md:py-4 rounded-xl font-black text-base md:text-lg text-white font-nunito tracking-wide transition-all duration-200 hover:brightness-110"
-          style={{
-            background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
-            boxShadow: '0 6px 24px rgba(124,58,237,0.4)'
-          }}
-        >
-          {question.index + 1 >= question.total ? '🏆 SHOW RESULTS' : '⏭️ NEXT QUESTION'}
-        </button>
+      {/* Live leaderboard sidebar */}
+      <div className="w-56 lg:w-64 flex-shrink-0 flex flex-col py-3 pr-3 pl-2 hidden sm:flex"
+        style={{ borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
+        <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-3 text-center">🏆 Live Rankings</p>
+        <div className="flex-1 space-y-1.5 overflow-y-auto">
+          {liveLeaderboard.length === 0 ? (
+            <p className="text-white/20 text-xs text-center mt-8">Waiting for answers...</p>
+          ) : (
+            liveLeaderboard.slice(0, 12).map((player, i) => (
+              <div
+                key={player.name}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-300"
+                style={{
+                  background: i === 0
+                    ? 'rgba(251,191,36,0.15)'
+                    : i < 3
+                    ? 'rgba(255,255,255,0.07)'
+                    : 'rgba(255,255,255,0.04)',
+                  border: i === 0 ? '1px solid rgba(251,191,36,0.3)' : '1px solid transparent',
+                }}
+              >
+                <span className="text-sm w-5 text-center flex-shrink-0 font-black"
+                  style={{ color: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#fb923c' : '#ffffff50' }}>
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                </span>
+                <span className="flex-1 text-xs font-bold truncate"
+                  style={{ color: i === 0 ? '#fbbf24' : '#ffffffcc' }}>
+                  {player.name}
+                </span>
+                <span className="text-xs font-black flex-shrink-0"
+                  style={{ color: i === 0 ? '#fbbf24' : '#ffffff70' }}>
+                  {player.score.toLocaleString()}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

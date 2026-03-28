@@ -153,7 +153,11 @@ io.on('connection', (socket) => {
     });
 
     const answeredCount = [...game.players.values()].filter(p => p.answered).length;
-    io.to(pin).emit('answer-progress', { answered: answeredCount, total: game.players.size });
+    io.to(pin).emit('answer-progress', {
+      answered: answeredCount,
+      total: game.players.size,
+      leaderboard: getLeaderboard(game),
+    });
 
     if (answeredCount === game.players.size) {
       clearTimeout(game.timer);
