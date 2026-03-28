@@ -50,9 +50,12 @@ io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
 
   // HOST: Create game
-  socket.on('create-game', (callback) => {
+  socket.on('create-game', ({ testament } = {}, callback) => {
     const pin = generatePin();
-    const gameQuestions = shuffleQuestions(questions);
+    const filtered = testament && testament !== 'both'
+      ? questions.filter(q => q.category === testament)
+      : questions;
+    const gameQuestions = shuffleQuestions(filtered);
     games[pin] = {
       pin,
       hostId: socket.id,

@@ -37,7 +37,7 @@ export default function HostLobby({ pin, players, onStart }) {
       </div>
 
       {/* Center content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 md:px-12 gap-6">
 
         {players.length === 0 ? (
           <>
@@ -48,26 +48,26 @@ export default function HostLobby({ pin, players, onStart }) {
                   style={{ animationDelay: `${i * 0.18}s` }} />
               ))}
             </div>
-            <h2 className="font-nunito font-black text-3xl text-white text-center">
+            <h2 className="font-nunito font-black text-3xl md:text-4xl lg:text-5xl text-white text-center">
               Waiting for Players...
             </h2>
-            <p className="text-white/50 text-base text-center">
-              Share the PIN <span className="text-amber-300 font-black">{pin}</span> with your players
+            <p className="text-white/50 text-base md:text-lg text-center">
+              Share the PIN <span className="text-amber-300 font-black text-2xl md:text-3xl tracking-widest">{pin}</span> with your players
             </p>
-            <p className="text-white/30 text-sm">
+            <p className="text-white/30 text-sm md:text-base">
               Join at <span className="text-purple-300">{joinUrl}</span>
             </p>
           </>
         ) : (
           <>
-            <h2 className="font-nunito font-black text-2xl text-white text-center">
+            <h2 className="font-nunito font-black text-2xl md:text-3xl text-white text-center">
               {players.length} Player{players.length !== 1 ? 's' : ''} Ready!
             </h2>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 w-full max-w-3xl">
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4 w-full max-w-4xl">
               {players.map((p, i) => (
                 <div key={p.id} className="flex flex-col items-center gap-1.5 animate-bounce-in"
                   style={{ animationDelay: `${i * 0.04}s` }}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-black text-white shadow-lg"
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-lg font-black text-white shadow-lg"
                     style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
                     {p.name[0].toUpperCase()}
                   </div>
@@ -82,7 +82,7 @@ export default function HostLobby({ pin, players, onStart }) {
         <button
           onClick={onStart}
           disabled={players.length === 0}
-          className="mt-2 px-10 py-3.5 rounded-2xl font-black text-lg text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed font-nunito"
+          className="mt-2 px-10 py-3.5 md:px-16 md:py-4 rounded-2xl font-black text-lg md:text-xl text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed font-nunito"
           style={{
             background: players.length > 0
               ? 'linear-gradient(135deg, #d97706, #b45309)'

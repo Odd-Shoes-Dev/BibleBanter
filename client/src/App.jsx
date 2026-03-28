@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { socket } from './socket';
 import LandingPage from './pages/LandingPage';
+import HostSetup from './pages/HostSetup';
 import HostLobby from './pages/HostLobby';
 import JoinPage from './pages/JoinPage';
 import PlayerLobby from './pages/PlayerLobby';
@@ -96,8 +97,8 @@ export default function App() {
     };
   }, []);
 
-  const handleCreateGame = () => {
-    socket.emit('create-game', ({ success, pin, error }) => {
+  const handleCreateGame = (testament) => {
+    socket.emit('create-game', { testament }, ({ success, pin, error }) => {
       if (success) {
         setGamePin(pin);
         setRole('host');
@@ -168,7 +169,10 @@ export default function App() {
       )}
 
       {screen === 'landing' && (
-        <LandingPage onHost={handleCreateGame} onJoin={() => setScreen('join')} />
+        <LandingPage onHost={() => setScreen('host-setup')} onJoin={() => setScreen('join')} />
+      )}
+      {screen === 'host-setup' && (
+        <HostSetup onSelect={handleCreateGame} onBack={() => setScreen('landing')} />
       )}
       {screen === 'join' && (
         <JoinPage onJoin={handleJoinGame} onBack={() => setScreen('landing')} />

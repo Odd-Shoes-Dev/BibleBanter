@@ -81,7 +81,8 @@ export default function GameScreen({
     const isTimeout = timeUp && !answerResult;
 
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
+      <div className="min-h-screen flex flex-col items-center" style={{ background: '#0d0918' }}>
+        <div className="w-full max-w-lg flex flex-col min-h-screen">
         {/* Top bar */}
         <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -149,12 +150,14 @@ export default function GameScreen({
 
           <p className="text-white/20 text-xs uppercase tracking-widest mt-2">Waiting for host...</p>
         </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
+    <div className="min-h-screen flex flex-col items-center" style={{ background: '#0d0918' }}>
+      <div className="w-full max-w-lg flex flex-col min-h-screen">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
         <span className="text-white/50 text-sm font-semibold">
@@ -185,7 +188,7 @@ export default function GameScreen({
       </div>
 
       {/* Answer grid */}
-      <div className="flex-1 grid grid-cols-2 gap-3 px-4 pb-4">
+      <div className="grid grid-cols-2 gap-3 px-4 pb-4 flex-1">
         {question.options.map((opt, i) => (
           <button
             key={i}
@@ -194,7 +197,7 @@ export default function GameScreen({
             className={`${getButtonClass(i)} rounded-2xl font-black text-white transition-all duration-200 active:scale-95 flex items-center justify-center gap-2.5 px-4 animate-slide-up`}
             style={{
               animationDelay: `${i * 0.07}s`,
-              minHeight: '80px',
+              minHeight: 'clamp(70px, 13vh, 130px)',
               boxShadow: selected === i
                 ? '0 0 0 4px rgba(255,255,255,0.85), 0 8px 30px rgba(0,0,0,0.5)'
                 : undefined
@@ -204,6 +207,7 @@ export default function GameScreen({
             <span className="text-base font-black leading-tight text-center">{opt}</span>
           </button>
         ))}
+      </div>
       </div>
     </div>
   );
@@ -215,14 +219,14 @@ function HostGameView({ question, answerProgress, onNextQuestion, timeUp, setTim
     : 0;
 
   return (
-    <div className="min-h-screen flex flex-col px-4 py-3" style={{ background: '#0d0918' }}>
+    <div className="min-h-screen flex flex-col px-4 py-3 md:px-8 lg:px-16" style={{ background: '#0d0918' }}>
 
       {/* Top bar */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-white/50 text-sm font-semibold">
+        <span className="text-white/50 text-sm md:text-base font-semibold">
           Question {question.index + 1} / {question.total}
         </span>
-        <span className="text-white/50 text-sm font-semibold">
+        <span className="text-white/50 text-sm md:text-base font-semibold">
           {answerProgress.answered}/{answerProgress.total} answered
         </span>
       </div>
@@ -239,38 +243,38 @@ function HostGameView({ question, answerProgress, onNextQuestion, timeUp, setTim
       </div>
 
       {/* Question card */}
-      <div className="rounded-2xl px-5 py-5 mb-5 text-center"
+      <div className="rounded-2xl px-5 py-5 mb-5 text-center max-w-4xl mx-auto w-full"
         style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
         <p className="text-white/50 text-sm font-semibold mb-2">
           {question.category} • {question.difficulty}
         </p>
-        <p className="text-white text-xl md:text-2xl font-black leading-snug">
+        <p className="text-white text-xl md:text-2xl lg:text-3xl font-black leading-snug">
           {question.question}
         </p>
       </div>
 
       {/* Answer grid */}
-      <div className="grid grid-cols-2 gap-3 flex-1">
+      <div className="grid grid-cols-2 gap-3 md:gap-5 flex-1 max-w-4xl mx-auto w-full">
         {question.options.map((opt, i) => (
           <div
             key={i}
-            className={`${ANSWERS[i].bg} rounded-2xl flex items-center justify-center gap-3 px-4 font-black text-white shadow-lg`}
-            style={{ minHeight: '90px' }}
+            className={`${ANSWERS[i].bg} rounded-2xl flex items-center justify-center gap-3 px-4 md:px-6 font-black text-white shadow-lg`}
+            style={{ minHeight: 'clamp(80px, 12vh, 160px)' }}
           >
-            <span className="text-2xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
-            <span className="text-lg leading-tight">{opt}</span>
+            <span className="text-2xl md:text-3xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
+            <span className="text-lg md:text-xl lg:text-2xl leading-tight">{opt}</span>
           </div>
         ))}
       </div>
 
       {/* Next button */}
-      <div className="mt-4">
+      <div className="mt-4 max-w-4xl mx-auto w-full">
         {pct === 100 && (
           <p className="text-green-400 text-xs font-semibold text-center mb-2">✓ All players answered</p>
         )}
         <button
           onClick={onNextQuestion}
-          className="w-full py-3 rounded-xl font-black text-base text-white font-nunito tracking-wide transition-all duration-200 hover:brightness-110"
+          className="w-full py-3 md:py-4 rounded-xl font-black text-base md:text-lg text-white font-nunito tracking-wide transition-all duration-200 hover:brightness-110"
           style={{
             background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
             boxShadow: '0 6px 24px rgba(124,58,237,0.4)'

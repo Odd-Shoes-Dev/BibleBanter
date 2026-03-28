@@ -15,7 +15,7 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain }) {
   const myResult = myRank > 0 ? rankMsg(myRank) : null;
 
   return (
-    <div className="min-h-screen flex flex-col px-4 py-6 overflow-y-auto relative">
+    <div className="min-h-screen flex flex-col px-4 py-6 overflow-y-auto relative" style={{ background: '#0d0918' }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-gradient-to-b from-purple-900/40 to-transparent" />
       </div>
@@ -24,7 +24,7 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain }) {
         {/* Title */}
         <div className="text-center animate-bounce-in">
           <div className="text-6xl mb-3">🏆</div>
-          <h1 className="font-cinzel text-4xl md:text-6xl font-black gradient-text tracking-wider mb-2">
+          <h1 className="font-anton text-4xl sm:text-5xl md:text-6xl gradient-text tracking-wider mb-2" style={{ letterSpacing: '0.04em' }}>
             GAME OVER
           </h1>
           <p className="text-white/50 font-medium">Bible Battle Complete!</p>
@@ -55,36 +55,36 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain }) {
               {/* 2nd place */}
               {podium[1] && (
                 <div className="flex flex-col items-center flex-1">
-                  <div className="w-12 h-12 rounded-full bg-slate-400 flex items-center justify-center text-xl font-black text-white mb-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-400 flex items-center justify-center text-xl font-black text-white mb-2">
                     {podium[1].name[0].toUpperCase()}
                   </div>
-                  <p className="text-white font-bold text-sm text-center truncate w-full px-1">{podium[1].name}</p>
-                  <p className="text-slate-300 font-nunito font-black text-sm">{podium[1].score.toLocaleString()}</p>
-                  <div className="w-full bg-slate-400/80 rounded-t-xl h-20 mt-2 flex items-center justify-center text-3xl">🥈</div>
+                  <p className="text-white font-bold text-xs sm:text-sm text-center truncate w-full px-1">{podium[1].name}</p>
+                  <p className="text-slate-300 font-nunito font-black text-xs sm:text-sm">{podium[1].score.toLocaleString()}</p>
+                  <div className="w-full bg-slate-400/80 rounded-t-xl h-16 sm:h-24 mt-2 flex items-center justify-center text-2xl sm:text-4xl">🥈</div>
                 </div>
               )}
 
               {/* 1st place */}
               {podium[0] && (
                 <div className="flex flex-col items-center flex-1">
-                  <div className="w-14 h-14 rounded-full bg-amber-400 flex items-center justify-center text-2xl font-black text-white mb-2 animate-pulse-glow">
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-amber-400 flex items-center justify-center text-2xl font-black text-white mb-2 animate-pulse-glow">
                     {podium[0].name[0].toUpperCase()}
                   </div>
-                  <p className="text-white font-bold text-sm text-center truncate w-full px-1">{podium[0].name}</p>
-                  <p className="text-amber-300 font-nunito font-black">{podium[0].score.toLocaleString()}</p>
-                  <div className="w-full bg-amber-400/80 rounded-t-xl h-28 mt-2 flex items-center justify-center text-4xl">🥇</div>
+                  <p className="text-white font-bold text-xs sm:text-sm text-center truncate w-full px-1">{podium[0].name}</p>
+                  <p className="text-amber-300 font-nunito font-black text-sm sm:text-base">{podium[0].score.toLocaleString()}</p>
+                  <div className="w-full bg-amber-400/80 rounded-t-xl h-20 sm:h-32 mt-2 flex items-center justify-center text-3xl sm:text-5xl">🥇</div>
                 </div>
               )}
 
               {/* 3rd place */}
               {podium[2] && (
                 <div className="flex flex-col items-center flex-1">
-                  <div className="w-12 h-12 rounded-full bg-orange-600 flex items-center justify-center text-xl font-black text-white mb-2">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-orange-600 flex items-center justify-center text-xl font-black text-white mb-2">
                     {podium[2].name[0].toUpperCase()}
                   </div>
-                  <p className="text-white font-bold text-sm text-center truncate w-full px-1">{podium[2].name}</p>
-                  <p className="text-orange-400 font-nunito font-black text-sm">{podium[2].score.toLocaleString()}</p>
-                  <div className="w-full bg-orange-600/80 rounded-t-xl h-14 mt-2 flex items-center justify-center text-3xl">🥉</div>
+                  <p className="text-white font-bold text-xs sm:text-sm text-center truncate w-full px-1">{podium[2].name}</p>
+                  <p className="text-orange-400 font-nunito font-black text-xs sm:text-sm">{podium[2].score.toLocaleString()}</p>
+                  <div className="w-full bg-orange-600/80 rounded-t-xl h-12 sm:h-16 mt-2 flex items-center justify-center text-2xl sm:text-3xl">🥉</div>
                 </div>
               )}
             </div>
@@ -127,7 +127,7 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain }) {
         {/* Play again */}
         <button
           onClick={onPlayAgain}
-          className="w-full py-5 rounded-2xl font-black text-2xl text-white font-nunito tracking-wide transition-all duration-300 hover:scale-105 animate-slide-up"
+          className="w-full py-4 sm:py-5 rounded-2xl font-black text-xl sm:text-2xl text-white font-nunito tracking-wide transition-all duration-300 hover:scale-105 animate-slide-up"
           style={{
             background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
             boxShadow: '0 8px 40px rgba(124,58,237,0.5)',

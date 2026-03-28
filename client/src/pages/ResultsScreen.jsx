@@ -21,7 +21,7 @@ export default function ResultsScreen({ results, role, answerResult, onNext, pla
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-4 py-3 overflow-y-auto">
+    <div className="min-h-screen flex flex-col px-4 py-3 overflow-y-auto" style={{ background: '#0d0918' }}>
       <div className="w-full max-w-2xl mx-auto space-y-3">
 
         {/* Correct answer banner */}
@@ -34,10 +34,10 @@ export default function ResultsScreen({ results, role, answerResult, onNext, pla
               boxShadow: '0 0 40px rgba(34,197,94,0.15)'
             }}
           >
-            <p className="font-nunito text-green-400/70 text-xs font-extrabold uppercase tracking-wider mb-3">✅ Correct Answer</p>
+            <p className="font-nunito text-green-400/70 text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-3">✅ Correct Answer</p>
             <div className={`inline-flex items-center gap-3 rounded-2xl px-5 py-3 border ${ANSWER_BG[correctAnswer]}`}>
-              <span className="text-2xl font-black">{ANSWER_SHAPES[correctAnswer]}</span>
-              <span className="font-nunito text-xl font-black">{ANSWER_LABELS[correctAnswer]}</span>
+              <span className="text-2xl sm:text-3xl font-black">{ANSWER_SHAPES[correctAnswer]}</span>
+              <span className="font-nunito text-base sm:text-xl font-black">{ANSWER_LABELS[correctAnswer]}</span>
               <span className="text-green-400 text-xl">✓</span>
             </div>
 
@@ -81,7 +81,7 @@ export default function ResultsScreen({ results, role, answerResult, onNext, pla
         {/* Leaderboard */}
         <div className="rounded-2xl p-4 animate-slide-up"
           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', animationDelay: '0.1s' }}>
-          <h3 className="font-nunito text-base font-black text-white mb-3 text-center tracking-wide uppercase">🏆 Leaderboard</h3>
+          <h3 className="font-nunito text-sm sm:text-base font-black text-white mb-3 text-center tracking-wide uppercase">🏆 Leaderboard</h3>
           <div className="space-y-2">
             {leaderboard.slice(0, 8).map((player, i) => {
               const isMe = player.name === playerName;
@@ -127,7 +127,7 @@ export default function ResultsScreen({ results, role, answerResult, onNext, pla
         {role === 'host' && (
           <button
             onClick={onNext}
-            className="w-full py-4 rounded-2xl font-black text-xl text-white font-nunito transition-all duration-300 hover:scale-[1.02] hover:brightness-110 animate-slide-up"
+            className="w-full py-3 sm:py-4 rounded-2xl font-black text-base sm:text-xl text-white font-nunito transition-all duration-300 hover:scale-[1.02] hover:brightness-110 animate-slide-up"
             style={{
               background: isLastQuestion
                 ? 'linear-gradient(135deg, #d97706, #b45309)'
