@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+
 const ANSWER_SHAPES = ['▲', '◆', '●', '■'];
 const ANSWER_LABELS = ['A', 'B', 'C', 'D'];
 const ANSWER_BG = [
@@ -10,7 +12,20 @@ const ANSWER_BG = [
 export default function ResultsScreen({ results, role, answerResult, onNext, playerName }) {
   if (!results) return null;
 
-  const { correctAnswer, scripture, leaderboard, isLastQuestion } = results;
+  const { correctAnswer, scripture, leaderboard, isLastQuestion, autoAdvanceIn = 7 } = results;
+
+  const [countdown, setCountdown] = useState(autoAdvanceIn);
+
+  useEffect(() => {
+    setCountdown(autoAdvanceIn);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) { clearInterval(interval); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [autoAdvanceIn]);
   const myRank = leaderboard.findIndex(p => p.name === playerName) + 1;
 
   const rankEmoji = (rank) => {
@@ -123,7 +138,29 @@ export default function ResultsScreen({ results, role, answerResult, onNext, pla
           )}
         </div>
 
-        {/* Host controls */}
+        {/* Auto-advance countdown bar — shown to everyone */}
+        <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center justify-between mb-1.5 px-1">
+            <p className="text-white/30 text-xs uppercase tracking-widest">
+              {isLastQuestion ? 'Final results in' : 'Next question in'}
+            </p>
+            <p className="font-nunito font-black text-white/60 text-sm">{countdown}s</p>
+          </div>
+          <div className="rounded-full overflow-hidden h-2" style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <div
+              className="h-full rounded-full transition-none"
+              style={{
+                width: `${(countdown / autoAdvanceIn) * 100}%`,
+                background: isLastQuestion
+                  ? 'linear-gradient(90deg, #d97706, #fbbf24)'
+                  : 'linear-gradient(90deg, #7c3aed, #a78bfa)',
+                transition: `width 1s linear`,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Host: skip ahead button */}
         {role === 'host' && (
           <button
             onClick={onNext}
@@ -138,21 +175,8 @@ export default function ResultsScreen({ results, role, answerResult, onNext, pla
               animationDelay: '0.15s'
             }}
           >
-            {isLastQuestion ? '🏆 FINAL RESULTS' : '⏭️ NEXT QUESTION'}
+            {isLastQuestion ? '🏆 FINAL RESULTS' : '⏭️ Skip Ahead'}
           </button>
-        )}
-
-        {/* Player waiting indicator */}
-        {role === 'player' && (
-          <div className="text-center pb-4 animate-fade-in">
-            <div className="flex justify-center gap-1.5 mb-2">
-              {[0, 1, 2].map(i => (
-                <div key={i} className="w-2 h-2 rounded-full bg-purple-400/60 animate-bounce"
-                  style={{ animationDelay: `${i * 0.15}s` }} />
-              ))}
-            </div>
-            <p className="text-white/30 text-sm">Waiting for host...</p>
-          </div>
         )}
       </div>
     </div>

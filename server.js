@@ -238,6 +238,7 @@ function getLeaderboard(game) {
 }
 
 const QUESTION_TIME = 20; // seconds
+const RESULTS_TIME = 7;   // seconds to show results before auto-advancing
 const MAX_POINTS = 1000;
 
 io.on('connection', (socket) => {
@@ -448,6 +449,7 @@ io.on('connection', (socket) => {
     if (game.hostId !== socket.id && socket.data.role === 'host') game.hostId = socket.id;
     if (game.hostId !== socket.id) return;
     clearTimeout(game.timer);
+    clearTimeout(game.resultsTimer);
     // sendQuestion already increments currentQuestion — just call it directly
     sendQuestion(pin);
   });
@@ -515,18 +517,21 @@ function showResults(pin) {
 
   const q = game.questions[game.currentQuestion];
   const leaderboard = getLeaderboard(game);
-
-  const playerResults = {};
-  game.players.forEach((p, id) => {
-    playerResults[id] = p.lastAnswer;
-  });
+  const isLast = game.currentQuestion === game.questions.length - 1;
 
   io.to(pin).emit('question-results', {
     correctAnswer: q.answer,
     scripture: q.scripture,
     leaderboard,
-    isLastQuestion: game.currentQuestion === game.questions.length - 1,
+    isLastQuestion: isLast,
+    autoAdvanceIn: RESULTS_TIME,
   });
+
+  // Auto-advance after RESULTS_TIME seconds
+  game.resultsTimer = setTimeout(() => {
+    if (game.status !== 'results') return;
+    if (isLast) { endGame(pin); } else { sendQuestion(pin); }
+  }, RESULTS_TIME * 1000);
 }
 
 async function endGame(pin) {
