@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import UploadQuestions from './UploadQuestions';
 
 const AVATAR_COLORS = [
   'linear-gradient(135deg, #7c3aed, #5b21b6)',
@@ -13,6 +15,8 @@ const AVATAR_COLORS = [
 
 export default function HostLobby({ pin, players, onStart }) {
   const joinUrl = `${window.location.origin}/?pin=${pin}`;
+  const [showUpload, setShowUpload] = useState(false);
+  const [customCount, setCustomCount] = useState(null);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
@@ -95,23 +99,40 @@ export default function HostLobby({ pin, players, onStart }) {
           </>
         )}
 
-        {/* Start button */}
-        <button
-          onClick={onStart}
-          disabled={players.length === 0}
-          className="mt-2 px-10 py-3.5 md:px-16 md:py-4 rounded-2xl font-black text-lg md:text-xl text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed font-nunito"
-          style={{
-            background: players.length > 0
-              ? 'linear-gradient(135deg, #d97706, #b45309)'
-              : 'rgba(100,100,100,0.3)',
-            boxShadow: players.length > 0
-              ? '0 8px 30px rgba(217,119,6,0.5)'
-              : 'none',
-          }}
-        >
-          🚀 Start Game ({players.length} players)
-        </button>
+        {/* Upload + Start buttons */}
+        <div className="flex flex-col items-center gap-3 w-full max-w-sm">
+          <button
+            onClick={() => setShowUpload(true)}
+            className="w-full px-6 py-2.5 rounded-xl font-bold text-sm text-white transition-all hover:brightness-110 font-nunito flex items-center justify-center gap-2"
+            style={{ background: 'rgba(139,92,246,0.25)', border: '1px solid rgba(139,92,246,0.4)' }}
+          >
+            📂 Upload Custom Questions
+            {customCount && <span className="text-purple-300 font-black">({customCount})</span>}
+          </button>
+
+          <button
+            onClick={onStart}
+            disabled={players.length === 0}
+            className="w-full px-10 py-3.5 rounded-2xl font-black text-lg text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed font-nunito"
+            style={{
+              background: players.length > 0
+                ? 'linear-gradient(135deg, #d97706, #b45309)'
+                : 'rgba(100,100,100,0.3)',
+              boxShadow: players.length > 0
+                ? '0 8px 30px rgba(217,119,6,0.5)'
+                : 'none',
+            }}
+          >
+            🚀 Start Game ({players.length} players)
+          </button>
+        </div>
       </div>
+      {showUpload && (
+        <UploadQuestions
+          onClose={() => setShowUpload(false)}
+          onImported={(count) => { setCustomCount(count); setShowUpload(false); }}
+        />
+      )}
     </div>
   );
 }

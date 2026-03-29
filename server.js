@@ -3,7 +3,45 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
+const multer = require('multer');
+const mammoth = require('mammoth');
+const pdfParse = require('pdf-parse');
+const { parse: csvParse } = require('csv-parse/sync');
 const questions = require('./questions');
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+function parseTextToQuestions(text) {
+  const questions = [];
+  const blocks = text.split(/(?=Q:|Question:)/i).map(b => b.trim()).filter(Boolean);
+  for (const block of blocks) {
+    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+    const q = {}; const options = [];
+    for (const line of lines) {
+      if (/^(Q|Question):\s*/i.test(line)) q.question = line.replace(/^(Q|Question):\s*/i, '').trim();
+      else if (/^A[.):]\s*/i.test(line)) options[0] = line.replace(/^A[.):]\s*/i, '').trim();
+      else if (/^B[.):]\s*/i.test(line)) options[1] = line.replace(/^B[.):]\s*/i, '').trim();
+      else if (/^C[.):]\s*/i.test(line)) options[2] = line.replace(/^C[.):]\s*/i, '').trim();
+      else if (/^D[.):]\s*/i.test(line)) options[3] = line.replace(/^D[.):]\s*/i, '').trim();
+      else if (/^(Answer|Correct)[^:]*:\s*/i.test(line)) {
+        const ans = line.replace(/^(Answer|Correct)[^:]*:\s*/i, '').trim().toUpperCase();
+        q.answer = ['A','B','C','D'].indexOf(ans[0]);
+      }
+      else if (/^Category:\s*/i.test(line)) q.category = line.replace(/^Category:\s*/i, '').trim();
+      else if (/^Difficulty:\s*/i.test(line)) q.difficulty = line.replace(/^Difficulty:\s*/i, '').trim().toLowerCase();
+      else if (/^Scripture:\s*/i.test(line)) q.scripture = line.replace(/^Scripture:\s*/i, '').trim();
+    }
+    if (q.question && options.filter(Boolean).length >= 2 && q.answer !== undefined && q.answer >= 0) {
+      while (options.length < 4) options.push('');
+      q.options = options;
+      q.category = q.category || 'General';
+      q.difficulty = q.difficulty || 'medium';
+      q.id = Date.now() + questions.length;
+      questions.push(q);
+    }
+  }
+  return questions;
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +54,56 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+
+app.post('/api/parse-questions', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+    const { originalname, buffer } = req.file;
+    const ext = originalname.split('.').pop().toLowerCase();
+    let parsed = [];
+
+    if (ext === 'csv') {
+      const records = csvParse(buffer.toString('utf8'), { columns: true, skip_empty_lines: true, trim: true });
+      parsed = records.map((r, i) => ({
+        id: Date.now() + i,
+        question: r.question || r.Question || '',
+        options: [r.optionA || r.OptionA || r.A || '', r.optionB || r.OptionB || r.B || '',
+                  r.optionC || r.OptionC || r.C || '', r.optionD || r.OptionD || r.D || ''],
+        answer: parseInt(r.answer ?? r.Answer ?? 0),
+        category: r.category || r.Category || 'General',
+        difficulty: (r.difficulty || r.Difficulty || 'medium').toLowerCase(),
+        scripture: r.scripture || r.Scripture || '',
+      })).filter(q => q.question && q.options.slice(0,2).every(Boolean) && !isNaN(q.answer));
+
+    } else if (ext === 'docx') {
+      const result = await mammoth.extractRawText({ buffer });
+      parsed = parseTextToQuestions(result.value);
+
+    } else if (ext === 'pdf') {
+      const data = await pdfParse(buffer);
+      parsed = parseTextToQuestions(data.text);
+
+    } else {
+      return res.status(400).json({ error: 'Unsupported file type. Use CSV, DOCX, or PDF.' });
+    }
+
+    if (parsed.length === 0) return res.status(400).json({ error: 'No valid questions found. Check the template format.' });
+    res.json({ questions: parsed, count: parsed.length });
+  } catch (err) {
+    console.error('Parse error:', err);
+    res.status(500).json({ error: 'Failed to parse file: ' + err.message });
+  }
+});
+
+app.get('/api/question-template.csv', (req, res) => {
+  const header = 'question,optionA,optionB,optionC,optionD,answer,category,difficulty,scripture\n';
+  const example = '"Who built the ark?","Moses","Noah","Abraham","David",1,"Old Testament","easy","Genesis 6:14"\n';
+  const example2 = '"What was Jesus\' first miracle?","Healing a blind man","Raising Lazarus","Walking on water","Turning water into wine",3,"New Testament","easy","John 2:1-11"\n';
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="question-template.csv"');
+  res.send(header + example + example2);
+});
+
 const distPath = path.join(__dirname, 'client', 'dist');
 if (require('fs').existsSync(distPath)) {
   app.use(express.static(distPath));
@@ -100,6 +188,17 @@ io.on('connection', (socket) => {
     io.to(pin).emit('player-joined', { players: playerList, name });
 
     callback({ success: true, pin });
+  });
+
+  // HOST: Replace questions from upload
+  socket.on('set-questions', (newQuestions, callback) => {
+    const pin = socket.data.pin;
+    const game = games[pin];
+    if (!game || game.hostId !== socket.id) return;
+    if (game.status !== 'lobby') return;
+    game.questions = shuffleQuestions(newQuestions);
+    console.log(`Game ${pin}: questions replaced with ${newQuestions.length} uploaded questions`);
+    if (callback) callback({ success: true, count: newQuestions.length });
   });
 
   // HOST: Start game
