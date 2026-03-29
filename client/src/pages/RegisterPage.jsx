@@ -13,7 +13,7 @@ function EyeIcon({ open }) {
   );
 }
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '');
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 export default function RegisterPage({ onLogin, onBack }) {
   const [name, setName] = useState('');

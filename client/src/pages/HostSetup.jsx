@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '');
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 const TESTAMENT_OPTIONS = [
   { id: 'Old Testament', label: 'Old Testament', emoji: '📜', desc: 'Genesis to Malachi', color: '#d97706', border: 'rgba(217,119,6,0.4)' },
