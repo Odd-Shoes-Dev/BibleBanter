@@ -1,4 +1,4 @@
-export default function LandingPage({ onHost, onJoin }) {
+export default function LandingPage({ onHost, onJoin, hostUser, onLogin, onLogout, onHistory }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #0d0e1a 0%, #111228 60%, #0d0e1a 100%)' }}>
@@ -90,8 +90,33 @@ export default function LandingPage({ onHost, onJoin }) {
           </button>
         </div>
 
+        {/* Auth bar */}
+        <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+          {hostUser ? (
+            <>
+              <span className="text-white/40 text-xs">👤 {hostUser.name}</span>
+              <button onClick={onHistory}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                style={{ background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)' }}>
+                📋 Game History
+              </button>
+              <button onClick={onLogout}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <button onClick={onLogin}
+              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+              style={{ background: 'rgba(251,191,36,0.12)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.25)' }}>
+              🔐 Host Login
+            </button>
+          )}
+        </div>
+
         {/* Kampus logo branding */}
-        <div className="mt-10 flex items-center gap-2.5 opacity-50 hover:opacity-80 transition-opacity">
+        <div className="mt-6 flex items-center gap-2.5 opacity-50 hover:opacity-80 transition-opacity">
           <img src="/kampus-logo.jpeg" alt="Kampus" className="w-7 h-7 object-contain rounded-full" />
           <span className="text-white/60 text-xs font-semibold tracking-wide">A Kampus Event</span>
         </div>

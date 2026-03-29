@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -7,7 +8,12 @@ const multer = require('multer');
 const mammoth = require('mammoth');
 const pdfParse = require('pdf-parse');
 const { parse: csvParse } = require('csv-parse/sync');
-const questions = require('./questions');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const { requireHost, optionalHost } = require('./middleware/auth');
+
+const prisma = new PrismaClient();
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -55,7 +61,88 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/parse-questions', upload.single('file'), async (req, res) => {
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+    if (!email || !password || !name) return res.status(400).json({ error: 'email, password, and name are required.' });
+    const exists = await prisma.host.findUnique({ where: { email } });
+    if (exists) return res.status(400).json({ error: 'Email already registered.' });
+    const passwordHash = await bcrypt.hash(password, 12);
+    const host = await prisma.host.create({ data: { email, passwordHash, name } });
+    const token = jwt.sign({ id: host.id, email: host.email, name: host.name }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, host: { id: host.id, email: host.email, name: host.name } });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'Registration failed.' }); }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const host = await prisma.host.findUnique({ where: { email } });
+    if (!host || !(await bcrypt.compare(password, host.passwordHash)))
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    const token = jwt.sign({ id: host.id, email: host.email, name: host.name }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, host: { id: host.id, email: host.email, name: host.name } });
+  } catch (err) { res.status(500).json({ error: 'Login failed.' }); }
+});
+
+app.get('/api/auth/me', requireHost, async (req, res) => {
+  const host = await prisma.host.findUnique({ where: { id: req.host.id }, select: { id: true, email: true, name: true, createdAt: true } });
+  if (!host) return res.status(404).json({ error: 'Not found.' });
+  res.json({ host });
+});
+
+// ── QUESTION SETS ─────────────────────────────────────────────────────────────
+app.get('/api/sets', optionalHost, async (req, res) => {
+  try {
+    const where = req.host
+      ? { OR: [{ isDefault: true }, { hostId: req.host.id }] }
+      : { isDefault: true };
+    const sets = await prisma.questionSet.findMany({
+      where,
+      select: { id: true, name: true, description: true, testament: true, isDefault: true, createdAt: true, _count: { select: { questions: true } } },
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+    });
+    res.json({ sets });
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch sets.' }); }
+});
+
+app.delete('/api/sets/:id', requireHost, async (req, res) => {
+  try {
+    const set = await prisma.questionSet.findUnique({ where: { id: req.params.id } });
+    if (!set) return res.status(404).json({ error: 'Set not found.' });
+    if (set.isDefault) return res.status(403).json({ error: 'Cannot delete the default set.' });
+    if (set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this set.' });
+    await prisma.questionSet.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: 'Failed to delete set.' }); }
+});
+
+// ── GAME HISTORY ──────────────────────────────────────────────────────────────
+app.get('/api/games', requireHost, async (req, res) => {
+  try {
+    const dbGames = await prisma.game.findMany({
+      where: { hostId: req.host.id },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      select: { id: true, pin: true, status: true, createdAt: true, finishedAt: true, set: { select: { name: true } }, _count: { select: { players: true } } },
+    });
+    res.json({ games: dbGames });
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch games.' }); }
+});
+
+app.get('/api/games/:id', requireHost, async (req, res) => {
+  try {
+    const game = await prisma.game.findFirst({
+      where: { id: req.params.id, hostId: req.host.id },
+      include: { set: { select: { name: true } }, players: { orderBy: { score: 'desc' } } },
+    });
+    if (!game) return res.status(404).json({ error: 'Game not found.' });
+    res.json({ game });
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch game.' }); }
+});
+
+app.post('/api/parse-questions', upload.single('file'), optionalHost, async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
     const { originalname, buffer } = req.file;
@@ -64,8 +151,7 @@ app.post('/api/parse-questions', upload.single('file'), async (req, res) => {
 
     if (ext === 'csv') {
       const records = csvParse(buffer.toString('utf8'), { columns: true, skip_empty_lines: true, trim: true });
-      parsed = records.map((r, i) => ({
-        id: Date.now() + i,
+      parsed = records.map((r) => ({
         question: r.question || r.Question || '',
         options: [r.optionA || r.OptionA || r.A || '', r.optionB || r.OptionB || r.B || '',
                   r.optionC || r.OptionC || r.C || '', r.optionD || r.OptionD || r.D || ''],
@@ -73,22 +159,41 @@ app.post('/api/parse-questions', upload.single('file'), async (req, res) => {
         category: r.category || r.Category || 'General',
         difficulty: (r.difficulty || r.Difficulty || 'medium').toLowerCase(),
         scripture: r.scripture || r.Scripture || '',
-      })).filter(q => q.question && q.options.slice(0,2).every(Boolean) && !isNaN(q.answer));
-
+      })).filter(q => q.question && q.options.slice(0, 2).every(Boolean) && !isNaN(q.answer));
     } else if (ext === 'docx') {
       const result = await mammoth.extractRawText({ buffer });
       parsed = parseTextToQuestions(result.value);
-
     } else if (ext === 'pdf') {
       const data = await pdfParse(buffer);
       parsed = parseTextToQuestions(data.text);
-
     } else {
       return res.status(400).json({ error: 'Unsupported file type. Use CSV, DOCX, or PDF.' });
     }
 
     if (parsed.length === 0) return res.status(400).json({ error: 'No valid questions found. Check the template format.' });
-    res.json({ questions: parsed, count: parsed.length });
+
+    // If authenticated host + setName provided → save to DB as a named question set
+    let savedSetId = null;
+    const setName = req.body.setName;
+    if (req.host && setName) {
+      const set = await prisma.questionSet.create({
+        data: {
+          name: setName,
+          description: `Imported from ${originalname}`,
+          testament: 'both',
+          hostId: req.host.id,
+          questions: {
+            create: parsed.map(q => ({
+              question: q.question, options: q.options, answer: q.answer,
+              category: q.category, difficulty: q.difficulty, scripture: q.scripture || '',
+            })),
+          },
+        },
+      });
+      savedSetId = set.id;
+    }
+
+    res.json({ questions: parsed, count: parsed.length, savedSetId });
   } catch (err) {
     console.error('Parse error:', err);
     res.status(500).json({ error: 'Failed to parse file: ' + err.message });
@@ -138,27 +243,59 @@ io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
 
   // HOST: Create game
-  socket.on('create-game', ({ testament } = {}, callback) => {
-    const pin = generatePin();
-    const filtered = testament && testament !== 'both'
-      ? questions.filter(q => q.category === testament)
-      : questions;
-    const gameQuestions = shuffleQuestions(filtered).slice(0, 10);
-    games[pin] = {
-      pin,
-      hostId: socket.id,
-      players: new Map(),
-      questions: gameQuestions,
-      currentQuestion: -1,
-      status: 'lobby',
-      timer: null,
-      questionStartTime: null,
-    };
-    socket.join(pin);
-    socket.data.pin = pin;
-    socket.data.role = 'host';
-    console.log(`Game created: ${pin}`);
-    callback({ success: true, pin });
+  socket.on('create-game', async ({ testament, setId, hostToken } = {}, callback) => {
+    try {
+      // Verify host JWT if provided
+      let hostDbId = null;
+      if (hostToken) {
+        try { const p = jwt.verify(hostToken, process.env.JWT_SECRET); hostDbId = p.id; } catch {}
+      }
+
+      // Fetch questions from DB
+      let dbQuestions;
+      if (setId) {
+        dbQuestions = await prisma.question.findMany({ where: { setId } });
+      } else {
+        const defaultSet = await prisma.questionSet.findFirst({ where: { isDefault: true } });
+        if (defaultSet) {
+          const where = { setId: defaultSet.id };
+          if (testament && testament !== 'both') where.category = testament;
+          dbQuestions = await prisma.question.findMany({ where });
+        }
+      }
+
+      const pin = generatePin();
+      const gameQuestions = dbQuestions && dbQuestions.length > 0
+        ? shuffleQuestions(dbQuestions).slice(0, 10)
+        : []; // fallback empty if DB not seeded yet
+
+      // Persist game to DB
+      let dbGameId = null;
+      try {
+        const dbGame = await prisma.game.create({
+          data: { pin, hostId: hostDbId, setId: setId || (await prisma.questionSet.findFirst({ where: { isDefault: true } }))?.id || null },
+        });
+        dbGameId = dbGame.id;
+      } catch (e) { console.error('DB game create error:', e.message); }
+
+      games[pin] = {
+        pin, dbGameId, hostId: socket.id,
+        players: new Map(),
+        questions: gameQuestions,
+        currentQuestion: -1,
+        status: 'lobby',
+        timer: null,
+        questionStartTime: null,
+      };
+      socket.join(pin);
+      socket.data.pin = pin;
+      socket.data.role = 'host';
+      console.log(`Game created: ${pin} (${gameQuestions.length} questions)`);
+      callback({ success: true, pin });
+    } catch (err) {
+      console.error('create-game error:', err);
+      callback({ success: false, error: 'Failed to create game.' });
+    }
   });
 
   // PLAYER: Join game
@@ -183,6 +320,15 @@ io.on('connection', (socket) => {
     socket.data.pin = pin;
     socket.data.role = 'player';
     socket.data.name = name;
+
+    // Persist player to DB
+    if (game.dbGameId) {
+      prisma.player.upsert({
+        where: { name_gameId: { name, gameId: game.dbGameId } },
+        update: {},
+        create: { name, gameId: game.dbGameId },
+      }).catch(e => console.error('DB player upsert:', e.message));
+    }
 
     const playerList = [...game.players.values()].map(p => ({ id: p.id, name: p.name, score: p.score }));
     io.to(pin).emit('player-joined', { players: playerList, name });
@@ -250,6 +396,20 @@ io.on('connection', (socket) => {
       streak: player.streak,
       scripture: q.scripture,
     });
+
+    // Persist answer to DB
+    if (game.dbGameId) {
+      prisma.playerAnswer.create({
+        data: {
+          playerName: player.name,
+          gameId: game.dbGameId,
+          questionIndex: game.currentQuestion,
+          answerIndex,
+          isCorrect,
+          pointsEarned,
+        },
+      }).catch(e => console.error('DB answer write:', e.message));
+    }
 
     const answeredCount = [...game.players.values()].filter(p => p.answered).length;
     io.to(pin).emit('answer-progress', {
@@ -355,7 +515,7 @@ function showResults(pin) {
   });
 }
 
-function endGame(pin) {
+async function endGame(pin) {
   const game = games[pin];
   if (!game) return;
   game.status = 'ended';
@@ -363,6 +523,22 @@ function endGame(pin) {
 
   const leaderboard = getLeaderboard(game);
   io.to(pin).emit('game-over', { leaderboard });
+
+  // Persist final scores to DB
+  if (game.dbGameId) {
+    try {
+      await prisma.game.update({
+        where: { id: game.dbGameId },
+        data: { status: 'finished', finishedAt: new Date() },
+      });
+      await Promise.all(leaderboard.map(p =>
+        prisma.player.update({
+          where: { name_gameId: { name: p.name, gameId: game.dbGameId } },
+          data: { score: p.score, streak: p.streak, rank: p.rank },
+        }).catch(() => {})
+      ));
+    } catch (e) { console.error('DB endGame error:', e.message); }
+  }
 }
 
 // Serve React app for all other routes (only in local dev where client/dist exists)

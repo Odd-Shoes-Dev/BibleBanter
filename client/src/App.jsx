@@ -8,6 +8,9 @@ import PlayerLobby from './pages/PlayerLobby';
 import GameScreen from './pages/GameScreen';
 import ResultsScreen from './pages/ResultsScreen';
 import GameOver from './pages/GameOver';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import GameHistory from './pages/GameHistory';
 import Confetti from './components/Confetti';
 
 export default function App() {
@@ -27,6 +30,26 @@ export default function App() {
   const [liveLeaderboard, setLiveLeaderboard] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
+
+  // Auth state
+  const [authToken, setAuthToken] = useState(() => localStorage.getItem('bb_token') || null);
+  const [hostUser, setHostUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('bb_host') || 'null'); } catch { return null; }
+  });
+
+  const handleLogin = (host, token) => {
+    setHostUser(host);
+    setAuthToken(token);
+    setScreen('host-setup');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('bb_token');
+    localStorage.removeItem('bb_host');
+    setAuthToken(null);
+    setHostUser(null);
+    setScreen('landing');
+  };
 
   useEffect(() => {
     socket.connect();
@@ -103,8 +126,8 @@ export default function App() {
     };
   }, []);
 
-  const handleCreateGame = (testament) => {
-    socket.emit('create-game', { testament }, ({ success, pin, error }) => {
+  const handleCreateGame = ({ testament, setId }) => {
+    socket.emit('create-game', { testament, setId, hostToken: authToken }, ({ success, pin, error }) => {
       if (success) {
         setGamePin(pin);
         setRole('host');
@@ -175,16 +198,32 @@ export default function App() {
       )}
 
       {screen === 'landing' && (
-        <LandingPage onHost={() => setScreen('host-setup')} onJoin={() => setScreen('join')} />
+        <LandingPage
+          onHost={() => setScreen(hostUser ? 'host-setup' : 'login')}
+          onJoin={() => setScreen('join')}
+          hostUser={hostUser}
+          onLogin={() => setScreen('login')}
+          onLogout={handleLogout}
+          onHistory={() => setScreen('history')}
+        />
+      )}
+      {screen === 'login' && (
+        <LoginPage onLogin={handleLogin} onRegister={() => setScreen('register')} />
+      )}
+      {screen === 'register' && (
+        <RegisterPage onLogin={handleLogin} onBack={() => setScreen('login')} />
+      )}
+      {screen === 'history' && (
+        <GameHistory token={authToken} onBack={() => setScreen('landing')} />
       )}
       {screen === 'host-setup' && (
-        <HostSetup onSelect={handleCreateGame} onBack={() => setScreen('landing')} />
+        <HostSetup onSelect={handleCreateGame} onBack={() => setScreen('landing')} token={authToken} />
       )}
       {screen === 'join' && (
         <JoinPage onJoin={handleJoinGame} onBack={() => setScreen('landing')} />
       )}
       {screen === 'host-lobby' && (
-        <HostLobby pin={gamePin} players={players} onStart={handleStartGame} onError={errorMsg} />
+        <HostLobby pin={gamePin} players={players} onStart={handleStartGame} onError={errorMsg} token={authToken} />
       )}
       {screen === 'player-lobby' && (
         <PlayerLobby pin={gamePin} playerName={playerName} players={players} />

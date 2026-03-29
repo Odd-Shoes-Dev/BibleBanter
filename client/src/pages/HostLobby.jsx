@@ -13,7 +13,7 @@ const AVATAR_COLORS = [
   'linear-gradient(135deg, #65a30d, #4d7c0f)',
 ];
 
-export default function HostLobby({ pin, players, onStart }) {
+export default function HostLobby({ pin, players, onStart, token }) {
   const joinUrl = `${window.location.origin}/?pin=${pin}`;
   const [showUpload, setShowUpload] = useState(false);
   const [customCount, setCustomCount] = useState(null);
@@ -131,6 +131,7 @@ export default function HostLobby({ pin, players, onStart }) {
         <UploadQuestions
           onClose={() => setShowUpload(false)}
           onImported={(count) => { setCustomCount(count); setShowUpload(false); }}
+          token={token}
         />
       )}
     </div>

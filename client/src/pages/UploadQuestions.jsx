@@ -1,10 +1,9 @@
 import { useState, useRef } from 'react';
 import { socket } from '../socket';
 
-const DIFFICULTIES = ['easy', 'medium', 'hard', 'expert'];
-
-export default function UploadQuestions({ onClose, onImported }) {
+export default function UploadQuestions({ onClose, onImported, token }) {
   const [file, setFile] = useState(null);
+  const [setName, setSetName] = useState('');
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -12,7 +11,7 @@ export default function UploadQuestions({ onClose, onImported }) {
   const [success, setSuccess] = useState('');
   const inputRef = useRef();
 
-  const BACKEND = import.meta.env.VITE_BACKEND_URL || '';
+  const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
   const handleFile = async (f) => {
     if (!f) return;
@@ -30,7 +29,8 @@ export default function UploadQuestions({ onClose, onImported }) {
     try {
       const form = new FormData();
       form.append('file', f);
-      const res = await fetch(`${BACKEND}/api/parse-questions`, { method: 'POST', body: form });
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${BACKEND}/api/parse-questions`, { method: 'POST', body: form, headers });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Parse failed');
       setPreview(data.questions);
@@ -47,18 +47,34 @@ export default function UploadQuestions({ onClose, onImported }) {
     if (f) handleFile(f);
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!preview?.length) return;
     setImporting(true);
-    socket.emit('set-questions', preview, ({ success: ok, count }) => {
-      if (ok) {
-        setSuccess(`✅ ${count} questions imported!`);
-        setTimeout(() => { onImported(count); onClose(); }, 1200);
-      } else {
-        setError('Failed to import questions.');
+    try {
+      // If authenticated + setName provided, save to DB first
+      if (token && setName.trim()) {
+        const form = new FormData();
+        form.append('file', file);
+        form.append('setName', setName.trim());
+        const headers = { Authorization: `Bearer ${token}` };
+        const res = await fetch(`${BACKEND}/api/parse-questions`, { method: 'POST', body: form, headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to save.');
       }
+      // Always push to current game via socket
+      socket.emit('set-questions', preview, ({ success: ok, count }) => {
+        if (ok) {
+          setSuccess(`✅ ${count} questions imported!`);
+          setTimeout(() => { onImported(count); onClose(); }, 1200);
+        } else {
+          setError('Failed to import questions.');
+        }
+        setImporting(false);
+      });
+    } catch (e) {
+      setError(e.message);
       setImporting(false);
-    });
+    }
   };
 
   const diffColor = (d) => {
@@ -96,6 +112,22 @@ export default function UploadQuestions({ onClose, onImported }) {
 
         {/* Body — scrollable */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+
+          {/* Set name (authenticated hosts only) */}
+          {token && (
+            <div>
+              <label className="block text-white/50 text-xs font-bold uppercase tracking-wider mb-1.5">Save as Question Set (optional)</label>
+              <input
+                type="text"
+                value={setName}
+                onChange={e => setSetName(e.target.value)}
+                placeholder="e.g. Youth Group Set 1"
+                className="w-full px-4 py-2.5 rounded-xl text-white font-semibold outline-none text-sm"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
+              />
+              <p className="text-white/30 text-xs mt-1">Named sets are saved to the database and reusable in future games.</p>
+            </div>
+          )}
 
           {/* Drop zone */}
           <div
