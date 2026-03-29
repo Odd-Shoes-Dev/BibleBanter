@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { requireHost, optionalHost } = require('./middleware/auth');
+const localQuestions = require('./questions');
 
 const prisma = new PrismaClient();
 
@@ -265,9 +266,12 @@ io.on('connection', (socket) => {
       }
 
       const pin = generatePin();
-      const gameQuestions = dbQuestions && dbQuestions.length > 0
-        ? shuffleQuestions(dbQuestions).slice(0, 10)
-        : []; // fallback empty if DB not seeded yet
+      // Fallback to local questions.js if DB returned nothing
+      const questionPool = (dbQuestions && dbQuestions.length > 0) ? dbQuestions : localQuestions;
+      const filtered = (testament && testament !== 'both')
+        ? questionPool.filter(q => q.category === testament)
+        : questionPool;
+      const gameQuestions = shuffleQuestions(filtered.length > 0 ? filtered : questionPool).slice(0, 10);
 
       // Persist game to DB
       let dbGameId = null;
@@ -351,9 +355,21 @@ io.on('connection', (socket) => {
   socket.on('start-game', () => {
     const pin = socket.data.pin;
     const game = games[pin];
-    if (!game || game.hostId !== socket.id) return;
+    if (!game) { socket.emit('error-msg', 'Game not found. Please refresh and try again.'); return; }
+    if (game.hostId !== socket.id) {
+      // Allow if socket reconnected — re-adopt host role by pin+role
+      if (socket.data.role === 'host') {
+        game.hostId = socket.id;
+      } else {
+        socket.emit('error-msg', 'Not authorised to start this game.'); return;
+      }
+    }
     if (game.players.size === 0) {
       socket.emit('error-msg', 'At least one player must join before starting.');
+      return;
+    }
+    if (game.questions.length === 0) {
+      socket.emit('error-msg', 'No questions loaded. Upload questions or check DB connection.');
       return;
     }
     game.status = 'playing';
@@ -428,14 +444,12 @@ io.on('connection', (socket) => {
   socket.on('next-question', () => {
     const pin = socket.data.pin;
     const game = games[pin];
-    if (!game || game.hostId !== socket.id) return;
+    if (!game) return;
+    if (game.hostId !== socket.id && socket.data.role === 'host') game.hostId = socket.id;
+    if (game.hostId !== socket.id) return;
     clearTimeout(game.timer);
-    const nextIdx = game.currentQuestion + 1;
-    if (nextIdx >= game.questions.length) {
-      endGame(pin);
-    } else {
-      sendQuestion(pin);
-    }
+    // sendQuestion already increments currentQuestion — just call it directly
+    sendQuestion(pin);
   });
 
   socket.on('disconnect', () => {
