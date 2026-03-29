@@ -143,7 +143,7 @@ io.on('connection', (socket) => {
     const filtered = testament && testament !== 'both'
       ? questions.filter(q => q.category === testament)
       : questions;
-    const gameQuestions = shuffleQuestions(filtered);
+    const gameQuestions = shuffleQuestions(filtered).slice(0, 10);
     games[pin] = {
       pin,
       hostId: socket.id,
