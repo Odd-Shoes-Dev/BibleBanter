@@ -11,7 +11,7 @@ export default function UploadQuestions({ onClose, onImported, token }) {
   const [success, setSuccess] = useState('');
   const inputRef = useRef();
 
-  const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  const BACKEND = import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? 'http://localhost:3001' : '');
 
   const handleFile = async (f) => {
     if (!f) return;
