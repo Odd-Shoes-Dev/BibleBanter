@@ -97,7 +97,7 @@ app.get('/api/auth/me', requireHost, async (req, res) => {
 app.get('/api/sets', optionalHost, async (req, res) => {
   try {
     const where = req.host
-      ? { OR: [{ isDefault: true }, { hostId: req.host.id }] }
+      ? { OR: [{ isDefault: true }, { hostId: req.host.id }, { hostId: null, isDefault: false }] }
       : { isDefault: true };
     const sets = await prisma.questionSet.findMany({
       where,
