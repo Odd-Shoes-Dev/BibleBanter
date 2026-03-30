@@ -15,7 +15,7 @@ function EyeIcon({ open }) {
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-export default function LoginPage({ onLogin, onRegister }) {
+export default function LoginPage({ onLogin, onRegister, onBack }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -116,6 +116,14 @@ export default function LoginPage({ onLogin, onRegister }) {
           >
             No account? <span className="text-amber-400 font-bold">Create one →</span>
           </button>
+          <div>
+            <button
+              onClick={onBack}
+              className="text-white/30 text-sm hover:text-white/60 transition-colors"
+            >
+              ← Back to Home
+            </button>
+          </div>
         </div>
       </div>
     </div>

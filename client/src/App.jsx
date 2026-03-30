@@ -208,7 +208,7 @@ export default function App() {
         />
       )}
       {screen === 'login' && (
-        <LoginPage onLogin={handleLogin} onRegister={() => setScreen('register')} />
+        <LoginPage onLogin={handleLogin} onRegister={() => setScreen('register')} onBack={() => setScreen('landing')} />
       )}
       {screen === 'register' && (
         <RegisterPage onLogin={handleLogin} onBack={() => setScreen('login')} />
