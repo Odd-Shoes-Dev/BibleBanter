@@ -14,6 +14,8 @@ const { PrismaClient } = require('@prisma/client');
 const { requireHost, optionalHost } = require('./middleware/auth');
 const localQuestions = require('./questions');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const gemini = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
@@ -87,11 +89,41 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const host = await prisma.host.findUnique({ where: { email } });
-    if (!host || !(await bcrypt.compare(password, host.passwordHash)))
+    if (!host || !host.passwordHash || !(await bcrypt.compare(password, host.passwordHash)))
       return res.status(401).json({ error: 'Invalid email or password.' });
     const token = jwt.sign({ id: host.id, email: host.email, name: host.name }, process.env.JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, host: { id: host.id, email: host.email, name: host.name } });
   } catch (err) { res.status(500).json({ error: 'Login failed.' }); }
+});
+
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: 'No credential provided.' });
+    if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ error: 'Google Sign In not configured.' });
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    let host = await prisma.host.findFirst({ where: { OR: [{ googleId }, { email }] } });
+    if (host) {
+      if (!host.googleId) await prisma.host.update({ where: { id: host.id }, data: { googleId } });
+    } else {
+      host = await prisma.host.create({
+        data: { email, name: name || email.split('@')[0], googleId },
+      });
+    }
+
+    const token = jwt.sign({ id: host.id, email: host.email, name: host.name }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, host: { id: host.id, email: host.email, name: host.name } });
+  } catch (err) {
+    console.error('Google auth error:', err.message);
+    res.status(401).json({ error: 'Google authentication failed.' });
+  }
 });
 
 app.get('/api/auth/me', requireHost, async (req, res) => {

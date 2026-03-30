@@ -10,7 +10,8 @@ datasource db {
 model Host {
   id           String        @id @default(cuid())
   email        String        @unique
-  passwordHash String
+  passwordHash String?
+  googleId     String?       @unique
   name         String
   createdAt    DateTime      @default(now())
   questionSets QuestionSet[]

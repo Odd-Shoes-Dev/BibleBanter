@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 function EyeIcon({ open }) {
   return open ? (
@@ -13,14 +17,33 @@ function EyeIcon({ open }) {
   );
 }
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-
 export default function LoginPage({ onLogin, onRegister, onBack }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch(`${BACKEND}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Google sign in failed.');
+      localStorage.setItem('bb_token', data.token);
+      localStorage.setItem('bb_host', JSON.stringify(data.host));
+      onLogin(data.host, data.token);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -108,6 +131,27 @@ export default function LoginPage({ onLogin, onRegister, onBack }) {
             {loading ? '⏳ Signing in...' : '⚔️ Sign In'}
           </button>
         </form>
+
+        {/* Google Sign In */}
+        {GOOGLE_CLIENT_ID && (
+          <div className="mt-5">
+            <div className="flex items-center gap-3 my-4">
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+              <span className="text-white/30 text-xs font-semibold">OR</span>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            </div>
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google sign in failed.')}
+                theme="filled_black"
+                shape="pill"
+                text="continue_with"
+                size="large"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 text-center space-y-3">
           <button

@@ -307,6 +307,7 @@ export default function App() {
           onHistory={() => setScreen('history')}
           onReports={() => setScreen('reports')}
           onTheme={() => setShowThemePicker(true)}
+          onGoogleLogin={handleLogin}
         />
       )}
       {showThemePicker && (

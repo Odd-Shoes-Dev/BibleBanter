@@ -1,10 +1,27 @@
 import { useState, useEffect } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const MEDALS = ['🥇', '🥈', '🥉'];
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
-export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin, onLogout, onHistory, onReports, onTheme }) {
+export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin, onLogout, onHistory, onReports, onTheme, onGoogleLogin }) {
   const [leaderboard, setLeaderboard] = useState([]);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const res = await fetch(`${BACKEND}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      localStorage.setItem('bb_token', data.token);
+      localStorage.setItem('bb_host', JSON.stringify(data.host));
+      onGoogleLogin?.(data.host, data.token);
+    } catch {}
+  };
 
   useEffect(() => {
     fetch(`${BACKEND}/api/leaderboard`)
@@ -142,11 +159,23 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
               </button>
             </>
           ) : (
-            <button onClick={onLogin}
-              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
-              style={{ background: 'rgba(251,191,36,0.12)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.25)' }}>
-              🔐 Host Login
-            </button>
+            <div className="flex flex-col items-center gap-2">
+              {GOOGLE_CLIENT_ID && (
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => {}}
+                  theme="filled_black"
+                  shape="pill"
+                  text="signin_with"
+                  size="medium"
+                />
+              )}
+              <button onClick={onLogin}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                style={{ background: 'rgba(251,191,36,0.12)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.25)' }}>
+                🔐 Host Login
+              </button>
+            </div>
           )}
         </div>
 
