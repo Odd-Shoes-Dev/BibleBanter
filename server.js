@@ -895,3 +895,28 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Bible Battle server running on http://localhost:${PORT}`);
 });
+
+// ── KEEP-ALIVE: prevent Render backend + Neon DB from sleeping ────────────────
+const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
+
+setInterval(async () => {
+  // 1. Ping Render backend (self-ping keeps the web service awake)
+  const backendUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  try {
+    await fetch(`${backendUrl}/api/ping`);
+    console.log('[keep-alive] backend ping ok');
+  } catch (e) {
+    console.warn('[keep-alive] backend ping failed:', e.message);
+  }
+
+  // 2. Ping Neon DB (lightweight query keeps the serverless DB connection warm)
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('[keep-alive] neon db ping ok');
+  } catch (e) {
+    console.warn('[keep-alive] neon db ping failed:', e.message);
+  }
+}, KEEP_ALIVE_INTERVAL);
+
+// Ping endpoint used by keep-alive above
+app.get('/api/ping', (req, res) => res.json({ ok: true, ts: Date.now() }));
