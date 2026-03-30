@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { socket } from './socket';
 import LandingPage from './pages/LandingPage';
 import HostSetup from './pages/HostSetup';
@@ -39,6 +39,9 @@ export default function App() {
   const [errorMsg, setErrorMsg] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
+  const [continueData, setContinueData] = useState(null);
+  const roleRef = useRef(null);
+  useEffect(() => { roleRef.current = role; }, [role]);
 
   // Auth state
   const [authToken, setAuthToken] = useState(() => localStorage.getItem('bb_token') || null);
@@ -144,12 +147,25 @@ export default function App() {
       setScreen('results');
     });
 
-    socket.on('game-over', ({ leaderboard: lb, dbGameId }) => {
+    socket.on('game-over', ({ leaderboard: lb, dbGameId, hasMore, nextOffset, setId, totalQuestions }) => {
       setLeaderboard(lb);
       if (dbGameId) setReportGameId(dbGameId);
+      setContinueData(hasMore ? { nextOffset, setId, totalQuestions } : null);
       setScreen('gameover');
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
+    });
+
+    socket.on('round-starting', ({ round, batchStart, batchEnd, totalQuestions, players: pl }) => {
+      setPlayers(pl || []);
+      setCurrentQuestion(null);
+      setAnswerResult(null);
+      setQuestionResults(null);
+      setAnswerProgress({ answered: 0, total: 0 });
+      setLiveLeaderboard([]);
+      setContinueData(null);
+      if (roleRef.current === 'host') setScreen('host-lobby');
+      else setScreen('player-lobby');
     });
 
     socket.on('host-disconnected', () => {
@@ -167,6 +183,7 @@ export default function App() {
     return () => {
       socket.off('connect');
       socket.off('disconnect');
+      socket.off('round-starting');
       socket.off('player-joined');
       socket.off('player-left');
       socket.off('game-started');
@@ -224,6 +241,12 @@ export default function App() {
     setScreen('game');
     setQuestionResults(null);
     setAnswerResult(null);
+  };
+
+  const handleContinueGame = () => {
+    socket.emit('continue-game', {}, ({ success, error }) => {
+      if (!success) setErrorMsg(error || 'Failed to continue game.');
+    });
   };
 
   const handlePlayAgain = () => {
@@ -376,6 +399,8 @@ export default function App() {
           onPlayAgain={handlePlayAgain}
           role={role}
           onViewReport={reportGameId ? () => setScreen('session-report') : null}
+          onContinue={continueData ? handleContinueGame : null}
+          continueInfo={continueData}
         />
       )}
     </div>

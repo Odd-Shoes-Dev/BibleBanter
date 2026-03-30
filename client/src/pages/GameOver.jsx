@@ -1,4 +1,4 @@
-export default function GameOver({ leaderboard, playerName, onPlayAgain, role, onViewReport }) {
+export default function GameOver({ leaderboard, playerName, onPlayAgain, role, onViewReport, onContinue, continueInfo }) {
   const myRank = leaderboard.findIndex(p => p.name === playerName) + 1;
   const myEntry = leaderboard.find(p => p.name === playerName);
 
@@ -136,6 +136,21 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain, role, o
             }}
           >
             📊 VIEW UNDERSTANDING REPORT
+          </button>
+        )}
+
+        {/* Continue to next batch — host only */}
+        {role === 'host' && onContinue && continueInfo && (
+          <button
+            onClick={onContinue}
+            className="w-full py-4 rounded-2xl font-black text-lg text-white font-nunito tracking-wide transition-all duration-300 hover:scale-105 animate-slide-up"
+            style={{
+              background: 'linear-gradient(135deg, #d97706, #b45309)',
+              boxShadow: '0 6px 30px rgba(217,119,6,0.45)',
+              animationDelay: '0.28s'
+            }}
+          >
+            ▶ Continue — Q{continueInfo.nextOffset + 1}–{Math.min(continueInfo.nextOffset + 10, continueInfo.totalQuestions)} of {continueInfo.totalQuestions}
           </button>
         )}
 

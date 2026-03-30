@@ -567,40 +567,52 @@ io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
 
   // HOST: Create game
-  socket.on('create-game', async ({ testament, setId, hostToken } = {}, callback) => {
+  socket.on('create-game', async ({ testament, setId, hostToken, offset = 0 } = {}, callback) => {
     try {
-      // Verify host JWT if provided
       let hostDbId = null;
       if (hostToken) {
         try { const p = jwt.verify(hostToken, process.env.JWT_SECRET); hostDbId = p.id; } catch {}
       }
 
-      // Fetch questions from DB
-      let dbQuestions;
+      let allSetQuestions;
+      let resolvedSetId = setId;
       if (setId) {
-        dbQuestions = await prisma.question.findMany({ where: { setId } });
+        allSetQuestions = await prisma.question.findMany({ where: { setId }, orderBy: { id: 'asc' } });
       } else {
         const defaultSet = await prisma.questionSet.findFirst({ where: { isDefault: true } });
         if (defaultSet) {
+          resolvedSetId = defaultSet.id;
           const where = { setId: defaultSet.id };
           if (testament && testament !== 'both') where.category = testament;
-          dbQuestions = await prisma.question.findMany({ where });
+          allSetQuestions = await prisma.question.findMany({ where, orderBy: { id: 'asc' } });
         }
       }
 
       const pin = generatePin();
-      // Fallback to local questions.js if DB returned nothing
-      const questionPool = (dbQuestions && dbQuestions.length > 0) ? dbQuestions : localQuestions;
-      const filtered = (testament && testament !== 'both')
-        ? questionPool.filter(q => q.category === testament)
-        : questionPool;
-      const gameQuestions = shuffleQuestions(filtered.length > 0 ? filtered : questionPool).slice(0, 10);
+      const questionPool = (allSetQuestions && allSetQuestions.length > 0) ? allSetQuestions : localQuestions;
+      const totalQuestions = questionPool.length;
 
-      // Persist game to DB
+      let gameQuestions;
+      if (setId) {
+        // Paginated: ordered slice, no shuffle
+        gameQuestions = questionPool.slice(offset, offset + 10);
+      } else {
+        // Default: filter by testament + shuffle, no pagination
+        const filtered = (testament && testament !== 'both')
+          ? questionPool.filter(q => q.category === testament)
+          : questionPool;
+        gameQuestions = shuffleQuestions(filtered.length > 0 ? filtered : questionPool).slice(0, 10);
+      }
+
+      if (gameQuestions.length === 0) return callback({ success: false, error: 'No questions available in this set.' });
+
+      const nextOffset = offset + gameQuestions.length;
+      const hasMore = setId ? nextOffset < totalQuestions : false;
+
       let dbGameId = null;
       try {
         const dbGame = await prisma.game.create({
-          data: { pin, hostId: hostDbId, setId: setId || (await prisma.questionSet.findFirst({ where: { isDefault: true } }))?.id || null },
+          data: { pin, hostId: hostDbId, setId: resolvedSetId || null },
         });
         dbGameId = dbGame.id;
       } catch (e) { console.error('DB game create error:', e.message); }
@@ -613,15 +625,58 @@ io.on('connection', (socket) => {
         status: 'lobby',
         timer: null,
         questionStartTime: null,
+        setId: resolvedSetId || null,
+        questionOffset: offset,
+        nextOffset,
+        hasMore,
+        totalQuestions,
       };
       socket.join(pin);
       socket.data.pin = pin;
       socket.data.role = 'host';
-      console.log(`Game created: ${pin} (${gameQuestions.length} questions)`);
+      console.log(`Game created: ${pin} (Q${offset + 1}-${nextOffset} of ${totalQuestions})`);
       callback({ success: true, pin });
     } catch (err) {
       console.error('create-game error:', err);
       callback({ success: false, error: 'Failed to create game.' });
+    }
+  });
+
+  // HOST: Continue game with next question batch
+  socket.on('continue-game', async (_, callback) => {
+    const pin = socket.data.pin;
+    const game = games[pin];
+    if (!game || game.hostId !== socket.id) return callback?.({ success: false, error: 'Not authorised.' });
+    if (!game.hasMore || !game.setId) return callback?.({ success: false, error: 'No more questions.' });
+    try {
+      const allQuestions = await prisma.question.findMany({ where: { setId: game.setId }, orderBy: { id: 'asc' } });
+      const batch = allQuestions.slice(game.nextOffset, game.nextOffset + 10);
+      if (batch.length === 0) return callback?.({ success: false, error: 'No more questions.' });
+
+      const newNextOffset = game.nextOffset + batch.length;
+      const stillHasMore = newNextOffset < allQuestions.length;
+
+      game.questions = batch;
+      game.currentQuestion = -1;
+      game.status = 'lobby';
+      game.questionOffset = game.nextOffset;
+      game.nextOffset = newNextOffset;
+      game.hasMore = stillHasMore;
+
+      for (const [, p] of game.players) { p.answered = false; p.lastAnswer = null; }
+
+      const playerList = [...game.players.values()].map(p => ({ id: p.id, name: p.name, score: p.score }));
+      const round = Math.floor(game.questionOffset / 10) + 1;
+      io.to(pin).emit('round-starting', {
+        round,
+        batchStart: game.questionOffset + 1,
+        batchEnd: newNextOffset,
+        totalQuestions: allQuestions.length,
+        players: playerList,
+      });
+      callback?.({ success: true });
+    } catch (e) {
+      callback?.({ success: false, error: e.message });
     }
   });
 
@@ -940,7 +995,15 @@ async function endGame(pin) {
   clearTimeout(game.timer);
 
   const leaderboard = getLeaderboard(game);
-  io.to(pin).emit('game-over', { leaderboard, dbGameId: game.dbGameId || null });
+  io.to(pin).emit('game-over', {
+    leaderboard,
+    dbGameId: game.dbGameId || null,
+    hasMore: game.hasMore || false,
+    nextOffset: game.nextOffset || 0,
+    setId: game.setId || null,
+    totalQuestions: game.totalQuestions || 0,
+    batchEnd: game.nextOffset || 0,
+  });
 
   // Persist final scores to DB
   if (game.dbGameId) {
