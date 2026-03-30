@@ -197,6 +197,26 @@ app.post('/api/sets/:id/questions', requireHost, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to add question.' }); }
 });
 
+// ── GLOBAL LEADERBOARD ────────────────────────────────────────────────────────
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const rows = await prisma.player.groupBy({
+      by: ['name'],
+      _sum: { score: true },
+      _count: { id: true },
+      orderBy: { _sum: { score: 'desc' } },
+      take: 10,
+    });
+    const leaderboard = rows.map((r, i) => ({
+      rank: i + 1,
+      name: r.name,
+      totalScore: r._sum.score || 0,
+      gamesPlayed: r._count.id,
+    }));
+    res.json({ leaderboard });
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch leaderboard.' }); }
+});
+
 // ── GAME HISTORY ──────────────────────────────────────────────────────────────
 app.get('/api/games', requireHost, async (req, res) => {
   try {

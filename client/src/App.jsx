@@ -17,10 +17,14 @@ import SessionReport from './pages/SessionReport';
 import ReportsPage from './pages/ReportsPage';
 import SoloPractice from './pages/SoloPractice';
 import Confetti from './components/Confetti';
+import ThemePicker from './components/ThemePicker';
+import { getSavedTheme } from './utils/themes';
 
 export default function App() {
   const [editSetId, setEditSetId] = useState(null);
   const [reportGameId, setReportGameId] = useState(null);
+  const [theme, setTheme] = useState(getSavedTheme);
+  const [showThemePicker, setShowThemePicker] = useState(false);
 
   const [screen, setScreen] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -269,7 +273,7 @@ export default function App() {
   const clearError = () => setErrorMsg('');
 
   return (
-    <div className="min-h-screen stars-bg">
+    <div className="min-h-screen stars-bg" style={{ background: theme.bg }}>
       {showConfetti && <Confetti />}
 
       {reconnecting && (
@@ -302,6 +306,14 @@ export default function App() {
           onLogout={handleLogout}
           onHistory={() => setScreen('history')}
           onReports={() => setScreen('reports')}
+          onTheme={() => setShowThemePicker(true)}
+        />
+      )}
+      {showThemePicker && (
+        <ThemePicker
+          current={theme.id}
+          onSelect={t => { setTheme(t); setShowThemePicker(false); }}
+          onClose={() => setShowThemePicker(false)}
         />
       )}
       {screen === 'login' && (

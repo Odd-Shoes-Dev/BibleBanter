@@ -1,4 +1,18 @@
-export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin, onLogout, onHistory, onReports }) {
+import { useState, useEffect } from 'react';
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const MEDALS = ['🥇', '🥈', '🥉'];
+
+export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin, onLogout, onHistory, onReports, onTheme }) {
+  const [leaderboard, setLeaderboard] = useState([]);
+
+  useEffect(() => {
+    fetch(`${BACKEND}/api/leaderboard`)
+      .then(r => r.json())
+      .then(d => setLeaderboard(d.leaderboard || []))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #0d0e1a 0%, #111228 60%, #0d0e1a 100%)' }}>
@@ -136,12 +150,43 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
           )}
         </div>
 
+        {/* Theme picker */}
+        {onTheme && (
+          <div className="mt-4">
+            <button onClick={onTheme}
+              className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+              style={{ background: 'rgba(139,92,246,0.12)', color: '#c4b5fd', border: '1px solid rgba(139,92,246,0.25)' }}>
+              🎨 Themes
+            </button>
+          </div>
+        )}
+
         {/* Kampus logo branding */}
-        <div className="mt-6 flex items-center gap-2.5 opacity-50 hover:opacity-80 transition-opacity">
+        <div className="mt-5 flex items-center gap-2.5 opacity-50 hover:opacity-80 transition-opacity">
           <img src="/kampus-logo.jpeg" alt="Kampus" className="w-7 h-7 object-contain rounded-full" />
           <span className="text-white/60 text-xs font-semibold tracking-wide">A Kampus Event</span>
         </div>
       </div>
+
+      {/* Global Leaderboard */}
+      {leaderboard.length > 0 && (
+        <div className="relative z-10 w-full max-w-sm mt-8 mb-6 px-4">
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <p className="text-center text-white/40 text-xs font-black uppercase tracking-widest mb-3">🏆 Hall of Fame — Top Players</p>
+            <div className="space-y-1.5">
+              {leaderboard.map((p, i) => (
+                <div key={p.name} className="flex items-center gap-2.5 rounded-xl px-3 py-2"
+                  style={{ background: i === 0 ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.03)', border: i === 0 ? '1px solid rgba(251,191,36,0.2)' : '1px solid transparent' }}>
+                  <span className="text-sm w-6 text-center flex-shrink-0">{MEDALS[i] || `#${p.rank}`}</span>
+                  <span className="flex-1 text-xs font-bold truncate" style={{ color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.7)' }}>{p.name}</span>
+                  <span className="text-xs font-black flex-shrink-0" style={{ color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.45)' }}>{p.totalScore.toLocaleString()}</span>
+                  <span className="text-white/20 text-xs flex-shrink-0">{p.gamesPlayed}g</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

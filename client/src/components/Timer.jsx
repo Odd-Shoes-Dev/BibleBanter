@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { sounds } from '../utils/sound';
 
 export default function Timer({ duration, onTimeUp, paused, questionIndex, hostMode = false, circular = false }) {
   const [timeLeft, setTimeLeft] = useState(duration);
@@ -10,6 +11,12 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
     startTimeRef.current = Date.now();
   }, [questionIndex, duration]);
 
+  const lastTickRef = useRef(-1);
+
+  useEffect(() => {
+    lastTickRef.current = -1;
+  }, [questionIndex]);
+
   useEffect(() => {
     if (paused) {
       clearInterval(intervalRef.current);
@@ -20,6 +27,14 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
       const elapsed = (Date.now() - startTimeRef.current) / 1000;
       const remaining = Math.max(0, duration - elapsed);
       setTimeLeft(remaining);
+
+      const secLeft = Math.ceil(remaining);
+      if (secLeft !== lastTickRef.current && remaining > 0) {
+        lastTickRef.current = secLeft;
+        if (secLeft <= 5) sounds.urgentTick();
+        else if (secLeft <= 10) sounds.tick();
+      }
+
       if (remaining <= 0) {
         clearInterval(intervalRef.current);
         onTimeUp?.();

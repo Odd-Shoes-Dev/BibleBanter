@@ -11,7 +11,12 @@ const TESTAMENT_OPTIONS = [
 ];
 
 const TIMER_OPTIONS = [10, 15, 20, 30, 45, 60];
-const ROUNDS_OPTIONS = [5, 10, 15, 20];
+const ROUND_PRESETS = [
+  { label: 'Mini', value: 10, desc: '~5 min', color: '#22c55e', border: 'rgba(34,197,94,0.5)' },
+  { label: 'Maxi', value: 25, desc: '~12 min', color: '#f59e0b', border: 'rgba(245,158,11,0.5)' },
+  { label: 'Pro',  value: 40, desc: '~20 min', color: '#ef4444', border: 'rgba(239,68,68,0.5)' },
+  { label: 'Custom', value: null, desc: 'You set it', color: '#a78bfa', border: 'rgba(167,139,250,0.5)' },
+];
 
 export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, token }) {
   const [sets, setSets] = useState([]);
@@ -23,6 +28,8 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
   const [showUpload, setShowUpload] = useState(false);
   const [questionTime, setQuestionTime] = useState(20);
   const [rounds, setRounds] = useState(10);
+  const [customRounds, setCustomRounds] = useState('');
+  const [roundPreset, setRoundPreset] = useState('Mini');
 
   const loadSets = () => {
     if (!token) return;
@@ -89,18 +96,28 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
             <div>
               <p className="text-white/60 text-xs font-semibold mb-2">🔢 Questions per round</p>
               <div className="flex flex-wrap gap-1.5">
-                {ROUNDS_OPTIONS.map(r => (
-                  <button key={r} onClick={() => setRounds(r)}
+                {ROUND_PRESETS.map(p => (
+                  <button key={p.label}
+                    onClick={() => { setRoundPreset(p.label); if (p.value) setRounds(p.value); }}
                     className="px-2.5 py-1 rounded-lg text-xs font-black transition-all"
                     style={{
-                      background: rounds === r ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)',
-                      border: rounds === r ? '1px solid rgba(124,58,237,0.6)' : '1px solid rgba(255,255,255,0.1)',
-                      color: rounds === r ? '#a78bfa' : '#ffffff60',
+                      background: roundPreset === p.label ? `${p.border.replace('0.5)', '0.25)')}` : 'rgba(255,255,255,0.06)',
+                      border: roundPreset === p.label ? `1px solid ${p.border}` : '1px solid rgba(255,255,255,0.1)',
+                      color: roundPreset === p.label ? p.color : '#ffffff60',
                     }}>
-                    {r}
+                    {p.label}{p.value ? ` (${p.value})` : ''}
                   </button>
                 ))}
               </div>
+              {roundPreset === 'Custom' && (
+                <input
+                  type="number" min="1" max="100" placeholder="e.g. 15"
+                  value={customRounds}
+                  onChange={e => { setCustomRounds(e.target.value); const n = parseInt(e.target.value); if (n > 0) setRounds(n); }}
+                  className="mt-2 w-full rounded-lg px-3 py-1.5 text-xs font-bold text-white outline-none"
+                  style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(167,139,250,0.4)' }}
+                />
+              )}
             </div>
           </div>
         </div>

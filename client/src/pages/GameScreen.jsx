@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Timer from '../components/Timer';
+import { sounds } from '../utils/sound';
 
 const ANSWERS = [
   { bg: 'answer-a', label: 'A', shape: '▲', color: '#ef4444' },
@@ -23,6 +24,12 @@ export default function GameScreen({
       prevQuestionRef.current = question.index;
     }
   }, [question]);
+
+  useEffect(() => {
+    if (!answerResult) return;
+    if (answerResult.isCorrect) sounds.correct();
+    else sounds.wrong();
+  }, [answerResult]);
 
   if (!question) {
     return (

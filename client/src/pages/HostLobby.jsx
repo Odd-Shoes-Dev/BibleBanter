@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { sounds } from '../utils/sound';
 import { QRCodeSVG } from 'qrcode.react';
 
 const AVATAR_COLORS = [
@@ -14,6 +15,11 @@ const AVATAR_COLORS = [
 
 export default function HostLobby({ pin, players, onStart, onCancel, token }) {
   const joinUrl = `${window.location.origin}/?pin=${pin}`;
+  const prevCountRef = useRef(players.length);
+  useEffect(() => {
+    if (players.length > prevCountRef.current) sounds.join();
+    prevCountRef.current = players.length;
+  }, [players.length]);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
@@ -40,48 +46,38 @@ export default function HostLobby({ pin, players, onStart, onCancel, token }) {
       </div>
 
       {/* Center content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 md:px-12 gap-6">
+      <div className="flex-1 flex flex-col md:flex-row items-center justify-center px-6 md:px-12 gap-8 py-6">
 
-        {players.length === 0 ? (
-          <>
-            {/* Waiting animation */}
-            <div className="flex gap-2 mb-2">
-              {[0,1,2].map(i => (
-                <div key={i} className="w-3 h-3 rounded-full bg-purple-400/60 animate-bounce"
-                  style={{ animationDelay: `${i * 0.18}s` }} />
-              ))}
+        {/* Left: QR + PIN — always visible */}
+        <div className="flex flex-col items-center gap-3 flex-shrink-0">
+          <div className="flex gap-1.5 mb-1">
+            {[0,1,2].map(i => (
+              <div key={i} className="w-2.5 h-2.5 rounded-full bg-purple-400/60 animate-bounce"
+                style={{ animationDelay: `${i * 0.18}s` }} />
+            ))}
+          </div>
+          <h2 className="font-nunito font-black text-2xl md:text-3xl text-white text-center">
+            {players.length === 0 ? 'Waiting for Players...' : `${players.length} Player${players.length !== 1 ? 's' : ''} Joined!`}
+          </h2>
+          <p className="text-white/50 text-sm text-center">
+            PIN: <span className="text-amber-300 font-black text-xl tracking-widest">{pin}</span>
+          </p>
+          <div className="rounded-2xl p-4 flex flex-col items-center gap-2 animate-fade-in"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="rounded-xl p-2.5 bg-white">
+              <QRCodeSVG value={joinUrl} size={140} bgColor="#ffffff" fgColor="#0d0918" level="M" />
             </div>
-            <h2 className="font-nunito font-black text-3xl md:text-4xl lg:text-5xl text-white text-center">
-              Waiting for Players...
-            </h2>
-            <p className="text-white/50 text-base md:text-lg text-center">
-              Share the PIN <span className="text-amber-300 font-black text-2xl md:text-3xl tracking-widest">{pin}</span> with your players
-            </p>
-            <p className="text-white/30 text-sm md:text-base">
-              Join at <span className="text-purple-300">{window.location.origin}</span>
-            </p>
+            <p className="text-white/40 text-xs">Scan to join</p>
+            <p className="text-white/25 text-xs">{window.location.origin}</p>
+          </div>
+        </div>
 
-            {/* QR code */}
-            <div className="rounded-2xl p-4 flex flex-col items-center gap-3 animate-fade-in"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div className="rounded-xl p-3 bg-white">
-                <QRCodeSVG
-                  value={joinUrl}
-                  size={160}
-                  bgColor="#ffffff"
-                  fgColor="#0d0918"
-                  level="M"
-                />
-              </div>
-              <p className="text-white/40 text-xs text-center">Scan to join instantly</p>
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="font-nunito font-black text-2xl md:text-3xl text-white text-center">
-              {players.length} Player{players.length !== 1 ? 's' : ''} Ready!
-            </h2>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4 w-full max-w-4xl">
+        {/* Right: Player list */}
+        <div className="flex-1 flex flex-col items-center gap-4 w-full max-w-2xl">
+          {players.length === 0 ? (
+            <p className="text-white/25 text-sm italic mt-4">Players will appear here as they join…</p>
+          ) : (
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 w-full">
               {players.map((p, i) => (
                 <div key={p.id} className="flex flex-col items-center gap-1.5 animate-bounce-in"
                   style={{ animationDelay: `${i * 0.04}s` }}>
@@ -93,34 +89,31 @@ export default function HostLobby({ pin, players, onStart, onCancel, token }) {
                 </div>
               ))}
             </div>
-          </>
-        )}
-
-        {/* Start button */}
-        <div className="flex flex-col items-center gap-3 w-full max-w-sm">
-          <button
-            onClick={onStart}
-            disabled={players.length === 0}
-            className="w-full px-10 py-3.5 rounded-2xl font-black text-lg text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed font-nunito"
-            style={{
-              background: players.length > 0
-                ? 'linear-gradient(135deg, #d97706, #b45309)'
-                : 'rgba(100,100,100,0.3)',
-              boxShadow: players.length > 0
-                ? '0 8px 30px rgba(217,119,6,0.5)'
-                : 'none',
-            }}
-          >
-            🚀 Start Game ({players.length} players)
-          </button>
-          <button
-            onClick={onCancel}
-            className="w-full px-10 py-2.5 rounded-2xl font-bold text-sm text-white/50 hover:text-white/80 transition-all duration-200 font-nunito"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-          >
-            ✕ Cancel Game
-          </button>
+          )}
         </div>
+
+      </div>
+
+      {/* Start/Cancel buttons — below the flex row */}
+      <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto px-6 pb-6">
+        <button
+          onClick={onStart}
+          disabled={players.length === 0}
+          className="w-full px-10 py-3.5 rounded-2xl font-black text-lg text-white transition-all duration-300 hover:scale-[1.03] hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed font-nunito"
+          style={{
+            background: players.length > 0 ? 'linear-gradient(135deg, #d97706, #b45309)' : 'rgba(100,100,100,0.3)',
+            boxShadow: players.length > 0 ? '0 8px 30px rgba(217,119,6,0.5)' : 'none',
+          }}
+        >
+          🚀 Start Game ({players.length} players)
+        </button>
+        <button
+          onClick={onCancel}
+          className="w-full px-10 py-2.5 rounded-2xl font-bold text-sm text-white/50 hover:text-white/80 transition-all duration-200 font-nunito"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          ✕ Cancel Game
+        </button>
       </div>
     </div>
   );
