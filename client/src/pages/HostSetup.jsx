@@ -10,7 +10,7 @@ const TESTAMENT_OPTIONS = [
   { id: 'both', label: 'Mixed (Both)', emoji: '📖', desc: 'Full Bible', color: '#8b5cf6', border: 'rgba(139,92,246,0.4)' },
 ];
 
-export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
+export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, token }) {
   const [sets, setSets] = useState([]);
   const [tab, setTab] = useState('default');
   const [loading, setLoading] = useState(false);
@@ -100,14 +100,23 @@ export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
         {/* My Sets tab */}
         {tab === 'custom' && (
           <div className="space-y-3 mb-6">
-            {/* Upload New Set button */}
-            <button
-              onClick={() => setShowUpload(true)}
-              className="w-full py-3 rounded-2xl text-sm font-bold transition-all hover:brightness-110"
-              style={{ background: 'rgba(124,58,237,0.15)', border: '1px dashed rgba(124,58,237,0.5)', color: '#a78bfa' }}
-            >
-              ＋ Upload New Set
-            </button>
+            {/* Action buttons */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => onAiGenerator && onAiGenerator()}
+                className="py-3 rounded-2xl text-sm font-bold transition-all hover:brightness-110"
+                style={{ background: 'rgba(217,119,6,0.15)', border: '1px dashed rgba(251,191,36,0.5)', color: '#fbbf24' }}
+              >
+                ✨ Generate with AI
+              </button>
+              <button
+                onClick={() => setShowUpload(true)}
+                className="py-3 rounded-2xl text-sm font-bold transition-all hover:brightness-110"
+                style={{ background: 'rgba(124,58,237,0.15)', border: '1px dashed rgba(124,58,237,0.5)', color: '#a78bfa' }}
+              >
+                ＋ Upload New Set
+              </button>
+            </div>
 
             {loading && <p className="text-white/40 text-sm text-center py-6">Loading sets...</p>}
             {!loading && sets.length === 0 && (

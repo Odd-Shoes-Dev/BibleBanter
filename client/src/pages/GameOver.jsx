@@ -1,4 +1,4 @@
-export default function GameOver({ leaderboard, playerName, onPlayAgain }) {
+export default function GameOver({ leaderboard, playerName, onPlayAgain, role, onViewReport }) {
   const myRank = leaderboard.findIndex(p => p.name === playerName) + 1;
   const myEntry = leaderboard.find(p => p.name === playerName);
 
@@ -122,6 +122,21 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain }) {
               })}
             </div>
           </div>
+        )}
+
+        {/* Host report button */}
+        {role === 'host' && onViewReport && (
+          <button
+            onClick={onViewReport}
+            className="w-full py-4 rounded-2xl font-black text-lg text-white font-nunito tracking-wide transition-all duration-300 hover:scale-105 animate-slide-up"
+            style={{
+              background: 'linear-gradient(135deg, #0f766e, #0d9488)',
+              boxShadow: '0 6px 30px rgba(13,148,136,0.45)',
+              animationDelay: '0.25s'
+            }}
+          >
+            📊 VIEW UNDERSTANDING REPORT
+          </button>
         )}
 
         {/* Play again */}

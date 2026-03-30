@@ -12,10 +12,14 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import GameHistory from './pages/GameHistory';
 import EditSet from './pages/EditSet';
+import AiQuizGenerator from './pages/AiQuizGenerator';
+import SessionReport from './pages/SessionReport';
+import ReportsPage from './pages/ReportsPage';
 import Confetti from './components/Confetti';
 
 export default function App() {
   const [editSetId, setEditSetId] = useState(null);
+  const [reportGameId, setReportGameId] = useState(null);
 
   const [screen, setScreen] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -99,8 +103,9 @@ export default function App() {
       setScreen('results');
     });
 
-    socket.on('game-over', ({ leaderboard: lb }) => {
+    socket.on('game-over', ({ leaderboard: lb, dbGameId }) => {
       setLeaderboard(lb);
+      if (dbGameId) setReportGameId(dbGameId);
       setScreen('gameover');
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
@@ -208,6 +213,7 @@ export default function App() {
           onLogin={() => setScreen('login')}
           onLogout={handleLogout}
           onHistory={() => setScreen('history')}
+          onReports={() => setScreen('reports')}
         />
       )}
       {screen === 'login' && (
@@ -217,13 +223,23 @@ export default function App() {
         <RegisterPage onLogin={handleLogin} onBack={() => setScreen('login')} />
       )}
       {screen === 'history' && (
-        <GameHistory token={authToken} onBack={() => setScreen('landing')} />
+        <GameHistory token={authToken} onBack={() => setScreen('landing')} onViewReport={(id) => { setReportGameId(id); setScreen('session-report'); }} />
+      )}
+      {screen === 'reports' && (
+        <ReportsPage token={authToken} onBack={() => setScreen('landing')} onViewReport={(id) => { setReportGameId(id); setScreen('session-report'); }} />
+      )}
+      {screen === 'session-report' && (
+        <SessionReport gameId={reportGameId} token={authToken} onBack={() => setScreen(role === 'host' ? 'gameover' : 'history')} />
+      )}
+      {screen === 'ai-generator' && (
+        <AiQuizGenerator token={authToken} onBack={() => setScreen('host-setup')} onSaved={() => setScreen('host-setup')} />
       )}
       {screen === 'host-setup' && (
         <HostSetup
           onSelect={handleCreateGame}
           onBack={() => setScreen('landing')}
           onEditSet={(id) => { setEditSetId(id); setScreen('edit-set'); }}
+          onAiGenerator={() => setScreen('ai-generator')}
           token={authToken}
         />
       )}
@@ -262,7 +278,13 @@ export default function App() {
         />
       )}
       {screen === 'gameover' && (
-        <GameOver leaderboard={leaderboard} playerName={playerName} onPlayAgain={handlePlayAgain} />
+        <GameOver
+          leaderboard={leaderboard}
+          playerName={playerName}
+          onPlayAgain={handlePlayAgain}
+          role={role}
+          onViewReport={reportGameId ? () => setScreen('session-report') : null}
+        />
       )}
     </div>
   );

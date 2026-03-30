@@ -13,6 +13,10 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { requireHost, optionalHost } = require('./middleware/auth');
 const localQuestions = require('./questions');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const gemini = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
 const prisma = new PrismaClient();
 
@@ -119,6 +123,17 @@ app.delete('/api/sets/:id', requireHost, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to delete set.' }); }
 });
 
+app.post('/api/sets', requireHost, async (req, res) => {
+  try {
+    const { name, testament = 'both', description = '' } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: 'Name is required.' });
+    const set = await prisma.questionSet.create({
+      data: { name: name.trim(), testament, description, hostId: req.host.id },
+    });
+    res.json({ set });
+  } catch (err) { res.status(500).json({ error: 'Failed to create set.' }); }
+});
+
 app.put('/api/sets/:id', requireHost, async (req, res) => {
   try {
     const { name } = req.body;
@@ -210,6 +225,7 @@ app.post('/api/parse-questions', upload.single('file'), optionalHost, async (req
     const ext = originalname.split('.').pop().toLowerCase();
     let parsed = [];
 
+    let rawText = '';
     if (ext === 'csv') {
       const records = csvParse(buffer.toString('utf8'), { columns: true, skip_empty_lines: true, trim: true });
       parsed = records.map((r) => ({
@@ -223,15 +239,21 @@ app.post('/api/parse-questions', upload.single('file'), optionalHost, async (req
       })).filter(q => q.question && q.options.slice(0, 2).every(Boolean) && !isNaN(q.answer));
     } else if (ext === 'docx') {
       const result = await mammoth.extractRawText({ buffer });
-      parsed = parseTextToQuestions(result.value);
+      rawText = result.value;
+      parsed = parseTextToQuestions(rawText);
     } else if (ext === 'pdf') {
       const data = await pdfParse(buffer);
-      parsed = parseTextToQuestions(data.text);
+      rawText = data.text;
+      parsed = parseTextToQuestions(rawText);
+    } else if (ext === 'txt') {
+      rawText = buffer.toString('utf8');
+      parsed = parseTextToQuestions(rawText);
     } else {
-      return res.status(400).json({ error: 'Unsupported file type. Use CSV, DOCX, or PDF.' });
+      return res.status(400).json({ error: 'Unsupported file type. Use CSV, DOCX, PDF, or TXT.' });
     }
 
-    if (parsed.length === 0) return res.status(400).json({ error: 'No valid questions found. Check the template format.' });
+    // If rawText present but no parsed questions (plain sermon notes), still return rawText
+    if (parsed.length === 0 && !rawText) return res.status(400).json({ error: 'No valid questions found. Check the template format.' });
 
     // If authenticated host + setName provided → save to DB as a named question set
     let savedSetId = null;
@@ -254,7 +276,7 @@ app.post('/api/parse-questions', upload.single('file'), optionalHost, async (req
       savedSetId = set.id;
     }
 
-    res.json({ questions: parsed, count: parsed.length, savedSetId });
+    res.json({ questions: parsed, count: parsed.length, savedSetId, rawText: rawText || undefined });
   } catch (err) {
     console.error('Parse error:', err);
     res.status(500).json({ error: 'Failed to parse file: ' + err.message });
@@ -273,6 +295,238 @@ app.get('/api/question-template.csv', (req, res) => {
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="question-template.csv"');
   res.send(header + rows);
+});
+
+// ── AI QUIZ GENERATION ─────────────────────────────────────────────────────────
+
+const AUDIENCE_PROMPTS = {
+  'Gen Z': 'Use casual, punchy Gen Z language. Short energetic questions with relatable framing.',
+  'Youth': 'Use friendly, conversational language for teenagers aged 13-19.',
+  'Children': 'Use very simple words and a fun, encouraging tone for children aged 7-12.',
+  'Adults': 'Use clear, respectful language suitable for adult church members.',
+  'General Church': 'Use warm, accessible language suitable for a mixed church congregation.',
+};
+
+const TONE_PROMPTS = {
+  'Playful': 'Keep questions light and fun with an energetic tone.',
+  'Conversational': 'Sound warm and natural, like a friendly discussion.',
+  'Formal': 'Use clear, dignified pastoral language.',
+  'Energetic': 'Use exciting, high-energy phrasing that builds excitement.',
+  'Simple': 'Use the simplest possible words. Short sentences. Easy to understand.',
+};
+
+function buildQuizPrompt(content, audience, tone, customPrompt, count) {
+  const audienceInstr = AUDIENCE_PROMPTS[audience] || AUDIENCE_PROMPTS['General Church'];
+  const toneInstr = TONE_PROMPTS[tone] || TONE_PROMPTS['Conversational'];
+  return `You are a Bible quiz generator for church use. Generate exactly ${count} multiple-choice quiz questions based ONLY on the content provided below.
+
+AUDIENCE: ${audience}. ${audienceInstr}
+TONE: ${tone}. ${toneInstr}
+${customPrompt ? `ADDITIONAL INSTRUCTION: ${customPrompt}` : ''}
+
+RULES:
+- Questions must be based solely on the provided content. Do NOT add outside information.
+- Each question has exactly 4 options (A, B, C, D).
+- The correct answer must be clearly derivable from the content.
+- Include a Bible scripture reference + short quote for each question where applicable.
+- Do NOT change biblical doctrine or meaning. Only the style/tone changes.
+- Return ONLY a valid JSON array. No markdown, no explanation, no extra text.
+
+JSON format:
+[
+  {
+    "question": "...",
+    "options": ["option A", "option B", "option C", "option D"],
+    "answer": 0,
+    "category": "Old Testament|New Testament|General",
+    "difficulty": "easy|medium|hard",
+    "scripture": "Reference — 'verse text'"
+  }
+]
+
+CONTENT TO USE:
+${content.slice(0, 8000)}`;
+}
+
+function buildRegeneratePrompt(content, audience, tone, existingQuestions, index) {
+  const audienceInstr = AUDIENCE_PROMPTS[audience] || AUDIENCE_PROMPTS['General Church'];
+  const toneInstr = TONE_PROMPTS[tone] || TONE_PROMPTS['Conversational'];
+  const existing = existingQuestions.map((q, i) => `${i + 1}. ${q.question}`).join('\n');
+  return `You are a Bible quiz generator. Generate exactly 1 new multiple-choice question based on the content below.
+
+AUDIENCE: ${audience}. ${audienceInstr}
+TONE: ${tone}. ${toneInstr}
+Make it DIFFERENT from these existing questions:
+${existing}
+
+Return ONLY a JSON object (no array, no markdown):
+{
+  "question": "...",
+  "options": ["A", "B", "C", "D"],
+  "answer": 0,
+  "category": "...",
+  "difficulty": "easy|medium|hard",
+  "scripture": "Reference — 'verse text'"
+}
+
+CONTENT:
+${content.slice(0, 6000)}`;
+}
+
+app.post('/api/ai/generate-quiz', requireHost, async (req, res) => {
+  try {
+    const { content, audience = 'General Church', tone = 'Conversational', customPrompt = '', count = 10, testament = 'both' } = req.body;
+    if (!content?.trim()) return res.status(400).json({ error: 'Content is required.' });
+    if (!process.env.GEMINI_API_KEY) return res.status(503).json({ error: 'AI not configured. Add GEMINI_API_KEY to environment.' });
+
+    const prompt = buildQuizPrompt(content.trim(), audience, tone, customPrompt, count);
+    const result = await gemini.generateContent(prompt);
+    const text = result.response.text().trim();
+
+    const jsonStr = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+    const questions = JSON.parse(jsonStr);
+
+    if (!Array.isArray(questions)) throw new Error('AI returned unexpected format');
+    const validated = questions.map(q => ({
+      question: String(q.question || ''),
+      options: Array.isArray(q.options) ? q.options.slice(0, 4).map(String) : ['', '', '', ''],
+      answer: parseInt(q.answer ?? 0),
+      category: String(q.category || 'General'),
+      difficulty: ['easy', 'medium', 'hard', 'expert'].includes(q.difficulty) ? q.difficulty : 'medium',
+      scripture: String(q.scripture || ''),
+    })).filter(q => q.question && q.options.length === 4);
+
+    res.json({ questions: validated, count: validated.length });
+  } catch (err) {
+    console.error('AI generate error:', err.message);
+    res.status(500).json({ error: 'AI generation failed: ' + err.message });
+  }
+});
+
+app.post('/api/ai/regenerate-question', requireHost, async (req, res) => {
+  try {
+    const { content, audience = 'General Church', tone = 'Conversational', existingQuestions = [], index = 0 } = req.body;
+    if (!content?.trim()) return res.status(400).json({ error: 'Content is required.' });
+
+    const prompt = buildRegeneratePrompt(content.trim(), audience, tone, existingQuestions, index);
+    const result = await gemini.generateContent(prompt);
+    const text = result.response.text().trim();
+    const jsonStr = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+    const q = JSON.parse(jsonStr);
+
+    res.json({
+      question: {
+        question: String(q.question || ''),
+        options: Array.isArray(q.options) ? q.options.slice(0, 4).map(String) : ['', '', '', ''],
+        answer: parseInt(q.answer ?? 0),
+        category: String(q.category || 'General'),
+        difficulty: ['easy', 'medium', 'hard', 'expert'].includes(q.difficulty) ? q.difficulty : 'medium',
+        scripture: String(q.scripture || ''),
+      },
+    });
+  } catch (err) {
+    console.error('AI regen error:', err.message);
+    res.status(500).json({ error: 'Regeneration failed: ' + err.message });
+  }
+});
+
+// ── SESSION REPORTS ─────────────────────────────────────────────────────────────
+
+async function buildReportData(gameId) {
+  const game = await prisma.game.findUnique({
+    where: { id: gameId },
+    include: {
+      players: { include: { answers: { orderBy: { questionIndex: 'asc' } } } },
+      set: { include: { questions: { orderBy: { id: 'asc' } } } },
+    },
+  });
+  if (!game) return null;
+
+  const players = game.players;
+  const questions = game.set?.questions || [];
+  const totalPlayers = players.length;
+  if (totalPlayers === 0 || questions.length === 0) return null;
+
+  const allScores = players.map(p => p.score);
+  const avgScore = Math.round(allScores.reduce((a, b) => a + b, 0) / totalPlayers);
+
+  const qStats = questions.map((q, idx) => {
+    const answers = players.flatMap(p => p.answers.filter(a => a.questionIndex === idx));
+    const total = answers.length;
+    const correct = answers.filter(a => a.isCorrect).length;
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    const avgTime = total > 0 ? Math.round(answers.reduce((s, a) => s + (a.responseTimeMs || 0), 0) / total / 1000) : 0;
+    let label = pct >= 75 ? 'well_understood' : pct >= 40 ? 'partly_understood' : 'needs_followup';
+    return { idx, question: q.question, correctAnswer: q.options[q.answer], pct, correct, total, avgTimeSec: avgTime, label, scripture: q.scripture || '' };
+  });
+
+  const totalAnswers = players.flatMap(p => p.answers);
+  const correctAnswers = totalAnswers.filter(a => a.isCorrect).length;
+  const overallAccuracy = totalAnswers.length > 0 ? Math.round((correctAnswers / totalAnswers.length) * 100) : 0;
+
+  const best = [...qStats].sort((a, b) => b.pct - a.pct)[0];
+  const worst = [...qStats].sort((a, b) => a.pct - b.pct)[0];
+
+  return { totalPlayers, avgScore, overallAccuracy, questions: qStats, best, worst, setName: game.set?.name || 'Unknown Set' };
+}
+
+async function generateAiSummary(reportData) {
+  if (!process.env.GEMINI_API_KEY) return 'Report generated. Review the breakdown below for details.';
+  const { totalPlayers, overallAccuracy, questions, best, worst, setName } = reportData;
+  const needsFollowup = questions.filter(q => q.label === 'needs_followup').map(q => `"${q.question}"`).join(', ');
+  const prompt = `You are a helpful assistant for a church pastor or fellowship leader. Write a short 3-4 sentence understanding summary for a Bible quiz session.
+
+Quiz: "${setName}"
+Players: ${totalPlayers}
+Overall accuracy: ${overallAccuracy}%
+Best understood question (${best?.pct}% correct): "${best?.question}"
+Most missed question (${worst?.pct}% correct): "${worst?.question}"
+${needsFollowup ? `Questions needing follow-up: ${needsFollowup}` : ''}
+
+Write in plain, warm, church-friendly language. No bullet points. No headings. Just a short paragraph. Mention what people understood well, what they struggled with, and suggest a follow-up if needed. Use language like "participants", "the group", "may need reinforcement", "strongest area". Avoid corporate jargon.`;
+
+  try {
+    const result = await gemini.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (e) {
+    return `The session had ${totalPlayers} participants with ${overallAccuracy}% overall accuracy. Review the breakdown below to see which questions may need follow-up.`;
+  }
+}
+
+app.get('/api/games/:id/report', requireHost, async (req, res) => {
+  try {
+    const game = await prisma.game.findFirst({ where: { id: req.params.id, hostId: req.host.id } });
+    if (!game) return res.status(404).json({ error: 'Game not found.' });
+
+    const existing = await prisma.sessionReport.findUnique({ where: { gameId: req.params.id } });
+    if (existing) return res.json({ report: existing });
+
+    const data = await buildReportData(req.params.id);
+    if (!data) return res.status(400).json({ error: 'Not enough data to generate report.' });
+
+    const summary = await generateAiSummary(data);
+    const report = await prisma.sessionReport.create({
+      data: { gameId: req.params.id, hostId: req.host.id, summary, data },
+    });
+    res.json({ report });
+  } catch (err) {
+    console.error('Report error:', err);
+    res.status(500).json({ error: 'Failed to generate report.' });
+  }
+});
+
+app.get('/api/reports', requireHost, async (req, res) => {
+  try {
+    const reports = await prisma.sessionReport.findMany({
+      where: { hostId: req.host.id },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      include: { game: { select: { pin: true, finishedAt: true, set: { select: { name: true } }, _count: { select: { players: true } } } } },
+    });
+    res.json({ reports });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch reports.' });
+  }
 });
 
 const distPath = path.join(__dirname, 'client', 'dist');
@@ -480,6 +734,7 @@ io.on('connection', (socket) => {
     });
 
     // Persist answer to DB
+    const responseTimeMs = Date.now() - game.questionStartTime;
     if (game.dbGameId) {
       prisma.playerAnswer.create({
         data: {
@@ -489,6 +744,7 @@ io.on('connection', (socket) => {
           answerIndex,
           isCorrect,
           pointsEarned,
+          responseTimeMs,
         },
       }).catch(e => console.error('DB answer write:', e.message));
     }
@@ -606,7 +862,7 @@ async function endGame(pin) {
   clearTimeout(game.timer);
 
   const leaderboard = getLeaderboard(game);
-  io.to(pin).emit('game-over', { leaderboard });
+  io.to(pin).emit('game-over', { leaderboard, dbGameId: game.dbGameId || null });
 
   // Persist final scores to DB
   if (game.dbGameId) {

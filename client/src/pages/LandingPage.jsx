@@ -1,4 +1,4 @@
-export default function LandingPage({ onHost, onJoin, hostUser, onLogin, onLogout, onHistory }) {
+export default function LandingPage({ onHost, onJoin, hostUser, onLogin, onLogout, onHistory, onReports }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #0d0e1a 0%, #111228 60%, #0d0e1a 100%)' }}>
@@ -98,7 +98,12 @@ export default function LandingPage({ onHost, onJoin, hostUser, onLogin, onLogou
               <button onClick={onHistory}
                 className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
                 style={{ background: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)' }}>
-                📋 Game History
+                📋 History
+              </button>
+              <button onClick={onReports}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                style={{ background: 'rgba(13,148,136,0.15)', color: '#2dd4bf', border: '1px solid rgba(13,148,136,0.3)' }}>
+                📊 Reports
               </button>
               <button onClick={onLogout}
                 className="text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"

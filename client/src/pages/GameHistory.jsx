@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
-export default function GameHistory({ token, onBack }) {
+export default function GameHistory({ token, onBack, onViewReport }) {
   const [games, setGames] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,9 +28,20 @@ export default function GameHistory({ token, onBack }) {
     return (
       <div className="min-h-screen flex flex-col px-4 py-6 overflow-y-auto" style={{ background: '#0d0918' }}>
         <div className="w-full max-w-2xl mx-auto">
-          <button onClick={() => setSelected(null)} className="text-white/40 text-sm hover:text-white/70 mb-6 transition-colors">
-            ← Back to history
-          </button>
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={() => setSelected(null)} className="text-white/40 text-sm hover:text-white/70 transition-colors">
+              ← Back to history
+            </button>
+            {selected.status === 'finished' && onViewReport && (
+              <button
+                onClick={() => onViewReport(selected.id)}
+                className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:brightness-110"
+                style={{ background: 'rgba(13,148,136,0.2)', border: '1px solid rgba(13,148,136,0.4)', color: '#2dd4bf' }}
+              >
+                📊 View Report
+              </button>
+            )}
+          </div>
           <div className="text-center mb-6">
             <p className="text-white/40 text-xs uppercase tracking-widest">Game PIN</p>
             <p className="font-anton text-4xl" style={{ color: '#f5a623' }}>{selected.pin}</p>
@@ -79,23 +90,33 @@ export default function GameHistory({ token, onBack }) {
 
         <div className="space-y-3">
           {games.map((g) => (
-            <button
-              key={g.id}
-              onClick={() => loadDetail(g.id)}
-              className="w-full rounded-2xl px-5 py-4 text-left transition-all hover:brightness-110 hover:scale-[1.01]"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-nunito font-black text-white text-base">PIN: {g.pin}</p>
-                  <p className="text-white/40 text-xs mt-0.5">{g.set?.name || 'Default Questions'} · {g._count?.players ?? 0} players</p>
+            <div key={g.id} className="rounded-2xl overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}>
+              <button
+                onClick={() => loadDetail(g.id)}
+                className="w-full px-5 py-4 text-left transition-all hover:brightness-110"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-nunito font-black text-white text-base">PIN: {g.pin}</p>
+                    <p className="text-white/40 text-xs mt-0.5">{g.set?.name || 'Default Questions'} · {g._count?.players ?? 0} players</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-bold" style={{ color: statusColor(g.status) }}>{statusLabel(g.status)}</p>
+                    <p className="text-white/30 text-xs mt-0.5">{new Date(g.createdAt).toLocaleDateString()}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold" style={{ color: statusColor(g.status) }}>{statusLabel(g.status)}</p>
-                  <p className="text-white/30 text-xs mt-0.5">{new Date(g.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-            </button>
+              </button>
+              {g.status === 'finished' && onViewReport && (
+                <button
+                  onClick={() => onViewReport(g.id)}
+                  className="w-full py-2 text-xs font-bold border-t transition-colors hover:brightness-110"
+                  style={{ borderColor: 'rgba(255,255,255,0.06)', color: '#2dd4bf', background: 'rgba(13,148,136,0.06)' }}
+                >
+                  📊 View Understanding Report
+                </button>
+              )}
+            </div>
           ))}
         </div>
       </div>
