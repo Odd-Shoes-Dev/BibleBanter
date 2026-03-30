@@ -263,11 +263,16 @@ app.post('/api/parse-questions', upload.single('file'), optionalHost, async (req
 
 app.get('/api/question-template.csv', (req, res) => {
   const header = 'question,optionA,optionB,optionC,optionD,answer,category,difficulty,scripture\n';
-  const example = '"Who built the ark?","Moses","Noah","Abraham","David",1,"Old Testament","easy","Genesis 6:14"\n';
-  const example2 = '"What was Jesus\' first miracle?","Healing a blind man","Raising Lazarus","Walking on water","Turning water into wine",3,"New Testament","easy","John 2:1-11"\n';
+  const rows = [
+    '"Who built the ark?","Moses","Noah","Abraham","David",1,"Old Testament","easy","Genesis 6:14 — \'So make yourself an ark of cypress wood; make rooms in it and coat it with pitch inside and out.\'"',
+    '"What was Jesus\' first miracle?","Healing a blind man","Raising Lazarus","Walking on water","Turning water into wine",3,"New Testament","easy","John 2:9-11 — \'The master of the banquet tasted the water that had been turned into wine... This was the first of the signs through which Jesus revealed his glory.\'"',
+    '"How many days and nights did it rain during the flood?","20","30","40","50",2,"Old Testament","easy","Genesis 7:12 — \'And rain fell on the earth forty days and forty nights.\'"',
+    '"Who interpreted Pharaoh\'s dreams?","Moses","Aaron","Jacob","Joseph",3,"Old Testament","easy","Genesis 41:15-16 — \'I cannot do it, Joseph replied, but God will give Pharaoh the answer he desires.\'"',
+    '"Which disciple denied Jesus three times?","Thomas","Judas","John","Peter",3,"New Testament","easy","Matthew 26:75 — \'Then Peter remembered the word Jesus had spoken: Before the rooster crows, you will disown me three times. And he went outside and wept bitterly.\'"',
+  ].join('\n') + '\n';
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="question-template.csv"');
-  res.send(header + example + example2);
+  res.send(header + rows);
 });
 
 const distPath = path.join(__dirname, 'client', 'dist');
