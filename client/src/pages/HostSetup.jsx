@@ -66,9 +66,9 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
         <div className="text-center mb-6 animate-fade-in">
           <div className="text-4xl mb-3">⚔️</div>
           <h1 className="font-anton text-3xl mb-1" style={{ color: '#f5a623', letterSpacing: '0.04em' }}>
-            CHOOSE QUESTIONS
+            CONFIGURE GAME
           </h1>
-          <p className="text-white/40 text-sm">Select the question set for this battle</p>
+          <p className="text-white/40 text-sm">Set up your game and choose a question set</p>
         </div>
 
         {/* Game Settings */}
