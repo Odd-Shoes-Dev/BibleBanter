@@ -897,7 +897,7 @@ server.listen(PORT, () => {
 });
 
 // ── KEEP-ALIVE: prevent Render backend + Neon DB from sleeping ────────────────
-const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
+const KEEP_ALIVE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 setInterval(async () => {
   // 1. Ping Render backend (self-ping keeps the web service awake)
