@@ -1,23 +1,26 @@
 # Bible Battle — Question Upload Guide
 
-The host can replace the default questions with custom ones by uploading a file in the lobby screen.  
+Hosts can upload custom question sets from the **My Sets** tab on the Choose Questions screen.  
 Supported formats: **CSV**, **PDF**, **Word (.docx)**
 
 ---
 
 ## 📥 Quick Start
 
-1. In the **Host Lobby**, click **📂 Upload Custom Questions**
-2. Download the **⬇ Template** CSV to see the exact format
-3. Fill in your questions, save, and upload
-4. Review the **preview table** — correct answers are highlighted in green
-5. Click **"⚔️ Use These N Questions"** to replace the question pool
+1. Log in as a host and click **⚔️ Host Game**
+2. Go to the **📂 My Sets** tab
+3. Click **＋ Upload New Set**
+4. Enter a **Set Name**, choose a **Testament category**, then drop your file
+5. Review the **preview** — correct answers are highlighted green, scripture shown in amber
+6. Click **"⚔️ Use These N Questions"** to save the set to your library
+7. Select the set from My Sets to start a game with it
 
 ---
 
 ## 📊 CSV Format
 
-This is the **recommended format** — most reliable and easiest to prepare in Excel or Google Sheets.
+This is the **recommended format** — most reliable and easiest to prepare in Excel or Google Sheets.  
+Download the **⬇ Template** button inside the upload dialog for a ready-to-fill example.
 
 ### Columns
 
@@ -29,18 +32,28 @@ This is the **recommended format** — most reliable and easiest to prepare in E
 | `optionC` | ✅ | Answer option C | `Abraham` |
 | `optionD` | ✅ | Answer option D | `David` |
 | `answer` | ✅ | Index of correct answer **(0 = A, 1 = B, 2 = C, 3 = D)** | `1` |
-| `category` | ✅ | Question category | `Old Testament` |
+| `category` | ✅ | `Old Testament` or `New Testament` or `General` | `Old Testament` |
 | `difficulty` | ✅ | `easy`, `medium`, `hard`, or `expert` | `easy` |
-| `scripture` | ❌ | Optional Bible reference shown after answer | `Genesis 6:14` |
+| `scripture` | ✅ | **Bible reference + verse text** shown after answer is revealed | see below |
+
+### Scripture Format
+
+The `scripture` field must include both the **reference** and the **actual verse text**:
+
+```
+Genesis 6:14 — 'So make yourself an ark of cypress wood; make rooms in it and coat it with pitch inside and out.'
+```
+
+> ⚠️ **Scripture is required.** Questions missing scripture will show a red warning in the preview. Players see the verse after each answer is revealed.
 
 ### Example CSV
 
 ```csv
 question,optionA,optionB,optionC,optionD,answer,category,difficulty,scripture
-"Who built the ark?","Moses","Noah","Abraham","David",1,"Old Testament","easy","Genesis 6:14"
-"What was Jesus' first miracle?","Healing a blind man","Raising Lazarus","Walking on water","Turning water into wine",3,"New Testament","easy","John 2:1-11"
-"How many disciples did Jesus choose?","7","10","12","15",2,"New Testament","easy","Matthew 10:1"
-"Who was thrown into the lions' den?","Shadrach","Daniel","Joseph","Nehemiah",1,"Old Testament","medium","Daniel 6:16"
+"Who built the ark?","Moses","Noah","Abraham","David",1,"Old Testament","easy","Genesis 6:14 — 'So make yourself an ark of cypress wood; make rooms in it and coat it with pitch inside and out.'"
+"What was Jesus' first miracle?","Healing a blind man","Raising Lazarus","Walking on water","Turning water into wine",3,"New Testament","easy","John 2:9-11 — 'The master of the banquet tasted the water that had been turned into wine. This was the first of the signs through which Jesus revealed his glory.'"
+"Who was thrown into the lions' den?","Shadrach","Daniel","Joseph","Nehemiah",1,"Old Testament","medium","Daniel 6:16 — 'So the king gave the order, and they brought Daniel and threw him into the lions den. The king said to Daniel, May your God, whom you serve continually, rescue you!'"
+"Which disciple denied Jesus three times?","Thomas","Judas","John","Peter",3,"New Testament","easy","Matthew 26:75 — 'Then Peter remembered the word Jesus had spoken: Before the rooster crows, you will disown me three times. And he went outside and wept bitterly.'"
 ```
 
 > **Tip:** `answer` value `1` means **option B is correct** (0-indexed: A=0, B=1, C=2, D=3)
@@ -63,7 +76,7 @@ D: David
 Answer: B
 Category: Old Testament
 Difficulty: easy
-Scripture: Genesis 6:14
+Scripture: Genesis 6:14 — 'So make yourself an ark of cypress wood; make rooms in it and coat it with pitch inside and out.'
 
 Q: What was Jesus' first miracle?
 A: Healing a blind man
@@ -73,7 +86,7 @@ D: Turning water into wine
 Answer: D
 Category: New Testament
 Difficulty: easy
-Scripture: John 2:1-11
+Scripture: John 2:9-11 — 'The master of the banquet tasted the water that had been turned into wine. This was the first of the signs through which Jesus revealed his glory.'
 ```
 
 ### Rules for PDF
@@ -81,7 +94,7 @@ Scripture: John 2:1-11
 - Each question block **must start** with `Q:` or `Question:`
 - Options must be labeled **A:**, **B:**, **C:**, **D:** (with colon, period, or bracket: `A.`, `A)`, `A:`)
 - `Answer:` must be a single letter: **A**, **B**, **C**, or **D**
-- `Category:`, `Difficulty:`, and `Scripture:` are optional but recommended
+- `Scripture:` must include the **reference and the verse text** — e.g. `John 3:16 — 'For God so loved the world...'`
 - Leave a **blank line** between question blocks
 - Avoid tables, text boxes, or multi-column layouts — plain paragraph text works best
 
@@ -102,7 +115,7 @@ D: 12
 Answer: C
 Category: Old Testament
 Difficulty: medium
-Scripture: Exodus 7-12
+Scripture: Exodus 7-12 — 'The LORD said to Moses, "Go to Pharaoh, for I have hardened his heart and the hearts of his officials so that I may perform these signs of mine among them."'
 
 Q: Who replaced Judas Iscariot as the twelfth apostle?
 A: Barnabas
@@ -112,13 +125,24 @@ D: Stephen
 Answer: C
 Category: New Testament
 Difficulty: expert
-Scripture: Acts 1:26
+Scripture: Acts 1:26 — 'Then they cast lots, and the lot fell to Matthias; so he was added to the eleven apostles.'
+
+Q: How many days and nights did it rain during the flood?
+A: 20
+B: 30
+C: 40
+D: 50
+Answer: C
+Category: Old Testament
+Difficulty: easy
+Scripture: Genesis 7:12 — 'And rain fell on the earth forty days and forty nights.'
 ```
 
 ### Rules for Word
 
 - Use **plain paragraph text only** — no tables, no text boxes, no columns
 - One blank line between each question block
+- `Scripture:` must include both the reference and the actual verse text
 - Headings, bold, and italic text are ignored — only the plain text content is parsed
 - Save as `.docx` (not `.doc`)
 
@@ -156,6 +180,7 @@ Scripture: Acts 1:26
 
 | Problem | Fix |
 |---------|-----|
+| ⚠ No scripture badge in preview | Add `Scripture: reference — 'verse text'` to each question |
 | No questions found in PDF/Word | Make sure each block starts with `Q:` or `Question:` |
 | Wrong answer highlighted | Check that `answer` is 0-indexed in CSV (B = `1`, not `2`) |
 | Parse error on CSV | Wrap text containing commas in double quotes: `"Jesus said, ""Follow me"""` |
@@ -167,9 +192,9 @@ Scripture: Acts 1:26
 ## 📏 Limits
 
 - Maximum file size: **10 MB**
-- Maximum questions previewed: **20** (all are imported, only 20 shown in preview)
+- Maximum questions previewed: **20** (all are saved, only 20 shown in preview)
 - Minimum questions per upload: **1**
 
 ---
 
-*Questions are shuffled automatically after import. The default built-in questions are replaced for that game session only.*
+*Questions are shuffled automatically when a game starts. Sets are saved to your account and reusable across multiple game sessions.*
