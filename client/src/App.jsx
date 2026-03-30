@@ -38,6 +38,7 @@ export default function App() {
   const [liveLeaderboard, setLiveLeaderboard] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
 
   // Auth state
   const [authToken, setAuthToken] = useState(() => localStorage.getItem('bb_token') || null);
@@ -61,6 +62,45 @@ export default function App() {
 
   useEffect(() => {
     socket.connect();
+
+    // Auto-rejoin after socket reconnects (new socket.id but same session)
+    socket.on('connect', () => {
+      setReconnecting(false);
+      const savedPin = sessionStorage.getItem('bb_pin');
+      const savedRole = sessionStorage.getItem('bb_role');
+      const savedName = sessionStorage.getItem('bb_name');
+      if (!savedPin || !savedRole) return;
+
+      if (savedRole === 'player' && savedName) {
+        socket.emit('rejoin-game', { pin: savedPin, name: savedName }, (res) => {
+          if (res?.success) {
+            setGamePin(savedPin);
+            setPlayerName(savedName);
+            setRole('player');
+            if (res.status === 'lobby') setScreen('player-lobby');
+          } else {
+            sessionStorage.removeItem('bb_pin');
+            sessionStorage.removeItem('bb_role');
+            sessionStorage.removeItem('bb_name');
+          }
+        });
+      } else if (savedRole === 'host') {
+        socket.emit('rejoin-host', { pin: savedPin }, (res) => {
+          if (res?.success) {
+            setGamePin(res.pin);
+            setRole('host');
+            setPlayers(res.players || []);
+            if (res.status === 'lobby') setScreen('host-lobby');
+          } else {
+            sessionStorage.removeItem('bb_pin');
+            sessionStorage.removeItem('bb_role');
+            sessionStorage.removeItem('bb_name');
+          }
+        });
+      }
+    });
+
+    socket.on('disconnect', () => setReconnecting(true));
 
     socket.on('player-joined', ({ players: pl, name }) => {
       setPlayers(pl);
@@ -113,6 +153,9 @@ export default function App() {
     });
 
     socket.on('host-disconnected', () => {
+      sessionStorage.removeItem('bb_pin');
+      sessionStorage.removeItem('bb_role');
+      sessionStorage.removeItem('bb_name');
       setErrorMsg('The host has disconnected. Game ended.');
       setScreen('landing');
     });
@@ -122,6 +165,8 @@ export default function App() {
     });
 
     return () => {
+      socket.off('connect');
+      socket.off('disconnect');
       socket.off('player-joined');
       socket.off('player-left');
       socket.off('game-started');
@@ -141,6 +186,8 @@ export default function App() {
         setGamePin(pin);
         setRole('host');
         setPlayers([]);
+        sessionStorage.setItem('bb_pin', pin);
+        sessionStorage.setItem('bb_role', 'host');
         setScreen('host-lobby');
       } else {
         setErrorMsg(error || 'Failed to create game.');
@@ -154,6 +201,9 @@ export default function App() {
         setGamePin(pin);
         setPlayerName(name);
         setRole('player');
+        sessionStorage.setItem('bb_pin', pin);
+        sessionStorage.setItem('bb_role', 'player');
+        sessionStorage.setItem('bb_name', name);
         setScreen('player-lobby');
       } else {
         setErrorMsg(error || 'Failed to join game.');
@@ -177,6 +227,9 @@ export default function App() {
   };
 
   const handlePlayAgain = () => {
+    sessionStorage.removeItem('bb_pin');
+    sessionStorage.removeItem('bb_role');
+    sessionStorage.removeItem('bb_name');
     setScreen('landing');
     setGamePin('');
     setPlayerName('');
@@ -195,6 +248,16 @@ export default function App() {
   return (
     <div className="min-h-screen stars-bg">
       {showConfetti && <Confetti />}
+
+      {reconnecting && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+          <div className="backdrop-blur text-white px-5 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 text-sm font-semibold"
+            style={{ background: 'rgba(124,58,237,0.85)', border: '1px solid rgba(167,139,250,0.4)' }}>
+            <span className="animate-spin inline-block">↻</span>
+            Reconnecting…
+          </div>
+        </div>
+      )}
 
       {errorMsg && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-bounce-in">

@@ -57,11 +57,14 @@ function parseTextToQuestions(text) {
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  connectTimeout: 45000,
 });
+
+// Grace-period timers so brief disconnects don't immediately kick players/hosts
+const disconnectTimers = new Map(); // key: `${pin}:${name}` for players, `host:${pin}` for hosts
 
 app.use(cors());
 app.use(express.json());
@@ -775,20 +778,95 @@ io.on('connection', (socket) => {
     sendQuestion(pin);
   });
 
+  // PLAYER: Rejoin after socket reconnect
+  socket.on('rejoin-game', ({ pin, name }, callback) => {
+    const game = games[pin];
+    if (!game) return callback?.({ success: false, error: 'Game not found.' });
+
+    const key = `${pin}:${name}`;
+    const pending = disconnectTimers.get(key);
+
+    if (pending) {
+      clearTimeout(pending.timerId);
+      disconnectTimers.delete(key);
+      const playerData = game.players.get(pending.oldSocketId);
+      if (playerData) {
+        game.players.delete(pending.oldSocketId);
+        game.players.set(socket.id, { ...playerData, id: socket.id });
+      } else {
+        game.players.set(socket.id, { id: socket.id, name, score: 0, streak: 0, answered: false, lastAnswer: null });
+      }
+    } else {
+      const already = [...game.players.values()].find(p => p.name === name);
+      if (already) {
+        game.players.delete(already.id);
+        game.players.set(socket.id, { ...already, id: socket.id });
+      } else if (game.status === 'lobby') {
+        game.players.set(socket.id, { id: socket.id, name, score: 0, streak: 0, answered: false, lastAnswer: null });
+      } else {
+        return callback?.({ success: false, error: 'Game already started.' });
+      }
+    }
+
+    socket.join(pin);
+    socket.data.pin = pin;
+    socket.data.role = 'player';
+    socket.data.name = name;
+
+    const playerList = [...game.players.values()].map(p => ({ id: p.id, name: p.name, score: p.score }));
+    io.to(pin).emit('player-joined', { players: playerList, name });
+    callback?.({ success: true, status: game.status });
+  });
+
+  // HOST: Rejoin after socket reconnect
+  socket.on('rejoin-host', ({ pin }, callback) => {
+    const game = games[pin];
+    if (!game) return callback?.({ success: false, error: 'Game not found.' });
+
+    const hostKey = `host:${pin}`;
+    const pending = disconnectTimers.get(hostKey);
+    if (pending) {
+      clearTimeout(pending.timerId);
+      disconnectTimers.delete(hostKey);
+    }
+
+    game.hostId = socket.id;
+    socket.join(pin);
+    socket.data.pin = pin;
+    socket.data.role = 'host';
+
+    const playerList = [...game.players.values()].map(p => ({ id: p.id, name: p.name, score: p.score }));
+    callback?.({ success: true, status: game.status, players: playerList, pin });
+  });
+
   socket.on('disconnect', () => {
     const pin = socket.data.pin;
     const role = socket.data.role;
+    const name = socket.data.name;
     if (!pin || !games[pin]) return;
     const game = games[pin];
 
     if (role === 'host') {
-      io.to(pin).emit('host-disconnected');
-      clearTimeout(game.timer);
-      delete games[pin];
+      const hostKey = `host:${pin}`;
+      const timerId = setTimeout(() => {
+        disconnectTimers.delete(hostKey);
+        if (!games[pin]) return;
+        clearTimeout(games[pin].timer);
+        clearTimeout(games[pin].resultsTimer);
+        io.to(pin).emit('host-disconnected');
+        delete games[pin];
+      }, 20000);
+      disconnectTimers.set(hostKey, { timerId, oldSocketId: socket.id });
     } else if (role === 'player') {
-      game.players.delete(socket.id);
-      const playerList = [...game.players.values()].map(p => ({ id: p.id, name: p.name, score: p.score }));
-      io.to(pin).emit('player-left', { players: playerList, name: socket.data.name });
+      const key = `${pin}:${name}`;
+      const timerId = setTimeout(() => {
+        disconnectTimers.delete(key);
+        if (!games[pin]) return;
+        games[pin].players.delete(socket.id);
+        const playerList = [...games[pin].players.values()].map(p => ({ id: p.id, name: p.name, score: p.score }));
+        io.to(pin).emit('player-left', { players: playerList, name });
+      }, 20000);
+      disconnectTimers.set(key, { timerId, oldSocketId: socket.id });
     }
   });
 });
