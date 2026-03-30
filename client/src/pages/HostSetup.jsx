@@ -8,10 +8,12 @@ const TESTAMENT_OPTIONS = [
   { id: 'both', label: 'Mixed (Both)', emoji: '📖', desc: 'Full Bible', color: '#8b5cf6', border: 'rgba(139,92,246,0.4)' },
 ];
 
-export default function HostSetup({ onSelect, onBack, token }) {
+export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
   const [sets, setSets] = useState([]);
   const [tab, setTab] = useState('default'); // 'default' | 'custom'
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(null); // set id being deleted
+  const [deleteErr, setDeleteErr] = useState('');
 
   useEffect(() => {
     if (!token) return;
@@ -85,20 +87,56 @@ export default function HostSetup({ onSelect, onBack, token }) {
                 <p className="text-white/30 text-xs mt-1">Upload questions from the lobby screen.</p>
               </div>
             )}
+            {deleteErr && (
+              <p className="text-red-400 text-xs text-center">{deleteErr}</p>
+            )}
             {sets.map((set, i) => (
-              <button
+              <div
                 key={set.id}
-                onClick={() => onSelect({ testament: 'both', setId: set.id })}
-                className="w-full rounded-2xl px-5 py-4 text-left transition-all hover:scale-[1.02] hover:brightness-110 flex items-center gap-4 animate-slide-up"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(139,92,246,0.4)', animationDelay: `${i * 0.06}s` }}
+                className="rounded-2xl overflow-hidden animate-slide-up"
+                style={{ border: '1px solid rgba(139,92,246,0.4)', animationDelay: `${i * 0.06}s` }}
               >
-                <span className="text-3xl flex-shrink-0">📂</span>
-                <div className="flex-1">
-                  <p className="font-nunito font-black text-base text-purple-300">{set.name}</p>
-                  <p className="text-white/40 text-xs mt-0.5">{set._count?.questions ?? 0} questions · {set.testament}</p>
+                <button
+                  onClick={() => onSelect({ testament: 'both', setId: set.id })}
+                  className="w-full px-5 py-4 text-left transition-all hover:brightness-110 flex items-center gap-4"
+                  style={{ background: 'rgba(255,255,255,0.05)' }}
+                >
+                  <span className="text-3xl flex-shrink-0">📂</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-nunito font-black text-base text-purple-300 truncate">{set.name}</p>
+                    <p className="text-white/40 text-xs mt-0.5">{set._count?.questions ?? 0} questions · {set.testament}</p>
+                  </div>
+                  <span className="text-white/20 text-lg">›</span>
+                </button>
+                <div className="flex border-t" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
+                  <button
+                    onClick={() => onEditSet(set.id)}
+                    className="flex-1 py-2 text-xs font-bold text-purple-400 hover:bg-purple-500/10 transition-colors"
+                  >
+                    ✏️ Edit Questions
+                  </button>
+                  <div style={{ width: '1px', background: 'rgba(139,92,246,0.2)' }} />
+                  <button
+                    disabled={deleting === set.id}
+                    onClick={async () => {
+                      if (!confirm(`Delete "${set.name}"? This will permanently remove all ${set._count?.questions ?? 0} questions.`)) return;
+                      setDeleting(set.id); setDeleteErr('');
+                      try {
+                        const res = await fetch(`${BACKEND}/api/sets/${set.id}`, {
+                          method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+                        });
+                        const d = await res.json();
+                        if (!res.ok) throw new Error(d.error || 'Delete failed');
+                        setSets(prev => prev.filter(s => s.id !== set.id));
+                      } catch (e) { setDeleteErr(e.message); }
+                      finally { setDeleting(null); }
+                    }}
+                    className="flex-1 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                  >
+                    {deleting === set.id ? '...' : '🗑 Delete'}
+                  </button>
                 </div>
-                <span className="text-white/20 text-lg">›</span>
-              </button>
+              </div>
             ))}
           </div>
         )}

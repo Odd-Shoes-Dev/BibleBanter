@@ -11,9 +11,12 @@ import GameOver from './pages/GameOver';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import GameHistory from './pages/GameHistory';
+import EditSet from './pages/EditSet';
 import Confetti from './components/Confetti';
 
 export default function App() {
+  const [editSetId, setEditSetId] = useState(null);
+
   const [screen, setScreen] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('pin') ? 'join' : 'landing';
@@ -217,7 +220,15 @@ export default function App() {
         <GameHistory token={authToken} onBack={() => setScreen('landing')} />
       )}
       {screen === 'host-setup' && (
-        <HostSetup onSelect={handleCreateGame} onBack={() => setScreen('landing')} token={authToken} />
+        <HostSetup
+          onSelect={handleCreateGame}
+          onBack={() => setScreen('landing')}
+          onEditSet={(id) => { setEditSetId(id); setScreen('edit-set'); }}
+          token={authToken}
+        />
+      )}
+      {screen === 'edit-set' && (
+        <EditSet setId={editSetId} token={authToken} onBack={() => setScreen('host-setup')} />
       )}
       {screen === 'join' && (
         <JoinPage onJoin={handleJoinGame} onBack={() => setScreen('landing')} />

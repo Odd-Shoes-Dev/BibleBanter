@@ -113,10 +113,70 @@ app.delete('/api/sets/:id', requireHost, async (req, res) => {
     const set = await prisma.questionSet.findUnique({ where: { id: req.params.id } });
     if (!set) return res.status(404).json({ error: 'Set not found.' });
     if (set.isDefault) return res.status(403).json({ error: 'Cannot delete the default set.' });
-    if (set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this set.' });
+    if (set.hostId !== null && set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this set.' });
     await prisma.questionSet.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: 'Failed to delete set.' }); }
+});
+
+app.put('/api/sets/:id', requireHost, async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: 'Name is required.' });
+    const set = await prisma.questionSet.findUnique({ where: { id: req.params.id } });
+    if (!set) return res.status(404).json({ error: 'Set not found.' });
+    if (set.isDefault) return res.status(403).json({ error: 'Cannot edit the default set.' });
+    if (set.hostId !== null && set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this set.' });
+    const updated = await prisma.questionSet.update({ where: { id: req.params.id }, data: { name: name.trim() } });
+    res.json({ set: updated });
+  } catch (err) { res.status(500).json({ error: 'Failed to rename set.' }); }
+});
+
+app.get('/api/sets/:id/questions', requireHost, async (req, res) => {
+  try {
+    const set = await prisma.questionSet.findUnique({ where: { id: req.params.id } });
+    if (!set) return res.status(404).json({ error: 'Set not found.' });
+    if (set.hostId !== null && set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this set.' });
+    const questions = await prisma.question.findMany({ where: { setId: req.params.id }, orderBy: { id: 'asc' } });
+    res.json({ questions, setName: set.name });
+  } catch (err) { res.status(500).json({ error: 'Failed to fetch questions.' }); }
+});
+
+app.patch('/api/questions/:id', requireHost, async (req, res) => {
+  try {
+    const { question, options, answer, category, difficulty, scripture } = req.body;
+    const existing = await prisma.question.findUnique({ where: { id: req.params.id }, include: { set: true } });
+    if (!existing) return res.status(404).json({ error: 'Question not found.' });
+    if (existing.set.hostId !== null && existing.set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this question.' });
+    const updated = await prisma.question.update({
+      where: { id: req.params.id },
+      data: { question, options, answer: parseInt(answer), category, difficulty, scripture: scripture || '' },
+    });
+    res.json({ question: updated });
+  } catch (err) { res.status(500).json({ error: 'Failed to update question.' }); }
+});
+
+app.delete('/api/questions/:id', requireHost, async (req, res) => {
+  try {
+    const existing = await prisma.question.findUnique({ where: { id: req.params.id }, include: { set: true } });
+    if (!existing) return res.status(404).json({ error: 'Question not found.' });
+    if (existing.set.hostId !== null && existing.set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this question.' });
+    await prisma.question.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: 'Failed to delete question.' }); }
+});
+
+app.post('/api/sets/:id/questions', requireHost, async (req, res) => {
+  try {
+    const { question, options, answer, category, difficulty, scripture } = req.body;
+    const set = await prisma.questionSet.findUnique({ where: { id: req.params.id } });
+    if (!set) return res.status(404).json({ error: 'Set not found.' });
+    if (set.hostId !== null && set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this set.' });
+    const q = await prisma.question.create({
+      data: { setId: req.params.id, question, options, answer: parseInt(answer), category: category || 'General', difficulty: difficulty || 'medium', scripture: scripture || '' },
+    });
+    res.json({ question: q });
+  } catch (err) { res.status(500).json({ error: 'Failed to add question.' }); }
 });
 
 // ── GAME HISTORY ──────────────────────────────────────────────────────────────
