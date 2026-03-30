@@ -10,6 +10,9 @@ const TESTAMENT_OPTIONS = [
   { id: 'both', label: 'Mixed (Both)', emoji: '📖', desc: 'Full Bible', color: '#8b5cf6', border: 'rgba(139,92,246,0.4)' },
 ];
 
+const TIMER_OPTIONS = [10, 15, 20, 30, 45, 60];
+const ROUNDS_OPTIONS = [5, 10, 15, 20];
+
 export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, token }) {
   const [sets, setSets] = useState([]);
   const [tab, setTab] = useState('default');
@@ -18,6 +21,8 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
   const [deleting, setDeleting] = useState(false);
   const [deleteErr, setDeleteErr] = useState('');
   const [showUpload, setShowUpload] = useState(false);
+  const [questionTime, setQuestionTime] = useState(20);
+  const [rounds, setRounds] = useState(10);
 
   const loadSets = () => {
     if (!token) return;
@@ -59,6 +64,47 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
           <p className="text-white/40 text-sm">Select the question set for this battle</p>
         </div>
 
+        {/* Game Settings */}
+        <div className="rounded-2xl p-4 mb-5 animate-fade-in" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-3">⚙️ Game Settings</p>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Timer */}
+            <div>
+              <p className="text-white/60 text-xs font-semibold mb-2">⏱ Time per question</p>
+              <div className="flex flex-wrap gap-1.5">
+                {TIMER_OPTIONS.map(t => (
+                  <button key={t} onClick={() => setQuestionTime(t)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-black transition-all"
+                    style={{
+                      background: questionTime === t ? 'rgba(217,119,6,0.3)' : 'rgba(255,255,255,0.06)',
+                      border: questionTime === t ? '1px solid rgba(217,119,6,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                      color: questionTime === t ? '#fbbf24' : '#ffffff60',
+                    }}>
+                    {t}s
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Rounds */}
+            <div>
+              <p className="text-white/60 text-xs font-semibold mb-2">🔢 Questions per round</p>
+              <div className="flex flex-wrap gap-1.5">
+                {ROUNDS_OPTIONS.map(r => (
+                  <button key={r} onClick={() => setRounds(r)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-black transition-all"
+                    style={{
+                      background: rounds === r ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.06)',
+                      border: rounds === r ? '1px solid rgba(124,58,237,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                      color: rounds === r ? '#a78bfa' : '#ffffff60',
+                    }}>
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Tab switcher */}
         {token && (
           <div className="flex rounded-xl p-1 mb-5" style={{ background: 'rgba(255,255,255,0.06)' }}>
@@ -82,7 +128,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
             {TESTAMENT_OPTIONS.map((opt, i) => (
               <button
                 key={opt.id}
-                onClick={() => onSelect({ testament: opt.id, setId: null })}
+                onClick={() => onSelect({ testament: opt.id, setId: null, questionTime, rounds })}
                 className="w-full rounded-2xl px-5 py-4 text-left transition-all duration-200 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] animate-slide-up flex items-center gap-4"
                 style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${opt.border}`, animationDelay: `${i * 0.08}s` }}
               >
@@ -136,7 +182,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
               >
                 {/* Clicking the card body prompts testament selection */}
                 <button
-                  onClick={() => onSelect({ testament: set.testament || 'both', setId: set.id })}
+                  onClick={() => onSelect({ testament: set.testament || 'both', setId: set.id, questionTime, rounds })}
                   className="w-full px-5 py-4 text-left transition-all hover:brightness-110 flex items-center gap-4"
                   style={{ background: 'rgba(255,255,255,0.05)' }}
                 >

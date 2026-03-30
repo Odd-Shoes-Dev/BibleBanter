@@ -1,4 +1,4 @@
-export default function GameOver({ leaderboard, playerName, onPlayAgain, role, onViewReport, onContinue, continueInfo }) {
+export default function GameOver({ leaderboard, playerName, onPlayAgain, role, onViewReport, onContinue, continueInfo, onJoinAnother }) {
   const myRank = leaderboard.findIndex(p => p.name === playerName) + 1;
   const myEntry = leaderboard.find(p => p.name === playerName);
 
@@ -166,6 +166,21 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain, role, o
         >
           ✝️ PLAY AGAIN
         </button>
+
+        {/* Join another game — players only */}
+        {role !== 'host' && onJoinAnother && (
+          <button
+            onClick={onJoinAnother}
+            className="w-full py-3 rounded-2xl font-bold text-sm text-white/50 hover:text-white/80 transition-all duration-200 animate-slide-up font-nunito"
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              animationDelay: '0.35s'
+            }}
+          >
+            🔗 Join Another Game
+          </button>
+        )}
 
         <p className="text-center text-white/25 text-xs font-nunito tracking-wide pb-4">
           BIBLE BATTLE — TEST YOUR SCRIPTURE KNOWLEDGE

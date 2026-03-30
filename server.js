@@ -567,7 +567,7 @@ io.on('connection', (socket) => {
   console.log('Connected:', socket.id);
 
   // HOST: Create game
-  socket.on('create-game', async ({ testament, setId, hostToken, offset = 0 } = {}, callback) => {
+  socket.on('create-game', async ({ testament, setId, hostToken, offset = 0, questionTime = 20, rounds = 10 } = {}, callback) => {
     try {
       let hostDbId = null;
       if (hostToken) {
@@ -595,19 +595,20 @@ io.on('connection', (socket) => {
       let gameQuestions;
       if (setId) {
         // Paginated: ordered slice, no shuffle
-        gameQuestions = questionPool.slice(offset, offset + 10);
+        gameQuestions = questionPool.slice(offset, offset + rounds);
       } else {
         // Default: filter by testament + shuffle, no pagination
         const filtered = (testament && testament !== 'both')
           ? questionPool.filter(q => q.category === testament)
           : questionPool;
-        gameQuestions = shuffleQuestions(filtered.length > 0 ? filtered : questionPool).slice(0, 10);
+        gameQuestions = shuffleQuestions(filtered.length > 0 ? filtered : questionPool).slice(0, rounds);
       }
 
       if (gameQuestions.length === 0) return callback({ success: false, error: 'No questions available in this set.' });
 
       const nextOffset = offset + gameQuestions.length;
       const hasMore = setId ? nextOffset < totalQuestions : false;
+
 
       let dbGameId = null;
       try {
@@ -630,11 +631,13 @@ io.on('connection', (socket) => {
         nextOffset,
         hasMore,
         totalQuestions,
+        questionTime: Math.min(Math.max(parseInt(questionTime) || 20, 5), 120),
+        rounds: Math.min(Math.max(parseInt(rounds) || 10, 1), 50),
       };
       socket.join(pin);
       socket.data.pin = pin;
       socket.data.role = 'host';
-      console.log(`Game created: ${pin} (Q${offset + 1}-${nextOffset} of ${totalQuestions})`);
+      console.log(`Game created: ${pin} (Q${offset + 1}-${nextOffset} of ${totalQuestions}, ${questionTime}s/q)`);
       callback({ success: true, pin });
     } catch (err) {
       console.error('create-game error:', err);
@@ -770,7 +773,7 @@ io.on('connection', (socket) => {
 
     let pointsEarned = 0;
     if (isCorrect) {
-      const timeBonus = Math.max(0, 1 - timeElapsed / QUESTION_TIME);
+      const timeBonus = Math.max(0, 1 - timeElapsed / (game.questionTime || QUESTION_TIME));
       pointsEarned = Math.round(MAX_POINTS * (0.5 + 0.5 * timeBonus));
       player.streak = (player.streak || 0) + 1;
       if (player.streak >= 3) pointsEarned = Math.round(pointsEarned * 1.2);
@@ -954,14 +957,15 @@ function sendQuestion(pin) {
     options: q.options,
     category: q.category,
     difficulty: q.difficulty,
-    timeLimit: QUESTION_TIME,
+    timeLimit: game.questionTime || QUESTION_TIME,
   };
 
   io.to(pin).emit('new-question', questionData);
 
+  const qTime = game.questionTime || QUESTION_TIME;
   game.timer = setTimeout(() => {
     showResults(pin);
-  }, QUESTION_TIME * 1000 + 500);
+  }, qTime * 1000 + 500);
 }
 
 function showResults(pin) {

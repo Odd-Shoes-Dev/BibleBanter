@@ -197,8 +197,8 @@ export default function App() {
     };
   }, []);
 
-  const handleCreateGame = ({ testament, setId }) => {
-    socket.emit('create-game', { testament, setId, hostToken: authToken }, ({ success, pin, error }) => {
+  const handleCreateGame = ({ testament, setId, questionTime = 20, rounds = 10 }) => {
+    socket.emit('create-game', { testament, setId, hostToken: authToken, questionTime, rounds }, ({ success, pin, error }) => {
       if (success) {
         setGamePin(pin);
         setRole('host');
@@ -381,6 +381,16 @@ export default function App() {
           players={players}
           onNextQuestion={handleNextQuestion}
           playerName={playerName}
+          onLeave={role !== 'host' ? () => {
+            sessionStorage.removeItem('bb_pin');
+            sessionStorage.removeItem('bb_role');
+            sessionStorage.removeItem('bb_name');
+            socket.disconnect();
+            socket.connect();
+            setGamePin(''); setPlayerName(''); setRole(null); setPlayers([]);
+            setCurrentQuestion(null); setAnswerResult(null);
+            setScreen('landing');
+          } : undefined}
         />
       )}
       {screen === 'results' && (
@@ -401,6 +411,16 @@ export default function App() {
           onViewReport={reportGameId ? () => setScreen('session-report') : null}
           onContinue={continueData ? handleContinueGame : null}
           continueInfo={continueData}
+          onJoinAnother={role !== 'host' ? () => {
+            sessionStorage.removeItem('bb_pin');
+            sessionStorage.removeItem('bb_role');
+            sessionStorage.removeItem('bb_name');
+            socket.disconnect();
+            socket.connect();
+            setGamePin(''); setPlayerName(''); setRole(null); setPlayers([]);
+            setCurrentQuestion(null); setLeaderboard([]);
+            setScreen('join');
+          } : undefined}
         />
       )}
     </div>

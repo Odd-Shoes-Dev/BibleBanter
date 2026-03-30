@@ -10,7 +10,7 @@ const ANSWERS = [
 
 export default function GameScreen({
   question, role, onSubmitAnswer, answerResult,
-  answerProgress, liveLeaderboard = [], players, onNextQuestion, playerName
+  answerProgress, liveLeaderboard = [], players, onNextQuestion, playerName, onLeave
 }) {
   const [selected, setSelected] = useState(null);
   const [timeUp, setTimeUp] = useState(false);
@@ -150,6 +150,14 @@ export default function GameScreen({
           </div>
 
           <p className="text-white/20 text-xs uppercase tracking-widest mt-2">Waiting for host...</p>
+
+          {onLeave && (
+            <button onClick={onLeave}
+              className="mt-4 px-5 py-2 rounded-xl text-xs font-bold text-white/25 hover:text-white/50 transition-colors"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              ✕ Leave Game
+            </button>
+          )}
         </div>
         </div>
       </div>
@@ -219,6 +227,16 @@ export default function GameScreen({
           </button>
         ))}
       </div>
+
+      {onLeave && (
+        <div className="flex justify-center pb-3">
+          <button onClick={onLeave}
+            className="px-5 py-2 rounded-xl text-xs font-bold text-white/25 hover:text-white/50 transition-colors"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            ✕ Leave Game
+          </button>
+        </div>
+      )}
       </div>
     </div>
   );
