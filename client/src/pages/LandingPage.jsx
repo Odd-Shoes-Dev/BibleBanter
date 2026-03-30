@@ -14,7 +14,7 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 relative overflow-x-hidden"
       style={{ background: 'linear-gradient(180deg, #0d0e1a 0%, #111228 60%, #0d0e1a 100%)' }}>
 
       {/* Subtle background glow */}
