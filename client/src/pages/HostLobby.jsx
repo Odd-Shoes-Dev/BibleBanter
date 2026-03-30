@@ -12,7 +12,7 @@ const AVATAR_COLORS = [
   'linear-gradient(135deg, #65a30d, #4d7c0f)',
 ];
 
-export default function HostLobby({ pin, players, onStart, token }) {
+export default function HostLobby({ pin, players, onStart, onCancel, token }) {
   const joinUrl = `${window.location.origin}/?pin=${pin}`;
 
   return (
@@ -112,6 +112,13 @@ export default function HostLobby({ pin, players, onStart, token }) {
             }}
           >
             🚀 Start Game ({players.length} players)
+          </button>
+          <button
+            onClick={onCancel}
+            className="w-full px-10 py-2.5 rounded-2xl font-bold text-sm text-white/50 hover:text-white/80 transition-all duration-200 font-nunito"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+          >
+            ✕ Cancel Game
           </button>
         </div>
       </div>

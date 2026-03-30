@@ -318,7 +318,18 @@ export default function App() {
         <JoinPage onJoin={handleJoinGame} onBack={() => setScreen('landing')} />
       )}
       {screen === 'host-lobby' && (
-        <HostLobby pin={gamePin} players={players} onStart={handleStartGame} onError={errorMsg} token={authToken} />
+        <HostLobby pin={gamePin} players={players} onStart={handleStartGame} token={authToken}
+          onCancel={() => {
+            sessionStorage.removeItem('bb_pin');
+            sessionStorage.removeItem('bb_role');
+            socket.disconnect();
+            socket.connect();
+            setGamePin('');
+            setRole(null);
+            setPlayers([]);
+            setScreen('host-setup');
+          }}
+        />
       )}
       {screen === 'player-lobby' && (
         <PlayerLobby pin={gamePin} playerName={playerName} players={players} />
