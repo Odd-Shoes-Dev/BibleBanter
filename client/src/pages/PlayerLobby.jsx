@@ -1,4 +1,4 @@
-export default function PlayerLobby({ pin, playerName, players }) {
+export default function PlayerLobby({ pin, playerName, players, onLeave }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -60,6 +60,14 @@ export default function PlayerLobby({ pin, playerName, players }) {
         <p className="mt-6 text-white/30 text-sm animate-pulse">
           ✝️ Sharpen your scripture knowledge... ✝️
         </p>
+
+        <button
+          onClick={onLeave}
+          className="mt-4 px-6 py-2.5 rounded-2xl font-bold text-sm text-white/40 hover:text-white/70 transition-all duration-200"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          ✕ Leave Game
+        </button>
       </div>
     </div>
   );

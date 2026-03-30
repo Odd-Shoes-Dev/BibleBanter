@@ -332,7 +332,20 @@ export default function App() {
         />
       )}
       {screen === 'player-lobby' && (
-        <PlayerLobby pin={gamePin} playerName={playerName} players={players} />
+        <PlayerLobby pin={gamePin} playerName={playerName} players={players}
+          onLeave={() => {
+            sessionStorage.removeItem('bb_pin');
+            sessionStorage.removeItem('bb_role');
+            sessionStorage.removeItem('bb_name');
+            socket.disconnect();
+            socket.connect();
+            setGamePin('');
+            setPlayerName('');
+            setRole(null);
+            setPlayers([]);
+            setScreen('landing');
+          }}
+        />
       )}
       {screen === 'game' && (
         <GameScreen
