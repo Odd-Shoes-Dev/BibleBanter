@@ -313,6 +313,9 @@ app.post('/api/parse-questions', upload.single('file'), optionalHost, async (req
     // If authenticated host + setName provided → save to DB as a named question set
     let savedSetId = null;
     const setName = req.body.setName;
+    if (setName && !req.host) {
+      return res.status(401).json({ error: 'You must be logged in to save a question set.' });
+    }
     if (req.host && setName) {
       const set = await prisma.questionSet.create({
         data: {

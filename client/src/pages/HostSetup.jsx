@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ConfirmModal from '../components/ConfirmModal';
 import UploadQuestions from './UploadQuestions';
 
@@ -31,17 +31,17 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
   const [customRounds, setCustomRounds] = useState('');
   const [roundPreset, setRoundPreset] = useState('Mini');
 
-  const loadSets = () => {
+  const loadSets = useCallback(() => {
     if (!token) return;
     setLoading(true);
     fetch(`${BACKEND}/api/sets`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => { setSets((d.sets || []).filter(s => !s.isDefault)); })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => setSets((d.sets || []).filter(s => !s.isDefault)))
       .catch(() => {})
       .finally(() => setLoading(false));
-  };
+  }, [token]);
 
-  useEffect(loadSets, [token]);
+  useEffect(() => { loadSets(); }, [loadSets]);
 
   const handleDelete = async () => {
     if (!confirmTarget) return;
@@ -251,7 +251,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
         <UploadQuestions
           token={token}
           onClose={() => setShowUpload(false)}
-          onImported={() => { setShowUpload(false); loadSets(); }}
+          onImported={() => { setShowUpload(false); setTab('custom'); loadSets(); }}
           saveOnly
         />
       )}

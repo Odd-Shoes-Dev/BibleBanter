@@ -68,8 +68,9 @@ export default function UploadQuestions({ onClose, onImported, token, saveOnly =
         const res = await fetch(`${BACKEND}/api/parse-questions`, { method: 'POST', body: form, headers });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to save.');
+        if (!data.savedSetId) throw new Error('Set was not saved — please log in again and retry.');
         setSuccess(`✅ "${setName.trim()}" saved with ${data.count} questions!`);
-        setTimeout(() => { onImported(); onClose(); }, 1400);
+        setTimeout(() => { onImported(data.savedSetId); onClose(); }, 1400);
         return;
       }
       if (saveOnly) { setError('You must be logged in to save a set.'); setImporting(false); return; }
