@@ -147,13 +147,13 @@ app.put('/api/sets/:id', requireHost, async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Failed to rename set.' }); }
 });
 
-app.get('/api/sets/:id/questions', requireHost, async (req, res) => {
+app.get('/api/sets/:id/questions', optionalHost, async (req, res) => {
   try {
     const set = await prisma.questionSet.findUnique({ where: { id: req.params.id } });
     if (!set) return res.status(404).json({ error: 'Set not found.' });
-    if (set.hostId !== null && set.hostId !== req.host.id) return res.status(403).json({ error: 'You do not own this set.' });
+    if (set.hostId !== null && (!req.host || set.hostId !== req.host.id)) return res.status(403).json({ error: 'You do not own this set.' });
     const questions = await prisma.question.findMany({ where: { setId: req.params.id }, orderBy: { id: 'asc' } });
-    res.json({ questions, setName: set.name });
+    res.json({ questions, setName: set.name, testament: set.testament });
   } catch (err) { res.status(500).json({ error: 'Failed to fetch questions.' }); }
 });
 

@@ -15,6 +15,7 @@ import EditSet from './pages/EditSet';
 import AiQuizGenerator from './pages/AiQuizGenerator';
 import SessionReport from './pages/SessionReport';
 import ReportsPage from './pages/ReportsPage';
+import SoloPractice from './pages/SoloPractice';
 import Confetti from './components/Confetti';
 
 export default function App() {
@@ -209,6 +210,7 @@ export default function App() {
         <LandingPage
           onHost={() => setScreen(hostUser ? 'host-setup' : 'login')}
           onJoin={() => setScreen('join')}
+          onSolo={() => setScreen('solo')}
           hostUser={hostUser}
           onLogin={() => setScreen('login')}
           onLogout={handleLogout}
@@ -230,6 +232,9 @@ export default function App() {
       )}
       {screen === 'session-report' && (
         <SessionReport gameId={reportGameId} token={authToken} onBack={() => setScreen(role === 'host' ? 'gameover' : 'history')} />
+      )}
+      {screen === 'solo' && (
+        <SoloPractice authToken={authToken} onBack={() => setScreen('landing')} />
       )}
       {screen === 'ai-generator' && (
         <AiQuizGenerator token={authToken} onBack={() => setScreen('host-setup')} onSaved={() => setScreen('host-setup')} />

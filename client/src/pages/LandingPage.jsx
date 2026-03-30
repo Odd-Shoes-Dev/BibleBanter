@@ -1,4 +1,4 @@
-export default function LandingPage({ onHost, onJoin, hostUser, onLogin, onLogout, onHistory, onReports }) {
+export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin, onLogout, onHistory, onReports }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #0d0e1a 0%, #111228 60%, #0d0e1a 100%)' }}>
@@ -87,6 +87,22 @@ export default function LandingPage({ onHost, onJoin, hostUser, onLogin, onLogou
             <span className="flex items-center justify-center gap-2">
               🎮 Join Game
             </span>
+          </button>
+        </div>
+
+        {/* Solo Practice */}
+        <div className="mt-3 animate-slide-up" style={{ animationDelay: '0.45s' }}>
+          <button
+            onClick={onSolo}
+            className="rounded-2xl px-6 py-3 font-nunito font-black text-sm transition-all duration-200 hover:scale-[1.03] hover:brightness-110 active:scale-95"
+            style={{
+              background: 'rgba(124,58,237,0.15)',
+              border: '1px solid rgba(124,58,237,0.35)',
+              color: '#c4b5fd',
+              boxShadow: '0 4px 20px rgba(124,58,237,0.2)',
+            }}
+          >
+            🎯 Solo Practice
           </button>
         </div>
 
