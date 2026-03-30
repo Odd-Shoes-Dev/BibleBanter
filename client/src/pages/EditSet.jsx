@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ConfirmModal from '../components/ConfirmModal';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const LABELS = ['A', 'B', 'C', 'D'];
@@ -11,6 +12,7 @@ function QuestionCard({ q, idx, token, setId, onSaved, onDeleted }) {
   const [draft, setDraft] = useState(null);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const startEdit = () => { setDraft({ ...q, options: [...q.options] }); setEditing(true); setErr(''); };
   const cancel = () => { setEditing(false); setDraft(null); setErr(''); };
@@ -39,7 +41,6 @@ function QuestionCard({ q, idx, token, setId, onSaved, onDeleted }) {
 
   const del = async () => {
     if (!q.id) { onDeleted(null); return; }
-    if (!confirm(`Delete question ${idx + 1}? This cannot be undone.`)) return;
     setSaving(true);
     try {
       const res = await fetch(`${BACKEND}/api/questions/${q.id}`, {
@@ -137,8 +138,17 @@ function QuestionCard({ q, idx, token, setId, onSaved, onDeleted }) {
       </div>
       <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <button onClick={startEdit} className="p-1.5 rounded-lg text-white/40 hover:text-purple-300 hover:bg-purple-500/15 transition-all" title="Edit">✏️</button>
-        <button onClick={del} disabled={saving} className="p-1.5 rounded-lg text-white/40 hover:text-red-300 hover:bg-red-500/15 transition-all" title="Delete">🗑</button>
+        <button onClick={() => q.id ? setConfirmDelete(true) : onDeleted(null)} disabled={saving} className="p-1.5 rounded-lg text-white/40 hover:text-red-300 hover:bg-red-500/15 transition-all" title="Delete">🗑</button>
       </div>
+      {confirmDelete && (
+        <ConfirmModal
+          title={`Delete question ${idx + 1}?`}
+          message="This question will be permanently removed from the set."
+          confirmLabel="Delete"
+          onConfirm={() => { setConfirmDelete(false); del(); }}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
     </div>
   );
 }

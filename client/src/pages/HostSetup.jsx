@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import ConfirmModal from '../components/ConfirmModal';
+import UploadQuestions from './UploadQuestions';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
@@ -10,12 +12,14 @@ const TESTAMENT_OPTIONS = [
 
 export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
   const [sets, setSets] = useState([]);
-  const [tab, setTab] = useState('default'); // 'default' | 'custom'
+  const [tab, setTab] = useState('default');
   const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState(null); // set id being deleted
+  const [confirmTarget, setConfirmTarget] = useState(null); // { id, name, count }
+  const [deleting, setDeleting] = useState(false);
   const [deleteErr, setDeleteErr] = useState('');
+  const [showUpload, setShowUpload] = useState(false);
 
-  useEffect(() => {
+  const loadSets = () => {
     if (!token) return;
     setLoading(true);
     fetch(`${BACKEND}/api/sets`, { headers: { Authorization: `Bearer ${token}` } })
@@ -23,7 +27,24 @@ export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
       .then(d => { setSets((d.sets || []).filter(s => !s.isDefault)); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [token]);
+  };
+
+  useEffect(loadSets, [token]);
+
+  const handleDelete = async () => {
+    if (!confirmTarget) return;
+    setDeleting(true); setDeleteErr('');
+    try {
+      const res = await fetch(`${BACKEND}/api/sets/${confirmTarget.id}`, {
+        method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Delete failed');
+      setSets(prev => prev.filter(s => s.id !== confirmTarget.id));
+      setConfirmTarget(null);
+    } catch (e) { setDeleteErr(e.message); }
+    finally { setDeleting(false); }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8"
@@ -76,28 +97,37 @@ export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
           </div>
         )}
 
-        {/* Custom sets tab */}
+        {/* My Sets tab */}
         {tab === 'custom' && (
           <div className="space-y-3 mb-6">
+            {/* Upload New Set button */}
+            <button
+              onClick={() => setShowUpload(true)}
+              className="w-full py-3 rounded-2xl text-sm font-bold transition-all hover:brightness-110"
+              style={{ background: 'rgba(124,58,237,0.15)', border: '1px dashed rgba(124,58,237,0.5)', color: '#a78bfa' }}
+            >
+              ＋ Upload New Set
+            </button>
+
             {loading && <p className="text-white/40 text-sm text-center py-6">Loading sets...</p>}
             {!loading && sets.length === 0 && (
-              <div className="text-center py-8">
+              <div className="text-center py-6">
                 <p className="text-4xl mb-2">📭</p>
                 <p className="text-white/40 text-sm">No custom sets yet.</p>
-                <p className="text-white/30 text-xs mt-1">Upload questions from the lobby screen.</p>
+                <p className="text-white/30 text-xs mt-1">Upload a set above to get started.</p>
               </div>
             )}
-            {deleteErr && (
-              <p className="text-red-400 text-xs text-center">{deleteErr}</p>
-            )}
+            {deleteErr && <p className="text-red-400 text-xs text-center">{deleteErr}</p>}
+
             {sets.map((set, i) => (
               <div
                 key={set.id}
                 className="rounded-2xl overflow-hidden animate-slide-up"
                 style={{ border: '1px solid rgba(139,92,246,0.4)', animationDelay: `${i * 0.06}s` }}
               >
+                {/* Clicking the card body prompts testament selection */}
                 <button
-                  onClick={() => onSelect({ testament: 'both', setId: set.id })}
+                  onClick={() => onSelect({ testament: set.testament || 'both', setId: set.id })}
                   className="w-full px-5 py-4 text-left transition-all hover:brightness-110 flex items-center gap-4"
                   style={{ background: 'rgba(255,255,255,0.05)' }}
                 >
@@ -113,27 +143,14 @@ export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
                     onClick={() => onEditSet(set.id)}
                     className="flex-1 py-2 text-xs font-bold text-purple-400 hover:bg-purple-500/10 transition-colors"
                   >
-                    ✏️ Edit Questions
+                    ✏️ Edit
                   </button>
                   <div style={{ width: '1px', background: 'rgba(139,92,246,0.2)' }} />
                   <button
-                    disabled={deleting === set.id}
-                    onClick={async () => {
-                      if (!confirm(`Delete "${set.name}"? This will permanently remove all ${set._count?.questions ?? 0} questions.`)) return;
-                      setDeleting(set.id); setDeleteErr('');
-                      try {
-                        const res = await fetch(`${BACKEND}/api/sets/${set.id}`, {
-                          method: 'DELETE', headers: { Authorization: `Bearer ${token}` },
-                        });
-                        const d = await res.json();
-                        if (!res.ok) throw new Error(d.error || 'Delete failed');
-                        setSets(prev => prev.filter(s => s.id !== set.id));
-                      } catch (e) { setDeleteErr(e.message); }
-                      finally { setDeleting(null); }
-                    }}
-                    className="flex-1 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                    onClick={() => setConfirmTarget({ id: set.id, name: set.name, count: set._count?.questions ?? 0 })}
+                    className="flex-1 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors"
                   >
-                    {deleting === set.id ? '...' : '🗑 Delete'}
+                    🗑 Delete
                   </button>
                 </div>
               </div>
@@ -145,6 +162,27 @@ export default function HostSetup({ onSelect, onBack, onEditSet, token }) {
           ← Back
         </button>
       </div>
+
+      {/* Delete confirmation modal */}
+      {confirmTarget && (
+        <ConfirmModal
+          title={`Delete "${confirmTarget.name}"?`}
+          message={`This will permanently remove all ${confirmTarget.count} questions. This cannot be undone.`}
+          confirmLabel={deleting ? 'Deleting...' : 'Delete'}
+          onConfirm={handleDelete}
+          onCancel={() => { setConfirmTarget(null); setDeleteErr(''); }}
+        />
+      )}
+
+      {/* Upload modal */}
+      {showUpload && (
+        <UploadQuestions
+          token={token}
+          onClose={() => setShowUpload(false)}
+          onImported={() => { setShowUpload(false); loadSets(); }}
+          saveOnly
+        />
+      )}
     </div>
   );
 }

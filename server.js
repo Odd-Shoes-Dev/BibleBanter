@@ -241,7 +241,7 @@ app.post('/api/parse-questions', upload.single('file'), optionalHost, async (req
         data: {
           name: setName,
           description: `Imported from ${originalname}`,
-          testament: 'both',
+          testament: req.body.testament || 'both',
           hostId: req.host.id,
           questions: {
             create: parsed.map(q => ({
