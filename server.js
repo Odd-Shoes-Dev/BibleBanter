@@ -1087,13 +1087,13 @@ app.get('*', (req, res) => {
   if (require('fs').existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
-    res.json({ status: 'Bible Battle API running' });
+    res.json({ status: 'Bible Banter API running' });
   }
 });
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`Bible Battle server running on http://localhost:${PORT}`);
+  console.log(`Bible Banter server running on http://localhost:${PORT}`);
 });
 
 // ── KEEP-ALIVE: prevent Render backend + Neon DB from sleeping ────────────────

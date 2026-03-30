@@ -27,7 +27,7 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain, role, o
           <h1 className="font-anton text-4xl sm:text-5xl md:text-6xl gradient-text tracking-wider mb-2" style={{ letterSpacing: '0.04em' }}>
             GAME OVER
           </h1>
-          <p className="text-white/50 font-medium">Bible Battle Complete!</p>
+          <p className="text-white/50 font-medium">Bible Banter Complete!</p>
         </div>
 
         {/* Player rank card */}
@@ -183,7 +183,7 @@ export default function GameOver({ leaderboard, playerName, onPlayAgain, role, o
         )}
 
         <p className="text-center text-white/25 text-xs font-nunito tracking-wide pb-4">
-          BIBLE BATTLE — TEST YOUR SCRIPTURE KNOWLEDGE
+          BIBLE BANTER — TEST YOUR SCRIPTURE KNOWLEDGE
         </p>
       </div>
     </div>

@@ -73,7 +73,7 @@ export default function GameHistory({ token, onBack, onViewReport }) {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="font-anton text-2xl text-white" style={{ letterSpacing: '0.04em' }}>GAME HISTORY</h1>
-            <p className="text-white/40 text-sm">Your past Bible Battle sessions</p>
+            <p className="text-white/40 text-sm">Your past Bible Banter sessions</p>
           </div>
           <button onClick={onBack} className="text-white/40 text-sm hover:text-white/70 transition-colors">← Back</button>
         </div>

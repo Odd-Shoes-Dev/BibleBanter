@@ -96,7 +96,7 @@ export default function GameScreen({
           style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-2">
             <img src="/kampus-logo.jpeg" alt="logo" className="w-6 h-6 object-contain opacity-80" />
-            <span className="font-cinzel font-black text-sm tracking-widest" style={{ color: '#d4a843' }}>BIBLE BATTLE</span>
+            <span className="font-cinzel font-black text-sm tracking-widest" style={{ color: '#d4a843' }}>BIBLE BANTER</span>
           </div>
           {playerName && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm"

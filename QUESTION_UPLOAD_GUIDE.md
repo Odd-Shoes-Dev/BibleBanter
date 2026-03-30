@@ -1,4 +1,4 @@
-# Bible Battle — Question Upload Guide
+# Bible Banter — Question Upload Guide
 
 Hosts can upload custom question sets from the **My Sets** tab on the Choose Questions screen.  
 Supported formats: **CSV**, **PDF**, **Word (.docx)**

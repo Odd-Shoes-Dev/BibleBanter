@@ -1,4 +1,4 @@
-# Bible Battle — Feature Documentation
+# Bible Banter — Feature Documentation
 
 > A live multiplayer Bible quiz platform for churches, fellowships, and youth groups.
 > Built with React + Vite (frontend), Express + Socket.IO (backend), PostgreSQL via Neon (database).
@@ -258,7 +258,7 @@ GEMINI_API_KEY=AIza...                 # Google AI Studio API key (free)
 
 ### Frontend (`client/.env.production`)
 ```
-VITE_BACKEND_URL=https://bitblebattle.onrender.com
+VITE_BACKEND_URL=https://biblebanter.onrender.com
 ```
 
 ### Getting a Gemini API Key (Free)
@@ -271,7 +271,7 @@ VITE_BACKEND_URL=https://bitblebattle.onrender.com
 ## 10. Deployment
 
 ### Backend — Render
-- Service: `bitblebattle` (Node.js web service)
+- Service: `biblebanter` (Node.js web service)
 - Build command: `npm install && npx prisma generate`
 - Start command: `node server.js`
 - **Required environment variables on Render:**
@@ -281,7 +281,7 @@ VITE_BACKEND_URL=https://bitblebattle.onrender.com
 
 ### Frontend — Vercel
 - Auto-deploys from `main` branch
-- Environment variable: `VITE_BACKEND_URL=https://bitblebattle.onrender.com`
+- Environment variable: `VITE_BACKEND_URL=https://biblebanter.onrender.com`
 
 ### Database — Neon
 - Serverless PostgreSQL

@@ -31,7 +31,7 @@ export default function PlayerLobby({ pin, playerName, players, onLeave }) {
             </div>
           </div>
           <p className="text-white/70 text-lg font-medium mb-2">Waiting for host to start...</p>
-          <p className="text-white/40 text-sm">Get ready for the Bible Battle!</p>
+          <p className="text-white/40 text-sm">Get ready for Bible Banter!</p>
         </div>
 
         <div className="bg-glass-dark rounded-3xl p-5 mb-4">

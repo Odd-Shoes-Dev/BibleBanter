@@ -29,7 +29,7 @@ export default function HostLobby({ pin, players, onStart, onCancel, token }) {
         style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="flex items-center gap-2">
           <img src="/kampus-logo.jpeg" alt="logo" className="w-8 h-8 object-contain" />
-          <span className="font-cinzel font-black text-base gradient-text tracking-wider">BIBLE BATTLE</span>
+          <span className="font-cinzel font-black text-base gradient-text tracking-wider">BIBLE BANTER</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="px-4 py-1.5 rounded-full text-sm font-bold"

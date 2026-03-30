@@ -1,8 +1,8 @@
-# ⚔️ Bible Battle
+# ⚔️ Bible Banter
 
 A real-time multiplayer Bible trivia game — Kahoot-style, built for church events and Bible study groups.
 
-![Bible Battle](https://img.shields.io/badge/Stack-React%20%2B%20Socket.io-blue) ![License](https://img.shields.io/badge/License-MIT-green)
+![Bible Banter](https://img.shields.io/badge/Stack-React%20%2B%20Socket.io-blue) ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
