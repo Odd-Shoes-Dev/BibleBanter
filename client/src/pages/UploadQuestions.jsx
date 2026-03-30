@@ -163,7 +163,8 @@ export default function UploadQuestions({ onClose, onImported, token }) {
             <div className="rounded-xl px-4 py-3 text-xs text-white/40 leading-relaxed"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <p className="font-bold text-white/50 mb-1">PDF / Word format (one block per question):</p>
-              <pre className="font-mono text-xs whitespace-pre-wrap">{`Q: Who built the ark?\nA: Moses\nB: Noah\nC: Abraham\nD: David\nAnswer: B\nCategory: Old Testament\nDifficulty: easy\nScripture: Genesis 6:14`}</pre>
+              <pre className="font-mono text-xs whitespace-pre-wrap">{`Q: Who built the ark?\nA: Moses\nB: Noah\nC: Abraham\nD: David\nAnswer: B\nCategory: Old Testament\nDifficulty: easy\nScripture: Genesis 6:14 — 'So make yourself an ark of cypress wood.'`}</pre>
+              <p className="mt-1.5 text-amber-400/70 text-xs">📖 <strong>Scripture is required</strong> — it shows to players after the answer is revealed.</p>
               <p className="mt-2">For CSV, download the template ↑ to see the required columns.</p>
             </div>
           )}
@@ -206,11 +207,15 @@ export default function UploadQuestions({ onClose, onImported, token }) {
                             </span>
                           ))}
                         </div>
-                        <div className="flex gap-2 mt-1.5">
+                        <div className="flex gap-2 mt-1.5 flex-wrap">
                           <span className="text-xs px-1.5 py-0.5 rounded-md"
                             style={{ background: 'rgba(255,255,255,0.08)', color: '#ffffff60' }}>{q.category}</span>
                           <span className="text-xs px-1.5 py-0.5 rounded-md font-bold"
                             style={{ color: diffColor(q.difficulty), background: 'rgba(255,255,255,0.06)' }}>{q.difficulty}</span>
+                          {q.scripture
+                            ? <span className="text-xs px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(251,191,36,0.12)', color: '#fbbf24' }}>📖 {q.scripture}</span>
+                            : <span className="text-xs px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>⚠ No scripture</span>
+                          }
                         </div>
                       </div>
                     </div>
