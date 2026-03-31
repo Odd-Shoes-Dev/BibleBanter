@@ -130,7 +130,9 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
               <button onClick={onLogin}
                 className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all hover:brightness-125"
                 style={{ background: 'rgba(251,191,36,0.12)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.25)' }}>
-                🔐 Login
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline',marginRight:'5px',verticalAlign:'middle'}}>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>Login
               </button>
             )}
           </div>
@@ -183,7 +185,7 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
             style={{ animationDelay: '0.28s', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)' }}>
             <p className="text-white/70 text-sm leading-relaxed">
               <span style={{ fontFamily: 'Bangers, cursive', color: '#fbbf24', fontSize: '1rem', letterSpacing: '0.04em', marginRight: '0.35em' }}>Bible Banter</span> turns sermons, Bible studies, and fellowship notes into
-              <strong className="text-white/90"> live interactive quizzes</strong> — with leaderboards for the room and <strong className="text-white/90">instant reports</strong> for leaders.
+              <strong className="text-white/90"> live interactive quizzes</strong> - with leaderboards for the room and <strong className="text-white/90">instant reports</strong> for leaders.
             </p>
           </div>
 
@@ -300,8 +302,8 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
               <div className="mb-3 flex justify-center transition-transform duration-300 group-hover:scale-110" style={{ color: f.color }}>
                 <FeatureIcon type={f.iconType} />
               </div>
-              <p className="text-xs sm:text-sm font-black text-white/90 mb-1" style={{ fontFamily: 'Nunito, sans-serif' }}>{f.title}</p>
-              <p className="text-[10px] sm:text-xs text-white/60 leading-snug hidden sm:block">{f.desc}</p>
+              <p className="text-sm sm:text-base font-black text-white mb-1" style={{ fontFamily: 'Nunito, sans-serif' }}>{f.title}</p>
+              <p className="text-xs sm:text-sm text-white/80 leading-snug hidden sm:block">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -327,8 +329,8 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
                 }}>
                 <div className="absolute top-3 right-3 opacity-5" style={{ fontFamily: 'Bangers, cursive', fontSize: '4rem', color: s.color }}>{s.step}</div>
                 <div className="text-xs font-black mb-2 tracking-widest" style={{ fontFamily: 'Orbitron, sans-serif', color: s.color, fontSize: '0.65rem' }}>STEP {s.step}</div>
-                <p className="font-nunito font-black text-white text-sm mb-1">{s.title}</p>
-                <p className="text-xs text-white/60 leading-relaxed">{s.desc}</p>
+                <p className="font-nunito font-black text-white text-base mb-1">{s.title}</p>
+                <p className="text-sm text-white/80 leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -341,8 +343,8 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
               style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
               <div className="px-4 py-3 text-center"
                 style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.04))', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <p className="text-xs font-black uppercase tracking-[0.2em]"
-                  style={{ fontFamily: 'Orbitron, sans-serif', color: '#fbbf24', fontSize: '0.65rem' }}>
+                <p className="text-sm font-black uppercase tracking-[0.2em]"
+                  style={{ fontFamily: 'Orbitron, sans-serif', color: '#fbbf24', fontSize: '0.8rem' }}>
                   🏆 Hall of Fame
                 </p>
               </div>
@@ -357,17 +359,17 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
                         border: i === 0 ? '1px solid rgba(251,191,36,0.15)' : '1px solid transparent',
                       }}>
                       <span className="text-base w-7 text-center flex-shrink-0">{MEDALS[i] || `#${p.rank}`}</span>
-                      <span className="flex-1 text-xs font-bold truncate" style={{ color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.85)' }}>{p.name}</span>
+                      <span className="flex-1 text-sm font-bold truncate" style={{ color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.95)' }}>{p.name}</span>
                       <span className="text-xs font-black flex-shrink-0 tabular-nums" style={{
                         fontFamily: score > 0 ? 'Orbitron, monospace, sans-serif' : 'Nunito, sans-serif',
                         fontSize: '0.75rem',
-                        color: i === 0 ? '#fbbf24' : score > 0 ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)',
+                        color: i === 0 ? '#fbbf24' : score > 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.55)',
                         minWidth: '2.5rem',
                         textAlign: 'right',
                       }}>
                         {score > 0 ? score.toLocaleString() : '—'}
                       </span>
-                      <span className="text-white/50 text-[10px] flex-shrink-0 w-6 text-right">{p.gamesPlayed}g</span>
+                      <span className="text-white/70 text-xs flex-shrink-0 w-6 text-right">{p.gamesPlayed}g</span>
                     </div>
                   );
                 })}
@@ -379,25 +381,25 @@ export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin,
         {/* ── Footer ── */}
         <div className="mt-auto pt-8 pb-4 text-center px-4">
           <div className="inline-flex flex-col items-center gap-3">
-            <p className="text-white/40 text-xs leading-relaxed max-w-xs">
+            <p className="text-white/70 text-sm leading-relaxed max-w-xs">
               Built by{' '}
               <a href="https://www.oddshoes.dev" target="_blank" rel="noopener noreferrer"
-                className="text-white/55 hover:text-white/80 underline underline-offset-2 transition-colors font-semibold">
+                className="text-white/80 hover:text-white underline underline-offset-2 transition-colors font-semibold">
                 Odd Shoes
               </a>
               {' '}in partnership with{' '}
               <a href="https://betweenhisshoulders.org/services/kingdom-tech-hubs/kc-labs-software-development"
                 target="_blank" rel="noopener noreferrer"
-                className="text-white/55 hover:text-white/80 underline underline-offset-2 transition-colors font-semibold">
+                className="text-white/80 hover:text-white underline underline-offset-2 transition-colors font-semibold">
                 Kingdom Chaplain
               </a>
             </p>
             <div className="flex items-center gap-4">
               <a href="https://www.oddshoes.dev" target="_blank" rel="noopener noreferrer"
-                className="text-white/40 hover:text-white/65 text-xs transition-colors">oddshoes.dev</a>
-              <span className="text-white/30">·</span>
+                className="text-white/65 hover:text-white text-sm transition-colors">oddshoes.dev</a>
+              <span className="text-white/50">·</span>
               <a href="https://betweenhisshoulders.org" target="_blank" rel="noopener noreferrer"
-                className="text-white/40 hover:text-white/65 text-xs transition-colors">betweenhisshoulders.org</a>
+                className="text-white/65 hover:text-white text-sm transition-colors">betweenhisshoulders.org</a>
             </div>
           </div>
         </div>

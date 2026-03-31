@@ -11,7 +11,12 @@ const prisma = require('./lib/prisma');
 // e.g. ALLOWED_ORIGINS=https://biblebanter.vercel.app,https://bitblebattle.onrender.com
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://localhost:3001'];
+  : [
+      'http://localhost:5173',
+      'http://localhost:3001',
+      'https://bitble-battle.vercel.app',
+      'https://bitblebattle.onrender.com',
+    ];
 
 const app = express();
 const server = http.createServer(app);

@@ -13,10 +13,12 @@
 4. [AI Quiz Generator](#4-ai-quiz-generator)
 5. [Understanding Reports](#5-understanding-reports)
 6. [Game History & Report Archive](#6-game-history--report-archive)
-7. [Authentication](#7-authentication)
-8. [Tech Stack](#8-tech-stack)
-9. [Environment Variables](#9-environment-variables)
-10. [Deployment](#10-deployment)
+7. [Solo Practice Mode](#7-solo-practice-mode)
+8. [Global Leaderboard](#8-global-leaderboard)
+9. [Authentication](#9-authentication)
+10. [Tech Stack](#10-tech-stack)
+11. [Environment Variables](#11-environment-variables)
+12. [Deployment](#12-deployment)
 
 ---
 
@@ -24,9 +26,10 @@
 
 ### Joining a Game
 - Players visit the app URL and click **Join Game**
-- Enter a 6-digit PIN shared by the host
+- Enter a 6-digit PIN shared by the host (or scan the **QR code** from the host lobby)
 - Choose a display name
 - Wait in a lobby that shows connected players in real time
+- **Reconnection:** Players who drop mid-game can rejoin with the same PIN and name within a 20-second grace period
 
 ### Gameplay
 - Questions appear one at a time with a countdown timer
@@ -46,14 +49,17 @@
 ### Starting a Session
 1. Log in as a host
 2. Go to **Host Setup** → choose a question set (default or custom)
-3. A unique 6-digit PIN is generated
-4. Share the PIN (or QR code) with players
-5. Click **Start Game** when ready
+3. Configure optional settings: **question timer** (5–120s, default 20s) and **rounds per batch** (1–50, default 10)
+4. A unique 6-digit PIN is generated
+5. Share the PIN or **QR code** with players
+6. Click **Start Game** when ready
 
 ### During the Game
 - Host view shows live answer progress (how many players have answered)
 - Questions auto-advance after the results timer expires (7 seconds)
-- Host can also manually advance to the next question
+- Host can manually advance at any time
+- If the host disconnects, players are notified; host can rejoin within 20 seconds
+- Large sets are split into batches with a **Continue Game** button between rounds
 
 ### After the Game
 - Host sees the full leaderboard on the Game Over screen
@@ -207,7 +213,26 @@ Each question shows:
 
 ---
 
-## 7. Authentication
+## 7. Solo Practice Mode
+
+- Available from the landing page via **Solo Practice** (no login required)
+- Players choose a testament filter (Old / New / Mixed) and difficulty
+- Questions drawn from the default question bank
+- Timed per question — score based on speed and accuracy
+- Personal score shown at the end; no leaderboard or host required
+
+---
+
+## 8. Global Leaderboard
+
+- Shown on the landing page (visible to all visitors)
+- Displays the top 10 all-time highest scorers across all games
+- Shows: rank, name, total score, and number of games played
+- Updates automatically after each game finishes
+
+---
+
+## 9. Authentication
 
 - Hosts register with name, email, and password (bcrypt-hashed)
 - JWT tokens stored in `localStorage` (`bb_token`, `bb_host`)
@@ -216,7 +241,7 @@ Each question shows:
 
 ---
 
-## 8. Tech Stack
+## 10. Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -231,6 +256,7 @@ Each question shows:
 | File Parsing | `pdf-parse`, `mammoth`, `csv-parse` |
 | QR Codes | `qrcode.react` |
 | Deployment | Vercel (frontend) + Render (backend) |
+| Routing | React Router v7 |
 
 ### Database Models
 
@@ -246,7 +272,7 @@ Each question shows:
 
 ---
 
-## 9. Environment Variables
+## 11. Environment Variables
 
 ### Backend (`.env`)
 ```
@@ -268,7 +294,7 @@ VITE_BACKEND_URL=https://biblebanter.onrender.com
 
 ---
 
-## 10. Deployment
+## 12. Deployment
 
 ### Backend — Render
 - Service: `biblebanter` (Node.js web service)

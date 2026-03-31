@@ -1,19 +1,21 @@
 # Bible Banter — Question Upload Guide
 
-Hosts can upload custom question sets from the **My Sets** tab on the Choose Questions screen.  
-Supported formats: **CSV**, **PDF**, **Word (.docx)**
+Hosts can upload custom question sets from the **My Sets** tab on the Host Setup screen.  
+Supported formats: **CSV**, **PDF**, **Word (.docx)**, **Plain Text (.txt)**
 
 ---
 
 ## 📥 Quick Start
 
-1. Log in as a host and click **⚔️ Host Game**
-2. Go to the **📂 My Sets** tab
+1. Log in as a host and click **Host a Game**
+2. Go to the **My Sets** tab
 3. Click **＋ Upload New Set**
-4. Enter a **Set Name**, choose a **Testament category**, then drop your file
+4. Drop your file (CSV, PDF, DOCX, or TXT), enter a **Set Name** and choose a **Testament category**
 5. Review the **preview** — correct answers are highlighted green, scripture shown in amber
-6. Click **"⚔️ Use These N Questions"** to save the set to your library
+6. Save the set to your library
 7. Select the set from My Sets to start a game with it
+
+> 💡 **Tip:** You can also use **✨ Generate with AI** to automatically generate questions from sermon notes or any text content.
 
 ---
 
@@ -192,9 +194,48 @@ Scripture: Genesis 7:12 — 'And rain fell on the earth forty days and forty nig
 ## 📏 Limits
 
 - Maximum file size: **10 MB**
-- Maximum questions previewed: **20** (all are saved, only 20 shown in preview)
+- Maximum questions previewed: **50** (all are saved, only 50 shown in preview)
 - Minimum questions per upload: **1**
 
 ---
 
 *Questions are shuffled automatically when a game starts. Sets are saved to your account and reusable across multiple game sessions.*
+
+---
+
+## 📄 Plain Text (.txt) Format
+
+Same block structure as PDF and Word. Write each question as plain text paragraphs.
+
+### Example
+
+```
+Q: What did God create on the first day?
+A: Sun and moon
+B: Light
+C: Land and sea
+D: Animals
+Answer: B
+Category: Old Testament
+Difficulty: easy
+Scripture: Genesis 1:3 — 'And God said, Let there be light, and there was light.'
+
+Q: Who wrote most of the New Testament epistles?
+A: Peter
+B: John
+C: Paul
+D: James
+Answer: C
+Category: New Testament
+Difficulty: easy
+Scripture: Romans 1:1 — 'Paul, a servant of Christ Jesus, called to be an apostle and set apart for the gospel of God.'
+```
+
+### Rules for TXT
+
+- Same rules as PDF and Word
+- Each block starts with `Q:` or `Question:`
+- Options labeled `A:`, `B:`, `C:`, `D:` (colon, period, or bracket accepted)
+- `Answer:` is a single letter: A, B, C, or D
+- Leave one blank line between question blocks
+- UTF-8 encoding recommended
