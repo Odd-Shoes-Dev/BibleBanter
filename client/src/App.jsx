@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Routes, Route, useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 import { socket } from './socket';
 import LandingPage from './pages/LandingPage';
 import HostSetup from './pages/HostSetup';
@@ -17,19 +18,29 @@ import SessionReport from './pages/SessionReport';
 import ReportsPage from './pages/ReportsPage';
 import SoloPractice from './pages/SoloPractice';
 import Confetti from './components/Confetti';
-import ThemePicker from './components/ThemePicker';
-import { getSavedTheme } from './utils/themes';
+
+// ── Route wrapper components ─────────────────────────────────────────────────
+
+function EditSetRoute({ token }) {
+  const { setId } = useParams();
+  const navigate = useNavigate();
+  return <EditSet setId={setId} token={token} onBack={() => navigate('/host')} />;
+}
+
+function SessionReportRoute({ token }) {
+  const { gameId } = useParams();
+  const navigate = useNavigate();
+  return <SessionReport gameId={gameId} token={token} onBack={() => navigate(-1)} />;
+}
+
+// ── Main App ─────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [editSetId, setEditSetId] = useState(null);
-  const [reportGameId, setReportGameId] = useState(null);
-  const [theme, setTheme] = useState(getSavedTheme);
-  const [showThemePicker, setShowThemePicker] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [screen, setScreen] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('pin') ? 'join' : 'landing';
-  });
+
+
   const [gamePin, setGamePin] = useState('');
   const [playerName, setPlayerName] = useState('');
   const [role, setRole] = useState(null);
@@ -44,8 +55,15 @@ export default function App() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
   const [continueData, setContinueData] = useState(null);
+  const [reportGameId, setReportGameId] = useState(null);
+  const [gamePhase, setGamePhase] = useState(null); // 'question' | 'results' | 'over'
+
   const roleRef = useRef(null);
   useEffect(() => { roleRef.current = role; }, [role]);
+
+  // Stable navigate ref for socket handlers
+  const navRef = useRef(navigate);
+  useEffect(() => { navRef.current = navigate; }, [navigate]);
 
   // Auth state
   const [authToken, setAuthToken] = useState(() => localStorage.getItem('bb_token') || null);
@@ -56,7 +74,7 @@ export default function App() {
   const handleLogin = (host, token) => {
     setHostUser(host);
     setAuthToken(token);
-    setScreen('host-setup');
+    navigate('/host');
   };
 
   const handleLogout = () => {
@@ -64,13 +82,22 @@ export default function App() {
     localStorage.removeItem('bb_host');
     setAuthToken(null);
     setHostUser(null);
-    setScreen('landing');
+    navigate('/');
   };
 
+  // Redirect /?pin=XXXXXX to /join?pin=XXXXXX
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const pin = params.get('pin');
+    if (pin && location.pathname === '/') {
+      navigate(`/join?pin=${pin}`, { replace: true });
+    }
+  }, []);
+
+  // ── Socket event handlers ───────────────────────────────────────────────
   useEffect(() => {
     socket.connect();
 
-    // Auto-rejoin after socket reconnects (new socket.id but same session)
     socket.on('connect', () => {
       setReconnecting(false);
       const savedPin = sessionStorage.getItem('bb_pin');
@@ -84,7 +111,7 @@ export default function App() {
             setGamePin(savedPin);
             setPlayerName(savedName);
             setRole('player');
-            if (res.status === 'lobby') setScreen('player-lobby');
+            if (res.status === 'lobby') navRef.current('/lobby');
           } else {
             sessionStorage.removeItem('bb_pin');
             sessionStorage.removeItem('bb_role');
@@ -97,7 +124,7 @@ export default function App() {
             setGamePin(res.pin);
             setRole('host');
             setPlayers(res.players || []);
-            if (res.status === 'lobby') setScreen('host-lobby');
+            if (res.status === 'lobby') navRef.current('/lobby');
           } else {
             sessionStorage.removeItem('bb_pin');
             sessionStorage.removeItem('bb_role');
@@ -109,18 +136,14 @@ export default function App() {
 
     socket.on('disconnect', () => setReconnecting(true));
 
-    socket.on('player-joined', ({ players: pl, name }) => {
-      setPlayers(pl);
-    });
-
-    socket.on('player-left', ({ players: pl }) => {
-      setPlayers(pl);
-    });
+    socket.on('player-joined', ({ players: pl }) => setPlayers(pl));
+    socket.on('player-left', ({ players: pl }) => setPlayers(pl));
 
     socket.on('game-started', () => {
-      setScreen('game');
+      setGamePhase('question');
       setAnswerResult(null);
       setQuestionResults(null);
+      navRef.current('/play');
     });
 
     socket.on('new-question', (q) => {
@@ -129,7 +152,8 @@ export default function App() {
       setQuestionResults(null);
       setAnswerProgress({ answered: 0, total: 0 });
       setLiveLeaderboard([]);
-      setScreen('game');
+      setGamePhase('question');
+      navRef.current('/play');
     });
 
     socket.on('answer-result', (result) => {
@@ -148,19 +172,19 @@ export default function App() {
     socket.on('question-results', (results) => {
       setQuestionResults(results);
       setLeaderboard(results.leaderboard);
-      setScreen('results');
+      setGamePhase('results');
     });
 
     socket.on('game-over', ({ leaderboard: lb, dbGameId, hasMore, nextOffset, setId, totalQuestions }) => {
       setLeaderboard(lb);
       if (dbGameId) setReportGameId(dbGameId);
       setContinueData(hasMore ? { nextOffset, setId, totalQuestions } : null);
-      setScreen('gameover');
+      setGamePhase('over');
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
     });
 
-    socket.on('round-starting', ({ round, batchStart, batchEnd, totalQuestions, players: pl }) => {
+    socket.on('round-starting', ({ players: pl }) => {
       setPlayers(pl || []);
       setCurrentQuestion(null);
       setAnswerResult(null);
@@ -168,8 +192,8 @@ export default function App() {
       setAnswerProgress({ answered: 0, total: 0 });
       setLiveLeaderboard([]);
       setContinueData(null);
-      if (roleRef.current === 'host') setScreen('host-lobby');
-      else setScreen('player-lobby');
+      setGamePhase(null);
+      navRef.current('/lobby');
     });
 
     socket.on('host-disconnected', () => {
@@ -177,12 +201,10 @@ export default function App() {
       sessionStorage.removeItem('bb_role');
       sessionStorage.removeItem('bb_name');
       setErrorMsg('The host has disconnected. Game ended.');
-      setScreen('landing');
+      navRef.current('/');
     });
 
-    socket.on('error-msg', (msg) => {
-      setErrorMsg(msg);
-    });
+    socket.on('error-msg', (msg) => setErrorMsg(msg));
 
     return () => {
       socket.off('connect');
@@ -201,6 +223,26 @@ export default function App() {
     };
   }, []);
 
+  // ── Game action handlers ────────────────────────────────────────────────
+
+  const resetGame = () => {
+    sessionStorage.removeItem('bb_pin');
+    sessionStorage.removeItem('bb_role');
+    sessionStorage.removeItem('bb_name');
+    setGamePin('');
+    setPlayerName('');
+    setRole(null);
+    setPlayers([]);
+    setCurrentQuestion(null);
+    setAnswerResult(null);
+    setQuestionResults(null);
+    setLeaderboard([]);
+    setGamePhase(null);
+    setContinueData(null);
+    socket.disconnect();
+    socket.connect();
+  };
+
   const handleCreateGame = ({ testament, setId, questionTime = 20, rounds = 10 }) => {
     socket.emit('create-game', { testament, setId, hostToken: authToken, questionTime, rounds }, ({ success, pin, error }) => {
       if (success) {
@@ -209,7 +251,7 @@ export default function App() {
         setPlayers([]);
         sessionStorage.setItem('bb_pin', pin);
         sessionStorage.setItem('bb_role', 'host');
-        setScreen('host-lobby');
+        navigate('/lobby');
       } else {
         setErrorMsg(error || 'Failed to create game.');
       }
@@ -225,24 +267,19 @@ export default function App() {
         sessionStorage.setItem('bb_pin', pin);
         sessionStorage.setItem('bb_role', 'player');
         sessionStorage.setItem('bb_name', name);
-        setScreen('player-lobby');
+        navigate('/lobby');
       } else {
         setErrorMsg(error || 'Failed to join game.');
       }
     });
   };
 
-  const handleStartGame = () => {
-    socket.emit('start-game');
-  };
-
-  const handleSubmitAnswer = (answerIndex) => {
-    socket.emit('submit-answer', { answerIndex });
-  };
+  const handleStartGame = () => socket.emit('start-game');
+  const handleSubmitAnswer = (answerIndex) => socket.emit('submit-answer', { answerIndex });
 
   const handleNextQuestion = () => {
     socket.emit('next-question');
-    setScreen('game');
+    setGamePhase('question');
     setQuestionResults(null);
     setAnswerResult(null);
   };
@@ -254,26 +291,16 @@ export default function App() {
   };
 
   const handlePlayAgain = () => {
-    sessionStorage.removeItem('bb_pin');
-    sessionStorage.removeItem('bb_role');
-    sessionStorage.removeItem('bb_name');
-    setScreen('landing');
-    setGamePin('');
-    setPlayerName('');
-    setRole(null);
-    setPlayers([]);
-    setCurrentQuestion(null);
-    setAnswerResult(null);
-    setQuestionResults(null);
-    setLeaderboard([]);
-    socket.disconnect();
-    socket.connect();
+    resetGame();
+    navigate('/');
   };
 
   const clearError = () => setErrorMsg('');
 
+  // ── Render ──────────────────────────────────────────────────────────────
+
   return (
-    <div className="min-h-screen stars-bg" style={{ background: theme.bg }}>
+    <div className="min-h-screen stars-bg">
       {showConfetti && <Confetti />}
 
       {reconnecting && (
@@ -296,146 +323,126 @@ export default function App() {
         </div>
       )}
 
-      {screen === 'landing' && (
-        <LandingPage
-          onHost={() => setScreen(hostUser ? 'host-setup' : 'login')}
-          onJoin={() => setScreen('join')}
-          onSolo={() => setScreen('solo')}
-          hostUser={hostUser}
-          onLogin={() => setScreen('login')}
-          onLogout={handleLogout}
-          onHistory={() => setScreen('history')}
-          onReports={() => setScreen('reports')}
-          onTheme={() => setShowThemePicker(true)}
-          onGoogleLogin={handleLogin}
-        />
-      )}
-      {showThemePicker && (
-        <ThemePicker
-          current={theme.id}
-          onSelect={t => { setTheme(t); setShowThemePicker(false); }}
-          onClose={() => setShowThemePicker(false)}
-        />
-      )}
-      {screen === 'login' && (
-        <LoginPage onLogin={handleLogin} onRegister={() => setScreen('register')} onBack={() => setScreen('landing')} />
-      )}
-      {screen === 'register' && (
-        <RegisterPage onLogin={handleLogin} onBack={() => setScreen('login')} />
-      )}
-      {screen === 'history' && (
-        <GameHistory token={authToken} onBack={() => setScreen('landing')} onViewReport={(id) => { setReportGameId(id); setScreen('session-report'); }} />
-      )}
-      {screen === 'reports' && (
-        <ReportsPage token={authToken} onBack={() => setScreen('landing')} onViewReport={(id) => { setReportGameId(id); setScreen('session-report'); }} />
-      )}
-      {screen === 'session-report' && (
-        <SessionReport gameId={reportGameId} token={authToken} onBack={() => setScreen(role === 'host' ? 'gameover' : 'history')} />
-      )}
-      {screen === 'solo' && (
-        <SoloPractice authToken={authToken} onBack={() => setScreen('landing')} />
-      )}
-      {screen === 'ai-generator' && (
-        <AiQuizGenerator token={authToken} onBack={() => setScreen('host-setup')} onSaved={() => setScreen('host-setup')} />
-      )}
-      {screen === 'host-setup' && (
-        <HostSetup
-          onSelect={handleCreateGame}
-          onBack={() => setScreen('landing')}
-          onEditSet={(id) => { setEditSetId(id); setScreen('edit-set'); }}
-          onAiGenerator={() => setScreen('ai-generator')}
-          token={authToken}
-        />
-      )}
-      {screen === 'edit-set' && (
-        <EditSet setId={editSetId} token={authToken} onBack={() => setScreen('host-setup')} />
-      )}
-      {screen === 'join' && (
-        <JoinPage onJoin={handleJoinGame} onBack={() => setScreen('landing')} />
-      )}
-      {screen === 'host-lobby' && (
-        <HostLobby pin={gamePin} players={players} onStart={handleStartGame} token={authToken}
-          onCancel={() => {
-            sessionStorage.removeItem('bb_pin');
-            sessionStorage.removeItem('bb_role');
-            socket.disconnect();
-            socket.connect();
-            setGamePin('');
-            setRole(null);
-            setPlayers([]);
-            setScreen('host-setup');
-          }}
-        />
-      )}
-      {screen === 'player-lobby' && (
-        <PlayerLobby pin={gamePin} playerName={playerName} players={players}
-          onLeave={() => {
-            sessionStorage.removeItem('bb_pin');
-            sessionStorage.removeItem('bb_role');
-            sessionStorage.removeItem('bb_name');
-            socket.disconnect();
-            socket.connect();
-            setGamePin('');
-            setPlayerName('');
-            setRole(null);
-            setPlayers([]);
-            setScreen('landing');
-          }}
-        />
-      )}
-      {screen === 'game' && (
-        <GameScreen
-          question={currentQuestion}
-          role={role}
-          onSubmitAnswer={handleSubmitAnswer}
-          answerResult={answerResult}
-          answerProgress={answerProgress}
-          liveLeaderboard={liveLeaderboard}
-          players={players}
-          onNextQuestion={handleNextQuestion}
-          playerName={playerName}
-          onLeave={role !== 'host' ? () => {
-            sessionStorage.removeItem('bb_pin');
-            sessionStorage.removeItem('bb_role');
-            sessionStorage.removeItem('bb_name');
-            socket.disconnect();
-            socket.connect();
-            setGamePin(''); setPlayerName(''); setRole(null); setPlayers([]);
-            setCurrentQuestion(null); setAnswerResult(null);
-            setScreen('landing');
-          } : undefined}
-        />
-      )}
-      {screen === 'results' && (
-        <ResultsScreen
-          results={questionResults}
-          role={role}
-          answerResult={answerResult}
-          onNext={handleNextQuestion}
-          playerName={playerName}
-        />
-      )}
-      {screen === 'gameover' && (
-        <GameOver
-          leaderboard={leaderboard}
-          playerName={playerName}
-          onPlayAgain={handlePlayAgain}
-          role={role}
-          onViewReport={reportGameId ? () => setScreen('session-report') : null}
-          onContinue={continueData ? handleContinueGame : null}
-          continueInfo={continueData}
-          onJoinAnother={role !== 'host' ? () => {
-            sessionStorage.removeItem('bb_pin');
-            sessionStorage.removeItem('bb_role');
-            sessionStorage.removeItem('bb_name');
-            socket.disconnect();
-            socket.connect();
-            setGamePin(''); setPlayerName(''); setRole(null); setPlayers([]);
-            setCurrentQuestion(null); setLeaderboard([]);
-            setScreen('join');
-          } : undefined}
-        />
-      )}
+      <Routes>
+        {/* ── Public pages ──────────────────────────────────────────── */}
+        <Route path="/" element={
+          <LandingPage
+            onHost={() => navigate(hostUser ? '/host' : '/login')}
+            onJoin={() => navigate('/join')}
+            onSolo={() => navigate('/solo')}
+            hostUser={hostUser}
+            onLogin={() => navigate('/login')}
+            onLogout={handleLogout}
+            onHistory={() => navigate('/history')}
+            onReports={() => navigate('/reports')}
+
+            onGoogleLogin={handleLogin}
+          />
+        } />
+
+        <Route path="/login" element={
+          <LoginPage onLogin={handleLogin} onRegister={() => navigate('/register')} onBack={() => navigate('/')} />
+        } />
+
+        <Route path="/register" element={
+          <RegisterPage onLogin={handleLogin} onBack={() => navigate('/login')} />
+        } />
+
+        <Route path="/join" element={
+          <JoinPage onJoin={handleJoinGame} onBack={() => navigate('/')} />
+        } />
+
+        <Route path="/solo" element={
+          <SoloPractice authToken={authToken} onBack={() => navigate('/')} />
+        } />
+
+        {/* ── Host pages ────────────────────────────────────────────── */}
+        <Route path="/host" element={
+          <HostSetup
+            onSelect={handleCreateGame}
+            onBack={() => navigate('/')}
+            onEditSet={(id) => navigate(`/host/edit/${id}`)}
+            onAiGenerator={() => navigate('/host/ai')}
+            token={authToken}
+          />
+        } />
+
+        <Route path="/host/edit/:setId" element={<EditSetRoute token={authToken} />} />
+
+        <Route path="/host/ai" element={
+          <AiQuizGenerator token={authToken} onBack={() => navigate('/host')} onSaved={() => navigate('/host')} />
+        } />
+
+        {/* ── Lobby (host or player, guarded) ───────────────────────── */}
+        <Route path="/lobby" element={
+          !gamePin ? <Navigate to="/" replace /> :
+          role === 'host' ? (
+            <HostLobby
+              pin={gamePin} players={players} onStart={handleStartGame} token={authToken}
+              onCancel={() => { resetGame(); navigate('/host'); }}
+            />
+          ) : (
+            <PlayerLobby
+              pin={gamePin} playerName={playerName} players={players}
+              onLeave={() => { resetGame(); navigate('/'); }}
+            />
+          )
+        } />
+
+        {/* ── Active game (phase-driven rendering) ─────────────────── */}
+        <Route path="/play" element={
+          !gamePin ? <Navigate to="/" replace /> :
+          gamePhase === 'over' ? (
+            <GameOver
+              leaderboard={leaderboard}
+              playerName={playerName}
+              onPlayAgain={handlePlayAgain}
+              role={role}
+              onViewReport={reportGameId ? () => navigate(`/reports/${reportGameId}`) : null}
+              onContinue={continueData ? handleContinueGame : null}
+              continueInfo={continueData}
+              onJoinAnother={role !== 'host' ? () => { resetGame(); navigate('/join'); } : undefined}
+            />
+          ) : gamePhase === 'results' ? (
+            <ResultsScreen
+              results={questionResults}
+              role={role}
+              answerResult={answerResult}
+              onNext={handleNextQuestion}
+              playerName={playerName}
+            />
+          ) : (
+            <GameScreen
+              question={currentQuestion}
+              role={role}
+              onSubmitAnswer={handleSubmitAnswer}
+              answerResult={answerResult}
+              answerProgress={answerProgress}
+              liveLeaderboard={liveLeaderboard}
+              players={players}
+              onNextQuestion={handleNextQuestion}
+              playerName={playerName}
+              onLeave={role !== 'host' ? () => { resetGame(); navigate('/'); } : undefined}
+            />
+          )
+        } />
+
+        {/* ── History & reports ─────────────────────────────────────── */}
+        <Route path="/history" element={
+          <GameHistory token={authToken} onBack={() => navigate('/')} onViewReport={(id) => navigate(`/reports/${id}`)} />
+        } />
+
+        <Route path="/reports" element={
+          <ReportsPage token={authToken} onBack={() => navigate('/')} onViewReport={(id) => navigate(`/reports/${id}`)} />
+        } />
+
+        <Route path="/reports/:gameId" element={<SessionReportRoute token={authToken} />} />
+
+        {/* ── Fallback ─────────────────────────────────────────────── */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+
+
     </div>
   );
 }

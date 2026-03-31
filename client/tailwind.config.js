@@ -13,8 +13,8 @@ export default {
       },
       animation: {
         'bounce-in': 'bounceIn 0.5s ease-out',
-        'fade-in': 'fadeIn 0.4s ease-out',
-        'slide-up': 'slideUp 0.4s ease-out',
+        'fade-in': 'fadeIn 0.4s ease-out both',
+        'slide-up': 'slideUp 0.4s ease-out both',
         'pulse-glow': 'pulseGlow 2s infinite',
         'shake': 'shake 0.5s ease-in-out',
         'pop': 'pop 0.3s ease-out',
