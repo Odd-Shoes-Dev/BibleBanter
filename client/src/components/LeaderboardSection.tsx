@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Medal, Award } from "lucide-react";
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
 const LeaderboardSection = () => {
   const [leaderboard, setLeaderboard] = useState([]);
@@ -42,7 +42,7 @@ const LeaderboardSection = () => {
               if (index === 0) Icon = Trophy;
               else if (index === 1) Icon = Medal;
               else if (index === 2) Icon = Award;
-              
+
               const score = Number(player.totalScore ?? 0);
               const games = player.gamesPlayed ?? 0;
 
@@ -50,7 +50,9 @@ const LeaderboardSection = () => {
                 <div
                   key={player.name}
                   className={`flex items-center gap-4 px-6 py-4 ${
-                    index !== leaderboard.length - 1 ? "border-b border-border" : ""
+                    index !== leaderboard.length - 1
+                      ? "border-b border-border"
+                      : ""
                   } ${index < 3 ? "bg-gold/5" : ""}`}
                 >
                   <div className="w-8 text-center">
@@ -60,8 +62,8 @@ const LeaderboardSection = () => {
                           index === 0
                             ? "text-gold"
                             : index === 1
-                            ? "text-muted-foreground"
-                            : "text-gold-dark"
+                              ? "text-muted-foreground"
+                              : "text-gold-dark"
                         }`}
                       />
                     ) : (
@@ -84,7 +86,9 @@ const LeaderboardSection = () => {
                     <p className="font-body font-bold text-foreground">
                       {score.toLocaleString()}
                     </p>
-                    <p className="font-body text-xs text-muted-foreground">points</p>
+                    <p className="font-body text-xs text-muted-foreground">
+                      points
+                    </p>
                   </div>
                 </div>
               );

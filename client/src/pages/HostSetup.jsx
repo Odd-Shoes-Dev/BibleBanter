@@ -133,7 +133,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
                   color: tab === t ? '#fbbf24' : '#ffffff60',
                   border: tab === t ? '1px solid rgba(251,191,36,0.3)' : '1px solid transparent',
                 }}>
-                {t === 'default' ? '📖 Default' : '📂 My Sets'}
+                {t === 'default' ? '📖 Default' : '📂 My Question sets'}
               </button>
             ))}
           </div>
@@ -179,6 +179,19 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
               >
                 ＋ Upload New Set
               </button>
+            </div>
+
+            <div className="text-center py-2">
+              <a 
+                href="/Question_Upload_Guide.pdf" 
+                download="Question Upload Guide.pdf"
+                className="text-xs font-semibold underline underline-offset-2 transition-all hover:brightness-125 opacity-80 hover:opacity-100"
+                style={{ color: '#93c5fd' }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                📄 Download Question Upload Guide (PDF)
+              </a>
             </div>
 
             {loading && <p className="text-white/40 text-sm text-center py-6">Loading sets...</p>}

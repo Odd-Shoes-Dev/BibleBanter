@@ -1,6 +1,6 @@
 # Bible Banter — Question Upload Guide
 
-Hosts can upload custom question sets from the **My Sets** tab on the Host Setup screen.  
+Hosts can upload custom question sets from the **My Question Sets** tab on the Host Setup screen.  
 Supported formats: **CSV**, **PDF**, **Word (.docx)**, **Plain Text (.txt)**
 
 ---
@@ -8,12 +8,12 @@ Supported formats: **CSV**, **PDF**, **Word (.docx)**, **Plain Text (.txt)**
 ## 📥 Quick Start
 
 1. Log in as a host and click **Host a Game**
-2. Go to the **My Sets** tab
+2. Go to the **My Question Sets** tab
 3. Click **＋ Upload New Set**
 4. Drop your file (CSV, PDF, DOCX, or TXT), enter a **Set Name** and choose a **Testament category**
 5. Review the **preview** — correct answers are highlighted green, scripture shown in amber
 6. Save the set to your library
-7. Select the set from My Sets to start a game with it
+7. Select the set from My Question Sets to start a game with it
 
 > 💡 **Tip:** You can also use **✨ Generate with AI** to automatically generate questions from sermon notes or any text content.
 
