@@ -18,7 +18,7 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("hostToken");
+  const isLoggedIn = !!localStorage.getItem("bb_token");
 
   return (
     <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
@@ -29,7 +29,8 @@ const HeroSection = () => {
             variant="outline"
             className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
             onClick={() => {
-              localStorage.removeItem("hostToken");
+              localStorage.removeItem("bb_token");
+              localStorage.removeItem("bb_host");
               window.location.reload();
             }}
           >
