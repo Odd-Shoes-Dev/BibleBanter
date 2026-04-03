@@ -30,7 +30,7 @@ const CTASection = () => {
             Get Early Access
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-          <p className="font-body text-muted-foreground text-sm mt-4">
+          <p className="font-body text-white drop-shadow-md font-medium text-sm mt-4">
             Join 150+ churches measuring what matters.
           </p>
         </motion.div>

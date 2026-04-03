@@ -2,7 +2,7 @@ import { BookOpen } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="py-10 bg-background border-t border-border">
+    <footer className="pt-20 pb-8 bg-background border-t border-border">
       <div className="container mx-auto px-4 text-center space-y-4">
         <p className="font-body text-base text-muted-foreground">
           Built by{" "}
