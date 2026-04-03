@@ -358,13 +358,17 @@ export default function App() {
 
         {/* ── Host pages ────────────────────────────────────────────── */}
         <Route path="/host" element={
-          <HostSetup
-            onSelect={handleCreateGame}
-            onBack={() => navigate('/')}
-            onEditSet={(id) => navigate(`/host/edit/${id}`)}
-            onAiGenerator={() => navigate('/host/ai')}
-            token={authToken}
-          />
+          hostUser ? (
+            <HostSetup
+              onSelect={handleCreateGame}
+              onBack={() => navigate('/')}
+              onEditSet={(id) => navigate(`/host/edit/${id}`)}
+              onAiGenerator={() => navigate('/host/ai')}
+              hostToken={hostUser} 
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         } />
 
         <Route path="/host/edit/:setId" element={<EditSetRoute token={authToken} />} />

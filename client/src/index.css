@@ -1,3 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 33% 97%;
+    --foreground: 222 47% 11%;
+
+    --card: 40 33% 99%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 40 33% 99%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 222 60% 18%;
+    --primary-foreground: 40 33% 97%;
+
+    --secondary: 40 40% 93%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 40 20% 93%;
+    --muted-foreground: 222 10% 45%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 222 60% 12%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 60% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --gold: 38 92% 50%;
+    --gold-light: 42 90% 62%;
+    --gold-dark: 34 90% 38%;
+
+    --navy: 222 60% 18%;
+    --navy-light: 222 40% 30%;
+
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 38 92% 50%;
+
+    --radius: 0.75rem;
+
+    --font-heading: 'Instrument Serif', serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+
+    --sidebar-background: 222 60% 18%;
+    --sidebar-foreground: 40 33% 97%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 222 60% 12%;
+    --sidebar-accent: 222 40% 25%;
+    --sidebar-accent-foreground: 40 33% 97%;
+    --sidebar-border: 222 40% 25%;
+    --sidebar-ring: 38 92% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+  }
+}
+
+@layer utilities {
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+  }
+
+  .gradient-navy {
+    background: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy-light)) 100%);
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--gold-dark)) 0%, hsl(var(--gold)) 50%, hsl(var(--gold-light)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shadow-gold {
+    box-shadow: 0 8px 32px -8px hsl(var(--gold) / 0.3);
+  }
+
+  .shadow-card {
+    box-shadow: 0 1px 3px hsl(var(--foreground) / 0.04), 0 4px 16px hsl(var(--foreground) / 0.06);
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 2px 6px hsl(var(--foreground) / 0.06), 0 8px 24px hsl(var(--foreground) / 0.1);
+  }
+}
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
