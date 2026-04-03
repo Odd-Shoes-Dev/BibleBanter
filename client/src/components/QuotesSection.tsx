@@ -4,9 +4,12 @@ const QuotesSection = () => {
   return (
     <section className="relative py-20 overflow-hidden">
       {/* Background Image & Overlay */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/bg-8.jpg')" }}
+      <img
+        src="/bg-8.jpg"
+        alt="Background"
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-background/30" />
 

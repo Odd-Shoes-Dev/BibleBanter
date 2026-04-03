@@ -9,9 +9,12 @@ const CTASection = () => {
   return (
     <section className="relative py-24 overflow-hidden">
       {/* Background Image & Overlay */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/bg-5.jpg')" }}
+      <img
+        src="/bg-5.jpg"
+        alt="Background"
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover"
       />
       <div className="absolute inset-0 bg-background/10" />
 
