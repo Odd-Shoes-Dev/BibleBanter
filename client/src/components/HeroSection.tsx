@@ -22,33 +22,6 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
-      {/* Top Navigation / Login Banner */}
-      <div className="absolute top-0 left-0 right-0 z-50 p-4 sm:p-6 flex justify-end">
-        {isLoggedIn ? (
-          <Button
-            variant="outline"
-            className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
-            onClick={() => {
-              localStorage.removeItem("bb_token");
-              localStorage.removeItem("bb_host");
-              window.location.reload();
-            }}
-          >
-            <LogOut className="mr-2 h-4 w-4 text-gold" />
-            Logout Host
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
-            onClick={() => navigate("/login")}
-          >
-            <LogIn className="mr-2 h-4 w-4 text-gold" />
-            Host Login
-          </Button>
-        )}
-      </div>
-
       <div
         className="absolute inset-0 bg-cover bg-center scale-105"
         style={{ backgroundImage: `url(${heroBg})` }}
@@ -80,17 +53,47 @@ const HeroSection = () => {
             transition={{ duration: 0.7, ease: "easeOut" }}
             className="text-center"
           >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-accent/20 border-[2px] border-accent px-4 py-2 mb-8 font-body text-sm font-semibold text-accent"
-              style={{ boxShadow: "3px 3px 0px hsl(var(--accent))" }}
-            >
-              <Church className="h-4 w-4" />
-              Built for churches & youth groups
-            </motion.div>
+            {/* Badge & Login Container */}
+            <div className="flex items-center justify-center gap-3 relative mb-8">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="inline-flex items-center gap-2 bg-accent/20 border-[2px] border-accent px-4 py-2 font-body text-sm font-semibold text-accent"
+                style={{ boxShadow: "3px 3px 0px hsl(var(--accent))" }}
+              >
+                <Church className="h-4 w-4" />
+                Built for churches & youth groups
+              </motion.div>
+
+              <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2">
+                {isLoggedIn ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full text-gold hover:bg-gold/10 w-10 h-10 p-0 hover:text-gold"
+                    title="Logout Host"
+                    onClick={() => {
+                      localStorage.removeItem("bb_token");
+                      localStorage.removeItem("bb_host");
+                      window.location.reload();
+                    }}
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full text-gold hover:bg-gold/10 w-10 h-10 p-0 hover:text-gold"
+                    title="Host Login"
+                    onClick={() => navigate("/login")}
+                  >
+                    <LogIn className="h-5 w-5" />
+                  </Button>
+                )}
+              </div>
+            </div>
 
             <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-primary-foreground mb-2 leading-[1.05] tracking-tight">
               Bible Banter
