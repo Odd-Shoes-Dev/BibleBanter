@@ -72,7 +72,7 @@ const HeroSection = () => {
         transition={{ duration: 4, repeat: Infinity }}
       />
 
-      <div className="relative z-10 container mx-auto px-4">
+      <div className="relative z-10 container mx-auto px-4 mt-20 sm:mt-0">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
