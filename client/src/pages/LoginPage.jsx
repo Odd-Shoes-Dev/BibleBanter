@@ -113,6 +113,14 @@ export default function LoginPage({ onLogin, onRegister, onBack }) {
                 <EyeIcon open={showPw} />
               </button>
             </div>
+            <div className="text-right mt-1.5">
+              <a href="/forgot-password" onClick={(e) => {
+                e.preventDefault();
+                window.location.href = '/forgot-password';
+              }} className="text-xs font-semibold text-white/40 hover:text-white/70 transition-colors underline underline-offset-2">
+                Forgot your password?
+              </a>
+            </div>
           </div>
 
           {error && (

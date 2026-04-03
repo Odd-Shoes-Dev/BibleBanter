@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const prisma = require('../lib/prisma');
 const { requireHost } = require('../middleware/auth');
 const { sanitizeText } = require('../utils/sanitize');
 const { createRateLimit } = require('../utils/rateLimit');
+const { sendResetEmail } = require('../utils/email');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -84,6 +86,80 @@ router.get('/me', requireHost, async (req, res) => {
   });
   if (!host) return res.status(404).json({ error: 'Not found.' });
   res.json({ host });
+});
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', authLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required.' });
+
+    const host = await prisma.host.findUnique({ where: { email } });
+    if (!host) {
+      // Return a 200 even if not found to prevent user enumeration
+      return res.json({ message: 'If an account with that email exists, we have sent a password reset link.' });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const expiry = new Date(Date.now() + 3600000); // 1 hour token
+
+    await prisma.host.update({
+      where: { email },
+      data: {
+        resetToken: hash,
+        resetTokenExpires: expiry,
+      },
+    });
+
+    // Send via utility
+    const sent = await sendResetEmail(email, resetToken);
+    if (!sent) {
+      return res.status(500).json({ error: 'Error sending email. Please try again later.' });
+    }
+
+    res.json({ message: 'If an account with that email exists, we have sent a password reset link.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to process request.' });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', authLimiter, async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: 'Token and new password are required.' });
+
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    const host = await prisma.host.findFirst({
+      where: {
+        resetToken: hash,
+        resetTokenExpires: { gt: new Date() }, // ensure it's not expired
+      },
+    });
+
+    if (!host) {
+      return res.status(400).json({ error: 'Invalid or expired password reset token.' });
+    }
+
+    const newPasswordHash = await bcrypt.hash(password, 12);
+
+    await prisma.host.update({
+      where: { id: host.id },
+      data: {
+        passwordHash: newPasswordHash,
+        resetToken: null,
+        resetTokenExpires: null,
+      },
+    });
+
+    res.json({ message: 'Password has been successfully reset. You may now log in.' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Failed to reset password.' });
+  }
 });
 
 module.exports = router;

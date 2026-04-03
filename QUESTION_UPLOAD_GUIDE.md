@@ -5,7 +5,7 @@ Supported formats: **CSV**, **PDF**, **Word (.docx)**, **Plain Text (.txt)**
 
 ---
 
-## 📥 Quick Start
+## Quick Start
 
 1. Log in as a host and click **Host a Game**
 2. Go to the **My Question Sets** tab
@@ -19,7 +19,7 @@ Supported formats: **CSV**, **PDF**, **Word (.docx)**, **Plain Text (.txt)**
 
 ---
 
-## 📊 CSV Format
+## CSV Format
 
 This is the **recommended format** — most reliable and easiest to prepare in Excel or Google Sheets.  
 Download the **⬇ Template** button inside the upload dialog for a ready-to-fill example.
@@ -42,21 +42,25 @@ Download the **⬇ Template** button inside the upload dialog for a ready-to-fil
 
 The `scripture` field must include both the **reference** and the **actual verse text**:
 
-```
+``
 Genesis 6:14 — 'So make yourself an ark of cypress wood; make rooms in it and coat it with pitch inside and out.'
-```
+``
 
 > ⚠️ **Scripture is required.** Questions missing scripture will show a red warning in the preview. Players see the verse after each answer is revealed.
 
 ### Example CSV
 
-```csv
+``csv
 question,optionA,optionB,optionC,optionD,answer,category,difficulty,scripture
+
 "Who built the ark?","Moses","Noah","Abraham","David",1,"Old Testament","easy","Genesis 6:14 — 'So make yourself an ark of cypress wood; make rooms in it and coat it with pitch inside and out.'"
+
 "What was Jesus' first miracle?","Healing a blind man","Raising Lazarus","Walking on water","Turning water into wine",3,"New Testament","easy","John 2:9-11 — 'The master of the banquet tasted the water that had been turned into wine. This was the first of the signs through which Jesus revealed his glory.'"
+
 "Who was thrown into the lions' den?","Shadrach","Daniel","Joseph","Nehemiah",1,"Old Testament","medium","Daniel 6:16 — 'So the king gave the order, and they brought Daniel and threw him into the lions den. The king said to Daniel, May your God, whom you serve continually, rescue you!'"
+
 "Which disciple denied Jesus three times?","Thomas","Judas","John","Peter",3,"New Testament","easy","Matthew 26:75 — 'Then Peter remembered the word Jesus had spoken: Before the rooster crows, you will disown me three times. And he went outside and wept bitterly.'"
-```
+``
 
 > **Tip:** `answer` value `1` means **option B is correct** (0-indexed: A=0, B=1, C=2, D=3)
 
@@ -69,7 +73,7 @@ Each question block must start with `Q:` or `Question:`.
 
 ### Structure
 
-```
+``
 Q: Who built the ark?
 A: Moses
 B: Noah
@@ -89,7 +93,7 @@ Answer: D
 Category: New Testament
 Difficulty: easy
 Scripture: John 2:9-11 — 'The master of the banquet tasted the water that had been turned into wine. This was the first of the signs through which Jesus revealed his glory.'
-```
+``
 
 ### Rules for PDF
 
@@ -108,7 +112,7 @@ Same structure as PDF above. Write each question as plain paragraphs — **do no
 
 ### Example Word Document Content
 
-```
+``
 Q: How many plagues did God send on Egypt?
 A: 7
 B: 8
@@ -138,7 +142,7 @@ Answer: C
 Category: Old Testament
 Difficulty: easy
 Scripture: Genesis 7:12 — 'And rain fell on the earth forty days and forty nights.'
-```
+``
 
 ### Rules for Word
 
@@ -153,6 +157,7 @@ Scripture: Genesis 7:12 — 'And rain fell on the earth forty days and forty nig
 ## ✅ Field Reference
 
 ### `answer` values (CSV)
+
 | Value | Correct Option |
 |-------|---------------|
 | `0` | A |
@@ -161,6 +166,7 @@ Scripture: Genesis 7:12 — 'And rain fell on the earth forty days and forty nig
 | `3` | D |
 
 ### `answer` values (PDF / Word)
+
 | Value | Correct Option |
 |-------|---------------|
 | `A` | Option A |
@@ -169,6 +175,7 @@ Scripture: Genesis 7:12 — 'And rain fell on the earth forty days and forty nig
 | `D` | Option D |
 
 ### `difficulty` values
+
 | Value | Description |
 |-------|-------------|
 | `easy` | Basic Bible knowledge |
@@ -209,7 +216,7 @@ Same block structure as PDF and Word. Write each question as plain text paragrap
 
 ### Example
 
-```
+``
 Q: What did God create on the first day?
 A: Sun and moon
 B: Light
@@ -229,7 +236,7 @@ Answer: C
 Category: New Testament
 Difficulty: easy
 Scripture: Romans 1:1 — 'Paul, a servant of Christ Jesus, called to be an apostle and set apart for the gospel of God.'
-```
+``
 
 ### Rules for TXT
 

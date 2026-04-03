@@ -8,14 +8,16 @@ datasource db {
 }
 
 model Host {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  passwordHash String?
-  googleId     String?       @unique
-  name         String
-  createdAt    DateTime      @default(now())
-  questionSets QuestionSet[]
-  games        Game[]
+  id                String        @id @default(cuid())
+  email             String        @unique
+  passwordHash      String?
+  resetToken        String?
+  resetTokenExpires DateTime?
+  googleId          String?       @unique
+  name              String
+  createdAt         DateTime      @default(now())
+  questionSets      QuestionSet[]
+  games             Game[]
 }
 
 model QuestionSet {

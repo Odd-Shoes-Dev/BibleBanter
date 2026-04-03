@@ -11,6 +11,8 @@ import ResultsScreen from './pages/ResultsScreen';
 import GameOver from './pages/GameOver';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import GameHistory from './pages/GameHistory';
 import EditSet from './pages/EditSet';
 import AiQuizGenerator from './pages/AiQuizGenerator';
@@ -343,6 +345,10 @@ export default function App() {
         <Route path="/login" element={
           <LoginPage onLogin={handleLogin} onRegister={() => navigate('/register')} onBack={() => navigate('/')} />
         } />
+
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
         <Route path="/register" element={
           <RegisterPage onLogin={handleLogin} onBack={() => navigate('/login')} />
