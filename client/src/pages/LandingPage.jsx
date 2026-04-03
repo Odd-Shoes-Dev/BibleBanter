@@ -5,17 +5,20 @@ import HowItWorksSection from "@/components/HowItWorksSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
-const Index = () => {
+export default function LandingPage({ onHost, onJoin, onSolo, hostUser, onLogin, onLogout, onHistory, onReports, onGoogleLogin }) {
   return (
     <div className="min-h-screen bg-background">
-      <HeroSection />
+      <HeroSection 
+        onHost={onHost} 
+        onJoin={onJoin} 
+        onSolo={onSolo} 
+        onHistory={onHistory}
+        onReports={onReports}
+        onLogin={onLogin}
+        onLogout={onLogout}
+        hostUser={hostUser}
+      />
       <QuotesSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <CTASection />
-      <Footer />
-    </div>
-  );
-};
-
-export default Index;
+      <CTASection onJoin={onJoin} />

@@ -1,11 +1,8 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
-const CTASection = () => {
-  const navigate = useNavigate();
-
+const CTASection = ({ onJoin }: { onJoin?: () => void }) => {
   return (
     <section className="py-24 bg-background">
       <div className="container mx-auto px-4 text-center">
@@ -16,7 +13,7 @@ const CTASection = () => {
           transition={{ duration: 0.5 }}
         >
           <Button
-            onClick={() => navigate("/join")}
+            onClick={onJoin}
             size="lg"
             className="bg-[hsl(270_60%_50%)] hover:bg-[hsl(270_60%_40%)] text-white font-heading text-xl md:text-2xl uppercase tracking-wider px-10 py-7 rounded-xl shadow-lg"
           >

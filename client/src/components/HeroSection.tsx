@@ -13,25 +13,18 @@ import {
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 
-const HeroSection = () => {
-  const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("hostToken");
-
+const HeroSection = ({ onHost, onJoin, onSolo, onHistory, onReports, onLogin, onLogout, hostUser }: any) => {
   return (
     <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
       {/* Top Navigation / Login Banner */}
       <div className="absolute top-0 left-0 right-0 z-50 p-4 sm:p-6 flex justify-end">
-        {isLoggedIn ? (
+        {hostUser ? (
           <Button
             variant="outline"
             className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
-            onClick={() => {
-              localStorage.removeItem("hostToken");
-              window.location.reload();
-            }}
+            onClick={onLogout}
           >
             <LogOut className="mr-2 h-4 w-4 text-gold" />
             Logout Host
@@ -40,7 +33,7 @@ const HeroSection = () => {
           <Button
             variant="outline"
             className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
-            onClick={() => navigate("/login")}
+            onClick={onLogin}
           >
             <LogIn className="mr-2 h-4 w-4 text-gold" />
             Host Login
@@ -117,7 +110,7 @@ const HeroSection = () => {
               size="lg"
               className="text-base px-8 py-6 rounded-none border-[3px] border-foreground font-bold animate-pulse-gold"
               style={{ boxShadow: "4px 4px 0px hsl(var(--foreground))" }}
-              onClick={() => navigate("/join")}
+              onClick={onJoin}
             >
               <Gamepad2 className="mr-2 h-5 w-5" />
               Join a Game
@@ -127,7 +120,7 @@ const HeroSection = () => {
               size="lg"
               className="text-base px-8 py-6 rounded-none border-[3px] border-gold font-bold"
               style={{ boxShadow: "4px 4px 0px hsl(var(--gold))" }}
-              onClick={() => navigate(isLoggedIn ? "/host" : "/login")}
+              onClick={hostUser ? onHost : onLogin}
             >
               <Users className="mr-2 h-5 w-5" />
               Host a Game
@@ -144,7 +137,7 @@ const HeroSection = () => {
             <Button
               size="lg"
               className="text-sm px-6 py-5 rounded-full border border-purple-400/40 bg-purple-500/15 backdrop-blur-md text-purple-50 font-bold hover:bg-purple-500/25 transition-colors shadow-lg"
-              onClick={() => navigate("/solo")}
+              onClick={onSolo}
             >
               <Target className="mr-2 h-4 w-4 text-purple-400 drop-shadow-sm" />{" "}
               <span className="drop-shadow-sm">Solo Practice</span>
@@ -169,7 +162,7 @@ const HeroSection = () => {
             <Button
               size="lg"
               className="text-sm px-6 py-5 rounded-full border border-blue-400/40 bg-blue-500/15 backdrop-blur-md text-blue-50 font-bold hover:bg-blue-500/25 transition-colors shadow-lg"
-              onClick={() => navigate("/history")}
+              onClick={onHistory}
             >
               <ClipboardList className="mr-2 h-4 w-4 text-blue-400 drop-shadow-sm" />{" "}
               <span className="drop-shadow-sm">Game History</span>
@@ -177,7 +170,7 @@ const HeroSection = () => {
             <Button
               size="lg"
               className="text-sm px-6 py-5 rounded-full border border-emerald-400/40 bg-emerald-500/15 backdrop-blur-md text-emerald-50 font-bold hover:bg-emerald-500/25 transition-colors shadow-lg"
-              onClick={() => navigate("/reports")}
+              onClick={onReports}
             >
               <BarChart2 className="mr-2 h-4 w-4 text-emerald-400 drop-shadow-sm" />{" "}
               <span className="drop-shadow-sm">Reports</span>
