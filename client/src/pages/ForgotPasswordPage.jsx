@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
       
       if (!res.ok) throw new Error(data.error || 'Failed to process request.');
       
-      setMessage(data.message || 'If an account with that email exists, we have sent a password reset link.');
+      setMessage(data.message || 'If an account with that email exists, we have sent a password reset link. Please check your spam folder.');
       setEmail('');
     } catch (err) {
       setError(err.message);
@@ -54,7 +54,8 @@ export default function ForgotPasswordPage() {
           <h1 className="font-anton text-3xl mb-1" style={{ color: '#f5a623', letterSpacing: '0.04em' }}>
             RESET PASSWORD
           </h1>
-          <p className="text-white/40 text-sm">Enter your email address and we'll send you a link to reset your password.</p>
+          <p className="text-white/40 text-sm mb-2">Enter your email address and we'll send you a link to reset your password.</p>
+          <p className="text-white/30 text-xs">If you don't see the email in your inbox, please check your spam folder.</p>
         </div>
 
         {/* Form */}

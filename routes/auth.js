@@ -97,7 +97,7 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
     const host = await prisma.host.findUnique({ where: { email } });
     if (!host) {
       // Return a 200 even if not found to prevent user enumeration
-      return res.json({ message: 'If an account with that email exists, we have sent a password reset link.' });
+      return res.json({ message: 'If an account with that email exists, we have sent a password reset link. Please check your spam folder.' });
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -118,7 +118,7 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
       return res.status(500).json({ error: 'Error sending email. Please try again later.' });
     }
 
-    res.json({ message: 'If an account with that email exists, we have sent a password reset link.' });
+    res.json({ message: 'If an account with that email exists, we have sent a password reset link. Please check your spam folder.' });
   } catch (err) {
     console.error('Forgot password error:', err);
     res.status(500).json({ error: 'Failed to process request.' });
