@@ -85,7 +85,7 @@ const FeaturesSection = () => {
                 <h3 className="font-heading text-2xl md:text-3xl font-bold uppercase tracking-wide mb-3">
                   {feature.title}
                 </h3>
-                <p className="font-body text-base font-medium leading-relaxed opacity-90">
+                <p className="font-body text-base font-semibold leading-relaxed">
                   {feature.description}
                 </p>
               </div>
