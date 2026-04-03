@@ -1,15 +1,21 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Medal, Award } from "lucide-react";
 
-const mockLeaderboard = [
-  { rank: 1, name: "Grace M.", score: 12480, games: 34, icon: Trophy },
-  { rank: 2, name: "Pastor James", score: 11250, games: 28, icon: Medal },
-  { rank: 3, name: "David K.", score: 10890, games: 31, icon: Award },
-  { rank: 4, name: "Sarah W.", score: 9750, games: 25 },
-  { rank: 5, name: "Emmanuel O.", score: 9340, games: 22 },
-];
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 
 const LeaderboardSection = () => {
+  const [leaderboard, setLeaderboard] = useState([]);
+
+  useEffect(() => {
+    fetch(`${BACKEND}/api/leaderboard`)
+      .then((r) => r.json())
+      .then((d) => setLeaderboard(d.leaderboard || []))
+      .catch(() => {});
+  }, []);
+
+  if (leaderboard.length === 0) return null;
+
   return (
     <section className="py-24 bg-secondary/50">
       <div className="container mx-auto px-4">
@@ -30,48 +36,59 @@ const LeaderboardSection = () => {
           className="max-w-2xl mx-auto"
         >
           <div className="rounded-2xl bg-card border border-border shadow-card overflow-hidden">
-            {mockLeaderboard.map((player, index) => (
-              <div
-                key={player.rank}
-                className={`flex items-center gap-4 px-6 py-4 ${
-                  index !== mockLeaderboard.length - 1 ? "border-b border-border" : ""
-                } ${index < 3 ? "bg-gold/5" : ""}`}
-              >
-                <div className="w-8 text-center">
-                  {player.icon ? (
-                    <player.icon
-                      className={`h-5 w-5 mx-auto ${
-                        index === 0
-                          ? "text-gold"
-                          : index === 1
-                          ? "text-muted-foreground"
-                          : "text-gold-dark"
-                      }`}
-                    />
-                  ) : (
-                    <span className="font-body font-semibold text-muted-foreground">
-                      {player.rank}
-                    </span>
-                  )}
-                </div>
+            {leaderboard.map((player, index) => {
+              // Add icons to top 3
+              let Icon = null;
+              if (index === 0) Icon = Trophy;
+              else if (index === 1) Icon = Medal;
+              else if (index === 2) Icon = Award;
+              
+              const score = Number(player.totalScore ?? 0);
+              const games = player.gamesPlayed ?? 0;
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-body font-semibold text-foreground truncate">
-                    {player.name}
-                  </p>
-                  <p className="font-body text-xs text-muted-foreground">
-                    {player.games} games played
-                  </p>
-                </div>
+              return (
+                <div
+                  key={player.name}
+                  className={`flex items-center gap-4 px-6 py-4 ${
+                    index !== leaderboard.length - 1 ? "border-b border-border" : ""
+                  } ${index < 3 ? "bg-gold/5" : ""}`}
+                >
+                  <div className="w-8 text-center">
+                    {Icon ? (
+                      <Icon
+                        className={`h-5 w-5 mx-auto ${
+                          index === 0
+                            ? "text-gold"
+                            : index === 1
+                            ? "text-muted-foreground"
+                            : "text-gold-dark"
+                        }`}
+                      />
+                    ) : (
+                      <span className="font-body font-semibold text-muted-foreground">
+                        {index + 1}
+                      </span>
+                    )}
+                  </div>
 
-                <div className="text-right">
-                  <p className="font-body font-bold text-foreground">
-                    {player.score.toLocaleString()}
-                  </p>
-                  <p className="font-body text-xs text-muted-foreground">points</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-body font-semibold text-foreground truncate">
+                      {player.name}
+                    </p>
+                    <p className="font-body text-xs text-muted-foreground">
+                      {games} games played
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="font-body font-bold text-foreground">
+                      {score.toLocaleString()}
+                    </p>
+                    <p className="font-body text-xs text-muted-foreground">points</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </motion.div>
       </div>
