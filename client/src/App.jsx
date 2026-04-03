@@ -364,7 +364,7 @@ export default function App() {
               onBack={() => navigate('/')}
               onEditSet={(id) => navigate(`/host/edit/${id}`)}
               onAiGenerator={() => navigate('/host/ai')}
-              hostToken={hostUser} 
+              token={hostUser} 
             />
           ) : (
             <Navigate to="/login" replace />
