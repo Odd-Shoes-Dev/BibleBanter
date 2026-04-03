@@ -13,7 +13,7 @@ const CTASection = () => {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('/bg-5.jpg')" }}
       />
-      <div className="absolute inset-0 bg-background/30" />
+      <div className="absolute inset-0 bg-background/10" />
 
       <div className="relative z-10 container mx-auto px-4 text-center">
         <motion.div
