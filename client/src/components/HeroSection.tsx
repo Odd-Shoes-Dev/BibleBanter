@@ -14,19 +14,18 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("bb_token");
 
   return (
-    <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[95vh] pt-6 flex items-center justify-center overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center scale-105"
-        style={{ backgroundImage: `url(${heroBg})` }}
+        style={{ backgroundImage: "url('/bg-3.jpg')" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-background" />
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/50 via-primary/30 to-background/90" />
 
       {/* Decorative neo-brutalist elements */}
       <motion.div
