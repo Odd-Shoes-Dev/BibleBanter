@@ -41,6 +41,28 @@ const FeaturesSection = () => {
       <div className="absolute inset-0 bg-background/30" />
 
       <div className="relative z-10 container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="flex justify-center mb-16"
+        >
+          <div className="relative inline-block">
+            {/* Hard shadow */}
+            <div className="absolute inset-0 translate-x-[6px] translate-y-[6px] bg-black rotate-[1deg]" />
+            {/* Banner box */}
+            <div
+              className="relative border-[4px] border-black px-8 py-4 rotate-[-1deg]"
+              style={{ backgroundColor: "hsl(0 65% 42%)" }}
+            >
+              <h2 className="font-heading font-black text-3xl md:text-5xl text-center uppercase tracking-wider text-white">
+                Engage Your Congregation
+              </h2>
+            </div>
+          </div>
+        </motion.div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {features.map((feature, i) => (
             <motion.div
