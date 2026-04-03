@@ -60,21 +60,28 @@ router.post('/parse-questions', upload.single('file'), optionalHost, async (req,
       return res.status(401).json({ error: 'You must be logged in to save a question set.' });
     }
     if (req.hostUser && setName) {
-      const set = await prisma.questionSet.create({
-        data: {
-          name: setName,
-          description: `Imported from ${originalname}`,
-          testament: req.body.testament || 'both',
-          hostId: req.hostUser.id,
-          questions: {
-            create: parsed.map(q => ({
-              question: q.question, options: q.options, answer: q.answer,
-              category: q.category, difficulty: q.difficulty, scripture: q.scripture || '',
-            })),
+      try {
+        const set = await prisma.questionSet.create({
+          data: {
+            name: setName,
+            description: `Imported from ${originalname}`,
+            testament: req.body.testament || 'both',
+            hostId: req.hostUser.id,
+            questions: {
+              create: parsed.map(q => ({
+                question: q.question, options: q.options, answer: q.answer,
+                category: q.category, difficulty: q.difficulty, scripture: q.scripture || '',
+              })),
+            },
           },
-        },
-      });
-      savedSetId = set.id;
+        });
+        savedSetId = set.id;
+      } catch (dbError) {
+        if (dbError.code === 'P2003') {
+          return res.status(401).json({ error: 'Session invalid: Host account not found. Please log out and back in.' });
+        }
+        throw dbError;
+      }
     }
 
     res.json({ questions: parsed, count: parsed.length, savedSetId, rawText: rawText || undefined });

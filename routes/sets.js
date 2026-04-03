@@ -39,6 +39,9 @@ router.post('/sets', requireHost, async (req, res) => {
     });
     res.json({ set });
   } catch (err) {
+    if (err.code === 'P2003') {
+      return res.status(401).json({ error: 'Session invalid: Host account not found. Please log out and back in.' });
+    }
     res.status(500).json({ error: 'Failed to create set.' });
   }
 });
