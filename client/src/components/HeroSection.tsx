@@ -9,6 +9,8 @@ import {
   Heart,
   ClipboardList,
   BarChart2,
+  LogIn,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -16,9 +18,36 @@ import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("hostToken");
 
   return (
     <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
+      {/* Top Navigation / Login Banner */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-4 sm:p-6 flex justify-end">
+        {isLoggedIn ? (
+          <Button
+            variant="outline"
+            className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
+            onClick={() => {
+              localStorage.removeItem("hostToken");
+              window.location.reload();
+            }}
+          >
+            <LogOut className="mr-2 h-4 w-4 text-gold" />
+            Logout Host
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
+            onClick={() => navigate("/login")}
+          >
+            <LogIn className="mr-2 h-4 w-4 text-gold" />
+            Host Login
+          </Button>
+        )}
+      </div>
+
       <div
         className="absolute inset-0 bg-cover bg-center scale-105"
         style={{ backgroundImage: `url(${heroBg})` }}
@@ -98,7 +127,7 @@ const HeroSection = () => {
               size="lg"
               className="text-base px-8 py-6 rounded-none border-[3px] border-gold font-bold"
               style={{ boxShadow: "4px 4px 0px hsl(var(--gold))" }}
-              onClick={() => navigate("/host")}
+              onClick={() => navigate(isLoggedIn ? "/host" : "/login")}
             >
               <Users className="mr-2 h-5 w-5" />
               Host a Game
