@@ -22,6 +22,33 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
+      {/* Top Navigation / Login Banner */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-4 sm:p-6 flex justify-end">
+        {isLoggedIn ? (
+          <Button
+            variant="outline"
+            className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
+            onClick={() => {
+              localStorage.removeItem("bb_token");
+              localStorage.removeItem("bb_host");
+              window.location.reload();
+            }}
+          >
+            <LogOut className="mr-2 h-4 w-4 text-gold" />
+            Logout Host
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            className="rounded-full bg-background/50 backdrop-blur-sm border-gold/30 text-primary-foreground hover:bg-background/80"
+            onClick={() => navigate("/login")}
+          >
+            <LogIn className="mr-2 h-4 w-4 text-gold" />
+            Host Login
+          </Button>
+        )}
+      </div>
+
       <div
         className="absolute inset-0 bg-cover bg-center scale-105"
         style={{ backgroundImage: `url(${heroBg})` }}
@@ -191,38 +218,6 @@ const HeroSection = () => {
                 <span>{item.text}</span>
               </div>
             ))}
-          </motion.div>
-
-          {/* Login / Logout (Moved to Bottom) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
-            className="flex justify-center mt-12 mb-4"
-          >
-            {isLoggedIn ? (
-              <Button
-                variant="ghost"
-                className="rounded-full text-white/50 hover:bg-white/10 hover:text-white backdrop-blur-sm transition-all border border-white/10 px-6 py-5 text-sm"
-                onClick={() => {
-                  localStorage.removeItem("bb_token");
-                  localStorage.removeItem("bb_host");
-                  window.location.reload();
-                }}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout Host
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                className="rounded-full text-white/50 hover:bg-white/10 hover:text-white backdrop-blur-sm transition-all border border-white/10 px-6 py-5 text-sm"
-                onClick={() => navigate("/login")}
-              >
-                <LogIn className="mr-2 h-4 w-4" />
-                Host Login
-              </Button>
-            )}
           </motion.div>
         </div>
       </div>
