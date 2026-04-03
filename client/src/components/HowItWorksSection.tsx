@@ -31,7 +31,7 @@ const HowItWorksSection = () => {
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
-        <h2 className="font-heading text-4xl md:text-5xl text-center mb-4 uppercase tracking-wide">
+        <h2 className="font-heading text-4xl md:text-5xl text-center mb-4 uppercase tracking-wide text-black">
           How It Works
         </h2>
         <p className="text-center text-muted-foreground font-body mb-14 max-w-md mx-auto">
