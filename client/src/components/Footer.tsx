@@ -24,25 +24,6 @@ const Footer = () => {
             Kingdom Chaplain
           </a>
         </p>
-        <div className="flex items-center justify-center gap-4 text-sm font-body text-muted-foreground/80">
-          <a
-            href="https://www.oddshoes.dev/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-accent transition-colors"
-          >
-            oddshoes.dev
-          </a>
-          <span>&middot;</span>
-          <a
-            href="https://betweenhisshoulders.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-accent transition-colors"
-          >
-            betweenhisshoulders.org
-          </a>
-        </div>
       </div>
     </footer>
   );

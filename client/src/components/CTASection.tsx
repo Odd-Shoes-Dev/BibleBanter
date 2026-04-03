@@ -7,8 +7,15 @@ const CTASection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-4 text-center">
+    <section className="relative py-24 overflow-hidden">
+      {/* Background Image & Overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/bg-5.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-background/30" />
+
+      <div className="relative z-10 container mx-auto px-4 text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}

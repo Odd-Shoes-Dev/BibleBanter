@@ -2,8 +2,15 @@ import { motion } from "framer-motion";
 
 const QuotesSection = () => {
   return (
-    <section className="py-20 bg-background">
-      <div className="container mx-auto px-4 max-w-2xl space-y-16">
+    <section className="relative py-20 overflow-hidden">
+      {/* Background Image & Overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/bg-8.jpg')" }}
+      />
+      <div className="absolute inset-0 bg-background/30" />
+
+      <div className="relative z-10 container mx-auto px-4 max-w-2xl space-y-16">
         {/* On Sunday Morning */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
