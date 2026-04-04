@@ -24,6 +24,17 @@ const Footer = () => {
             Kingdom Chaplain
           </a>
         </p>
+        <p className="font-body text-sm text-muted-foreground pt-2">
+          Open source contributions by{" "}
+          <a
+            href="https://github.com/shadrack-ss"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline decoration-accent underline-offset-4 hover:text-accent transition-colors font-bold"
+          >
+            Shadrack
+          </a>
+        </p>
       </div>
     </footer>
   );

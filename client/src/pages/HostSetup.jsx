@@ -30,6 +30,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
   const [rounds, setRounds] = useState(10);
   const [customRounds, setCustomRounds] = useState('');
   const [roundPreset, setRoundPreset] = useState('Mini');
+  const [mode, setMode] = useState('Multiplayer');
 
   const loadSets = useCallback(() => {
     if (!token) return;
@@ -73,7 +74,24 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
 
         {/* Game Settings */}
         <div className="rounded-2xl p-4 mb-5 animate-fade-in" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-3">⚙️ Game Settings</p>
+          <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-3">⚙️ Game Settings</p>          
+          {/* Mode Selection */}
+          <div className="mb-4">
+            <p className="text-white/60 text-xs font-semibold mb-2">🎮 Mode</p>
+            <div className="flex gap-2">
+              {['Multiplayer', 'Team mode'].map(m => (
+                <button key={m} onClick={() => setMode(m)}
+                  className="flex-1 py-1.5 rounded-lg text-xs font-black transition-all"
+                  style={{
+                    background: mode === m ? 'rgba(56,189,248,0.25)' : 'rgba(255,255,255,0.06)',
+                    border: mode === m ? '1px solid rgba(56,189,248,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                    color: mode === m ? '#38bdf8' : '#ffffff60',
+                  }}>
+                  {m === 'Multiplayer' ? '👤 Multiplayer' : '🛡️ Team mode'}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             {/* Timer */}
             <div>
@@ -145,7 +163,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
             {TESTAMENT_OPTIONS.map((opt, i) => (
               <button
                 key={opt.id}
-                onClick={() => onSelect({ testament: opt.id, setId: null, questionTime, rounds })}
+                onClick={() => onSelect({ testament: opt.id, setId: null, questionTime, rounds, mode })}
                 className="w-full rounded-2xl px-5 py-4 text-left transition-all duration-200 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] animate-slide-up flex items-center gap-4"
                 style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${opt.border}`, animationDelay: `${i * 0.08}s` }}
               >
@@ -212,7 +230,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
               >
                 {/* Clicking the card body prompts testament selection */}
                 <button
-                  onClick={() => onSelect({ testament: set.testament || 'both', setId: set.id, questionTime, rounds })}
+                  onClick={() => onSelect({ testament: set.testament || 'both', setId: set.id, questionTime, rounds, mode })}
                   className="w-full px-5 py-4 text-left transition-all hover:brightness-110 flex items-center gap-4"
                   style={{ background: 'rgba(255,255,255,0.05)' }}
                 >

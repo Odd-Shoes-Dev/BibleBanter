@@ -209,6 +209,7 @@ function setupSocketHandlers(io) {
           offset = 0,
           questionTime = 20,
           rounds = 10,
+          mode = "Multiplayer",
         } = {},
         callback,
       ) => {
@@ -300,6 +301,7 @@ function setupSocketHandlers(io) {
             nextOffset,
             hasMore,
             totalQuestions,
+            mode,
             questionTime: Math.min(
               Math.max(parseInt(questionTime) || 20, 5),
               120,

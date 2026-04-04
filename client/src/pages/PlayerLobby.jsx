@@ -4,11 +4,14 @@ export default function PlayerLobby({ pin, playerName, players, onLeave }) {
     red: "#ef4444",
     blue: "#3b82f6",
     green: "#22c55e",
-    yellow: "#eab308",
   };
-  const myBg =
-    me && me.team
-      ? teamColors[me.team]
+  
+  // Default to purple if they have a custom team name or no team at all
+  const isPresetColor = me?.team && teamColors[me?.team];
+  const myBg = isPresetColor
+    ? teamColors[me.team]
+    : me?.team 
+      ? "#a855f7" // Custom team gets a purple badge
       : "linear-gradient(135deg, #7c3aed, #5b21b6)";
 
   return (
@@ -33,7 +36,7 @@ export default function PlayerLobby({ pin, playerName, players, onLeave }) {
             {playerName}
           </h2>
           <p className="text-amber-400 font-semibold">
-            You're in! ✅ {me?.team && `(${me.team.toUpperCase()} TEAM)`}
+            You're in! ✅ {me?.team && `(Team: ${me.team.toUpperCase()})`}      
           </p>{" "}
         </div>
         <div className="bg-glass-dark rounded-3xl p-8 mb-6">

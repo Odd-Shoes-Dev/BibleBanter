@@ -245,8 +245,8 @@ export default function App() {
     socket.connect();
   };
 
-  const handleCreateGame = ({ testament, setId, questionTime = 20, rounds = 10 }) => {
-    socket.emit('create-game', { testament, setId, hostToken: authToken, questionTime, rounds }, ({ success, pin, error }) => {
+  const handleCreateGame = ({ testament, setId, questionTime = 20, rounds = 10, mode = 'Multiplayer' }) => {
+    socket.emit('create-game', { testament, setId, hostToken: authToken, questionTime, rounds, mode }, ({ success, pin, error }) => {
       if (success) {
         setGamePin(pin);
         setRole('host');

@@ -7,6 +7,7 @@ export default function JoinPage({ onJoin, onBack }) {
   });
   const [name, setName] = useState("");
   const [team, setTeam] = useState(""); // '' means No Team
+  const [customTeamName, setCustomTeamName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,7 +15,7 @@ export default function JoinPage({ onJoin, onBack }) {
     { id: "red", name: "Red Team", color: "#ef4444" },
     { id: "blue", name: "Blue Team", color: "#3b82f6" },
     { id: "green", name: "Green Team", color: "#22c55e" },
-    { id: "yellow", name: "Yellow Team", color: "#eab308" },
+    { id: "custom", name: "Custom Name", color: "#a855f7" },
   ];
 
   const handleSubmit = (e) => {
@@ -28,8 +29,15 @@ export default function JoinPage({ onJoin, onBack }) {
       setError("Name must be at least 2 characters");
       return;
     }
+
+    if (team === 'custom' && (!customTeamName.trim() || customTeamName.length < 2)) {
+      setError("Please enter a valid Custom Team Name (at least 2 chars)");
+      return;
+    }
+
     setLoading(true);
-    onJoin(pin.trim(), name.trim(), team);
+    const finalTeam = team === 'custom' ? customTeamName.trim() : team;
+    onJoin(pin.trim(), name.trim(), finalTeam);
     setTimeout(() => setLoading(false), 3000);
   };
 
@@ -111,7 +119,19 @@ export default function JoinPage({ onJoin, onBack }) {
                     {t.name}
                   </button>
                 ))}
-              </div>
+              </div>              
+              {team === 'custom' && (
+                <div className="mt-3 animate-slide-up">
+                  <input 
+                    type="text"
+                    value={customTeamName}
+                    onChange={(e) => setCustomTeamName(e.target.value.slice(0, 20))}
+                    placeholder="Enter your team name..."
+                    className="w-full bg-white/10 border border-purple-500/50 rounded-xl px-4 py-3 text-white text-md font-semibold focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all"
+                    maxLength={20}
+                  />
+                </div>
+              )}
               <p className="text-white/40 text-xs text-center italic mt-2">
                 Deselect to play solo
               </p>
