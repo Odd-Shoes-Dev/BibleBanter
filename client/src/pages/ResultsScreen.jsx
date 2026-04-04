@@ -65,14 +65,14 @@ export default function ResultsScreen({ results, teamLeaderboard, role, answerRe
             }}
           >
             <p className="font-nunito text-green-400/70 text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-3">✅ Correct Answer</p>
-            <div className={`inline-flex flex-col sm:flex-row items-center gap-3 rounded-2xl px-5 py-3 border ${ANSWER_BG[correctAnswer]} w-full`}>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="text-2xl sm:text-3xl font-black">{ANSWER_SHAPES[correctAnswer]}</span>
-                <span className="font-nunito text-base sm:text-xl font-black">{ANSWER_LABELS[correctAnswer]}</span>
-                <span className="text-green-400 text-xl hidden sm:block">✓</span>
+            <div className={`inline-flex flex-col sm:flex-row items-center gap-4 rounded-2xl px-5 py-4 border ${ANSWER_BG[correctAnswer]} w-full justify-center`}>
+              <div className="flex items-center justify-center gap-3 shrink-0">
+                <span className="text-3xl sm:text-4xl leading-none flex items-center">{ANSWER_SHAPES[correctAnswer]}</span>
+                <span className="font-nunito text-3xl sm:text-4xl font-black leading-none">{ANSWER_LABELS[correctAnswer]}</span>
+                <span className="text-green-400 text-2xl hidden sm:block ml-1">✓</span>
               </div>
               {correctText && (
-                <span className="font-semibold text-lg sm:text-xl sm:border-l sm:border-current/30 sm:pl-3 text-center sm:text-left break-words w-full sm:w-auto">
+                <span className="font-semibold text-xl sm:text-2xl sm:border-l sm:border-current/30 sm:pl-4 text-center sm:text-left break-words w-full sm:w-auto">
                   {decodeHTML(correctText)}
                 </span>
               )}
