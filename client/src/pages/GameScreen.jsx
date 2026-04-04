@@ -9,6 +9,12 @@ const ANSWERS = [
   { bg: 'answer-d', label: 'D', shape: '■', color: '#22c55e' },
 ];
 
+const decodeHTML = (html) => {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = html;
+  return txt.value;
+};
+
 export default function GameScreen({
   question, role, onSubmitAnswer, answerResult,
   answerProgress, liveLeaderboard = [], players, onNextQuestion, playerName, onLeave
@@ -157,11 +163,11 @@ export default function GameScreen({
           {correctText && (
             <div className="text-center animate-fade-in">
               <p className="text-white font-semibold text-lg">
-                Answer: <span className="font-black" style={{ color: '#d4a843' }}>{correctText}</span>
+                Answer: <span className="font-black" style={{ color: '#d4a843' }}>{decodeHTML(correctText)}</span>
               </p>
               {question.scripture && (
                 <p className="text-white/40 text-sm mt-1">
-                  📖 {question.scripture}
+                  📖 {decodeHTML(question.scripture)}
                 </p>
               )}
             </div>
@@ -195,20 +201,20 @@ export default function GameScreen({
               ✕ Leave Game
             </button>
           )}
-
-          {/* Volume slider */}
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <span className="text-white/30 text-xs">🔈</span>
-            <input 
-              type="range" min="0" max="1" step="0.01" 
-              value={vol} onChange={handleVolumeChange} 
-              className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-              style={{ cursor: 'pointer' }}
-            />
-            <span className="text-white/30 text-xs">🔊</span>
-          </div>
-
         </div>
+
+        {/* Volume slider */}
+        <div className="mt-4 flex items-center justify-center gap-2 pb-6">
+          <span className="text-white/30 text-xs">🔈</span>
+          <input 
+            type="range" min="0" max="1" step="0.01" 
+            value={vol} onChange={handleVolumeChange} 
+            className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+            style={{ cursor: 'pointer' }}
+          />
+          <span className="text-white/30 text-xs">🔊</span>
+        </div>
+
         </div>
       </div>
     );
@@ -252,7 +258,7 @@ export default function GameScreen({
           {question.category} • {question.difficulty}
         </p>
         <p className="text-white text-base sm:text-lg font-black leading-snug">
-          {question.question}
+          {decodeHTML(question.question)}
         </p>
       </div>
 
@@ -273,31 +279,31 @@ export default function GameScreen({
             }}
           >
             <span className="text-xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
-            <span className="text-base font-black leading-tight text-center">{opt}</span>
+            <span className="text-base font-black leading-tight text-center">{decodeHTML(opt)}</span>
           </button>
         ))}
       </div>
 
-      {onLeave && (
-        <div className="flex flex-col items-center pb-3 gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-white/30 text-xs">🔈</span>
-            <input 
-              type="range" min="0" max="1" step="0.01" 
-              value={vol} onChange={handleVolumeChange} 
-              className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-              style={{ cursor: 'pointer' }}
-            />
-            <span className="text-white/30 text-xs">🔊</span>
-          </div>
+      <div className="flex flex-col items-center pb-3 gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-white/30 text-xs">🔈</span>
+          <input 
+            type="range" min="0" max="1" step="0.01" 
+            value={vol} onChange={handleVolumeChange} 
+            className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+            style={{ cursor: 'pointer' }}
+          />
+          <span className="text-white/30 text-xs">🔊</span>
+        </div>
 
+        {onLeave && (
           <button onClick={handleLeave}
             className="px-5 py-2 rounded-xl text-xs font-bold text-white/25 hover:text-white/50 transition-colors"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             ✕ Leave Game
           </button>
-        </div>
-      )}
+        )}
+      </div>
       </div>
     </div>
   );
@@ -341,7 +347,7 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
             {question.category} • {question.difficulty}
           </p>
           <p className="text-white text-xl md:text-2xl lg:text-3xl font-black leading-snug">
-            {question.question}
+            {decodeHTML(question.question)}
           </p>
         </div>
 
@@ -354,7 +360,7 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
               style={{ minHeight: 'clamp(80px, 12vh, 160px)' }}
             >
               <span className="text-2xl md:text-3xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
-              <span className="text-lg md:text-xl lg:text-2xl leading-tight">{opt}</span>
+              <span className="text-lg md:text-xl lg:text-2xl leading-tight text-center">{decodeHTML(opt)}</span>
             </div>
           ))}
         </div>
@@ -375,26 +381,26 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
             {question.index + 1 >= question.total ? '🏆 SHOW RESULTS' : '⏭️ NEXT QUESTION'}
           </button>
           
-          {onLeave && (
-            <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-3">
+            {onLeave && (
               <button onClick={onLeave}
                 className="w-full py-3 rounded-xl font-bold text-sm text-red-300/80 hover:text-red-300 hover:bg-red-500/20 transition-colors"
                 style={{ border: '1px solid rgba(239, 68, 68, 0.3)' }}>
                 🛑 END GAME EARLY
               </button>
+            )}
 
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-white/30 text-xs">🔈</span>
-                <input 
-                  type="range" min="0" max="1" step="0.01" 
-                  value={vol} onChange={handleVolumeChange} 
-                  className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-                  style={{ cursor: 'pointer' }}
-                />
-                <span className="text-white/30 text-xs">🔊</span>
-              </div>
+            <div className="flex items-center gap-2 mt-2 pb-3">
+              <span className="text-white/30 text-xs">🔈</span>
+              <input 
+                type="range" min="0" max="1" step="0.01" 
+                value={vol} onChange={handleVolumeChange} 
+                className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+                style={{ cursor: 'pointer' }}
+              />
+              <span className="text-white/30 text-xs">🔊</span>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
