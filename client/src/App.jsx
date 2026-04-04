@@ -20,6 +20,7 @@ import SessionReport from './pages/SessionReport';
 import ReportsPage from './pages/ReportsPage';
 import SoloPractice from './pages/SoloPractice';
 import Confetti from './components/Confetti';
+import { sounds } from './utils/sound';
 
 // ── Route wrapper components ─────────────────────────────────────────────────
 
@@ -180,6 +181,7 @@ export default function App() {
     });
 
     socket.on('game-over', ({ leaderboard: lb, teamLeaderboard: tlb, dbGameId, hasMore, nextOffset, setId, totalQuestions }) => {
+      if (sounds.stopBg) sounds.stopBg();
       setLeaderboard(lb);
       setTeamLeaderboard(tlb || []);
       setShowConfetti(true);
@@ -187,6 +189,7 @@ export default function App() {
     });
 
     socket.on('round-starting', ({ players: pl }) => {
+      if (sounds.stopBg) sounds.stopBg();
       setPlayers(pl || []);
       setCurrentQuestion(null);
       setAnswerResult(null);
@@ -199,6 +202,7 @@ export default function App() {
     });
 
     socket.on('host-disconnected', () => {
+      if (sounds.stopBg) sounds.stopBg();
       sessionStorage.removeItem('bb_pin');
       sessionStorage.removeItem('bb_role');
       sessionStorage.removeItem('bb_name');
@@ -228,6 +232,7 @@ export default function App() {
   // ── Game action handlers ────────────────────────────────────────────────
 
   const resetGame = () => {
+    if (sounds.stopBg) sounds.stopBg();
     if (roleRef.current === 'host') {
       socket.emit('end-game');
     }

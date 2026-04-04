@@ -49,13 +49,8 @@ export default function GameScreen({
   }, [question]);
 
   useEffect(() => {
-    // Play music when component mounts initially
+    // Play music when entering game
     if (sounds.playBg) sounds.playBg();
-    
-    // Stop music upon unmount
-    return () => {
-      if (sounds.stopBg) sounds.stopBg();
-    };
   }, []);
 
   useEffect(() => {

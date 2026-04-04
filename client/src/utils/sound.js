@@ -55,12 +55,21 @@ export const sounds = {
   playBg() {
     try {
       if (_fadeInterval) clearInterval(_fadeInterval);
-      _bgAudio.currentTime = 0;
-      _bgAudio.volume = 0;
-      const targetVolume = sounds.getBgVolume();
-      _bgAudio.play().catch(e => console.log('Audio auto-play blocked', e));
       
-      let currentVol = 0;
+      const audioCtx = ctx();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      
+      const targetVolume = sounds.getBgVolume();
+      
+      if (_bgAudio.paused) {
+        _bgAudio.currentTime = 0;
+        _bgAudio.volume = 0;
+        _bgAudio.play().catch(e => console.log('Audio auto-play blocked', e));
+      }
+      
+      let currentVol = _bgAudio.volume;
       _fadeInterval = setInterval(() => {
         currentVol += 0.05;
         currentVol = Math.min(currentVol, targetVolume);
