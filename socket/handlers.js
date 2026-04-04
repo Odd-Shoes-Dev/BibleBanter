@@ -374,6 +374,15 @@ function setupSocketHandlers(io) {
     });
 
     // ── PLAYER: Join game ──────────────────────────────────────────────────
+    socket.on("check-game-mode", (pin, callback) => {
+      const game = games[pin];
+      if (game) {
+        callback({ success: true, mode: game.mode });
+      } else {
+        callback({ success: false, error: "Game not found" });
+      }
+    });
+
     socket.on("join-game", ({ pin, name, team }, callback) => {
       const game = games[pin];
       if (!game)

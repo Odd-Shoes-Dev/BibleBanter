@@ -10,6 +10,7 @@ export default function JoinPage({ onJoin, onBack }) {
   const [customTeamName, setCustomTeamName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [gameMode, setGameMode] = useState(null); // null means unknown yet
 
   const teams = [
     { id: "red", name: "Red Team", color: "#ef4444" },
@@ -17,6 +18,20 @@ export default function JoinPage({ onJoin, onBack }) {
     { id: "green", name: "Green Team", color: "#22c55e" },
     { id: "custom", name: "Custom Name", color: "#a855f7" },
   ];
+
+  useEffect(() => {
+    import("../socket").then(({ socket }) => {
+      if (pin && pin.length === 6) {
+        socket.emit("check-game-mode", pin, (res) => {
+          if (res && res.success) {
+            setGameMode(res.mode);
+          }
+        });
+      } else {
+        setGameMode(null);
+      }
+    });
+  }, [pin]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -98,44 +113,48 @@ export default function JoinPage({ onJoin, onBack }) {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-amber-400 mb-2 tracking-wide uppercase">
-                Team (Optional)
-              </label>
-              <div className="grid grid-cols-2 gap-3 mb-2">
-                {teams.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setTeam(team === t.id ? "" : t.id)}
-                    className="py-3 rounded-2xl font-bold text-sm transition-all"
-                    style={{
-                      backgroundColor:
-                        team === t.id ? t.color : "rgba(255,255,255,0.05)",
-                      color: team === t.id ? "#fff" : t.color,
-                      border: `2px solid ${team === t.id ? t.color : "rgba(255,255,255,0.1)"}`,
-                    }}
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              </div>              
-              {team === 'custom' && (
-                <div className="mt-3 animate-slide-up">
-                  <input 
-                    type="text"
-                    value={customTeamName}
-                    onChange={(e) => setCustomTeamName(e.target.value.slice(0, 20))}
-                    placeholder="Enter your team name..."
-                    className="w-full bg-white/10 border border-purple-500/50 rounded-xl px-4 py-3 text-white text-md font-semibold focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all"
-                    maxLength={20}
-                  />
-                </div>
-              )}
-              <p className="text-white/40 text-xs text-center italic mt-2">
-                Deselect to play solo
-              </p>
-            </div>
+            {gameMode === "Team mode" && (
+              <div>
+                <label className="block text-sm font-semibold text-amber-400 mb-2 tracking-wide uppercase">
+                  Team (Optional)
+                </label>
+                <div className="grid grid-cols-2 gap-3 mb-2">
+                  {teams.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setTeam(team === t.id ? "" : t.id)}
+                      className="py-3 rounded-2xl font-bold text-sm transition-all"
+                      style={{
+                        backgroundColor:
+                          team === t.id ? t.color : "rgba(255,255,255,0.05)",
+                        color: team === t.id ? "#fff" : t.color,
+                        border: `2px solid ${
+                          team === t.id ? t.color : "rgba(255,255,255,0.1)"
+                        }`,
+                      }}
+                    >
+                      {t.name}
+                    </button>
+                  ))}
+                </div>              
+                {team === 'custom' && (
+                  <div className="mt-3 animate-slide-up">
+                    <input 
+                      type="text"
+                      value={customTeamName}
+                      onChange={(e) => setCustomTeamName(e.target.value.slice(0, 20))}
+                      placeholder="Enter your team name..."
+                      className="w-full bg-white/10 border border-purple-500/50 rounded-xl px-4 py-3 text-white text-md font-semibold focus:outline-none focus:border-purple-400 focus:bg-white/15 transition-all"
+                      maxLength={20}
+                    />
+                  </div>
+                )}
+                <p className="text-white/40 text-xs text-center italic mt-2">
+                  Deselect to play solo
+                </p>
+              </div>
+            )}
 
             {error && (
               <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3 text-red-300 text-sm font-medium animate-bounce-in">
