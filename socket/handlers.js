@@ -519,7 +519,7 @@ function setupSocketHandlers(io) {
       }
       game.status = "playing";
       io.to(pin).emit("game-started");
-      setTimeout(() => sendQuestion(pin), 1000);
+      setTimeout(() => sendQuestion(pin), 2000);
     });
 
     // ── PLAYER: Submit answer ──────────────────────────────────────────────
