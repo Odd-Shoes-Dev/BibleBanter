@@ -12,8 +12,15 @@ const ANSWER_BG = [
 export default function ResultsScreen({ results, teamLeaderboard, role, answerResult, onNext, playerName }) {
   if (!results) return null;
 
-  const { correctAnswer, scripture, leaderboard, isLastQuestion, autoAdvanceIn = 7 } = results;
+  const { correctAnswer, correctText, scripture, leaderboard, isLastQuestion, autoAdvanceIn = 7 } = results;
   const tLeaderboard = teamLeaderboard || results.teamLeaderboard || [];
+
+  const decodeHTML = (html) => {
+    if (!html) return '';
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  };
 
   const teamColors = {
     red: 'bg-red-500/20 border-red-500/40 text-red-400',
@@ -50,7 +57,7 @@ export default function ResultsScreen({ results, teamLeaderboard, role, answerRe
         {/* Correct answer banner */}
         <div className="animate-bounce-in">
           <div
-            className="rounded-2xl p-4 text-center"
+            className="rounded-2xl p-4 text-center max-w-sm mx-auto"
             style={{
               background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(22,163,74,0.15))',
               border: '2px solid rgba(34,197,94,0.4)',
@@ -58,10 +65,17 @@ export default function ResultsScreen({ results, teamLeaderboard, role, answerRe
             }}
           >
             <p className="font-nunito text-green-400/70 text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-3">✅ Correct Answer</p>
-            <div className={`inline-flex items-center gap-3 rounded-2xl px-5 py-3 border ${ANSWER_BG[correctAnswer]}`}>
-              <span className="text-2xl sm:text-3xl font-black">{ANSWER_SHAPES[correctAnswer]}</span>
-              <span className="font-nunito text-base sm:text-xl font-black">{ANSWER_LABELS[correctAnswer]}</span>
-              <span className="text-green-400 text-xl">✓</span>
+            <div className={`inline-flex flex-col sm:flex-row items-center gap-3 rounded-2xl px-5 py-3 border ${ANSWER_BG[correctAnswer]} w-full`}>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-2xl sm:text-3xl font-black">{ANSWER_SHAPES[correctAnswer]}</span>
+                <span className="font-nunito text-base sm:text-xl font-black">{ANSWER_LABELS[correctAnswer]}</span>
+                <span className="text-green-400 text-xl hidden sm:block">✓</span>
+              </div>
+              {correctText && (
+                <span className="font-semibold text-lg sm:text-xl sm:border-l sm:border-current/30 sm:pl-3 text-center sm:text-left break-words w-full sm:w-auto">
+                  {decodeHTML(correctText)}
+                </span>
+              )}
             </div>
 
             {/* Player personal result */}

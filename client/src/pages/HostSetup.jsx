@@ -151,7 +151,7 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
                   color: tab === t ? '#fbbf24' : '#ffffff60',
                   border: tab === t ? '1px solid rgba(251,191,36,0.3)' : '1px solid transparent',
                 }}>
-                {t === 'default' ? '📖 Default' : '📂 My Question sets'}
+                {t === "default" ? "🌍 Community Questions" : "📂 My Question sets"}
               </button>
             ))}
           </div>

@@ -15,11 +15,19 @@ const AVATAR_COLORS = [
 
 export default function HostLobby({ pin, players, onStart, onCancel, token }) {
   const joinUrl = `${window.location.origin}/?pin=${pin}`;
+  const [copied, setCopied] = useState(false);
   const prevCountRef = useRef(players.length);
+
   useEffect(() => {
     if (players.length > prevCountRef.current) sounds.join();
     prevCountRef.current = players.length;
   }, [players.length]);
+
+  const handleCopyPin = () => {
+    navigator.clipboard.writeText(pin);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#0d0918' }}>
@@ -59,9 +67,17 @@ export default function HostLobby({ pin, players, onStart, onCancel, token }) {
           <h2 className="font-nunito font-black text-2xl md:text-3xl text-white text-center">
             {players.length === 0 ? 'Waiting for Players...' : `${players.length} Player${players.length !== 1 ? 's' : ''} Joined!`}
           </h2>
-          <p className="text-white/50 text-sm text-center">
-            PIN: <span className="text-amber-300 font-black text-xl tracking-widest">{pin}</span>
-          </p>
+          <div 
+            onClick={handleCopyPin}
+            className="flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-105 active:scale-95 group relative"
+          >
+            <p className="text-white/50 text-sm text-center m-0">
+              PIN: <span className="text-amber-300 font-black text-xl tracking-widest">{pin}</span>
+            </p>
+            <span className="text-white/30 text-xs group-hover:text-amber-300 transition-colors">
+              {copied ? '✓ Copied' : '📋 Copy'}
+            </span>
+          </div>
           <div className="rounded-2xl p-4 flex flex-col items-center gap-2 animate-fade-in"
             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="rounded-xl p-2.5 bg-white">

@@ -184,9 +184,10 @@ export default function App() {
       if (sounds.stopBg) sounds.stopBg();
       setLeaderboard(lb);
       setTeamLeaderboard(tlb || []);
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
-    });
+          if (hasMore) setContinueData({ setId, nextOffset, totalQuestions });
+          if (dbGameId) setReportGameId(dbGameId);
+          setGamePhase('over');
+      });
 
     socket.on('round-starting', ({ players: pl }) => {
       if (sounds.stopBg) sounds.stopBg();

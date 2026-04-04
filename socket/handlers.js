@@ -101,6 +101,7 @@ function createGameFlowFunctions(io) {
 
     io.to(pin).emit("question-results", {
       correctAnswer: q.answer,
+      correctText: q.options ? q.options[q.answer] : null,
       scripture: q.scripture,
       leaderboard,
       teamLeaderboard,
@@ -230,18 +231,13 @@ function setupSocketHandlers(io) {
               orderBy: { id: "asc" },
             });
           } else {
-            const defaultSet = await prisma.questionSet.findFirst({
-              where: { isDefault: true },
+            // Community feature: pool from ALL available questions
+            const where = {};
+            if (testament && testament !== "both") where.category = testament;
+            allSetQuestions = await prisma.question.findMany({
+              where,
+              orderBy: { timesPlayed: "asc" },
             });
-            if (defaultSet) {
-              resolvedSetId = defaultSet.id;
-              const where = { setId: defaultSet.id };
-              if (testament && testament !== "both") where.category = testament;
-              allSetQuestions = await prisma.question.findMany({
-                where,
-                orderBy: { id: "asc" },
-              });
-            }
           }
 
           const pin = generatePin();
@@ -257,21 +253,30 @@ function setupSocketHandlers(io) {
               ? questionPool.filter((q) => q.category === testament)
               : questionPool;
 
-          // Sort by timesPlayed ascending, then shuffle chunks of same timesPlayed, or just group them.
-          filtered.sort((a, b) => {
-            if (a.timesPlayed !== b.timesPlayed)
-              return (a.timesPlayed || 0) - (b.timesPlayed || 0);
-            return 0.5 - Math.random();
-          });
+            // To properly randomize questions with the same timesPlayed value:
+            // 1. Fully shuffle the filtered array first
+            let shuffled = shuffleQuestions(filtered);
+            // 2. Perform a stable sort by timesPlayed (ascending). 
+            // This guarantees the least played questions bubble up, but in a randomized order.
+            shuffled.sort((a, b) => (a.timesPlayed || 0) - (b.timesPlayed || 0));
 
-          gameQuestions = filtered.slice(0, rounds);
-          gameQuestions = shuffleQuestions(gameQuestions);
+            gameQuestions = shuffled.slice(0, rounds);              gameQuestions = shuffleQuestions(gameQuestions);
 
-          if (gameQuestions.length === 0)
-            return callback({
-              success: false,
-              error: "No questions available in this set.",
-            });
+              if (gameQuestions.length === 0) {
+                return callback({
+                  success: false,
+                  error: "No questions available in this set.",
+                });
+              }
+          // Increment timesPlayed for selected questions asynchronously
+          Promise.all(
+            gameQuestions.map((q) =>
+              prisma.question.update({
+                where: { id: q.id },
+                data: { timesPlayed: { increment: 1 } },
+              })
+            )
+          ).catch((err) => console.error("Failed to increment timesPlayed:", err));
 
           const nextOffset = offset + gameQuestions.length;
           const hasMore = setId ? nextOffset < totalQuestions : false;
@@ -341,6 +346,16 @@ function setupSocketHandlers(io) {
 
         const newNextOffset = game.nextOffset + batch.length;
         const stillHasMore = newNextOffset < allQuestions.length;
+
+        // Increment timesPlayed for selected questions asynchronously
+        Promise.all(
+          batch.map((q) =>
+            prisma.question.update({
+              where: { id: q.id },
+              data: { timesPlayed: { increment: 1 } },
+            })
+          )
+        ).catch((err) => console.error("Failed to increment timesPlayed during continue:", err));
 
         game.questions = batch;
         game.currentQuestion = -1;

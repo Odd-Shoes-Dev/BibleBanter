@@ -222,7 +222,7 @@ export default function GameScreen({
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
         <span className="text-white/50 text-sm font-semibold flex items-center gap-3">
           <span>Question {question.index + 1} / {question.total}</span>
-          <div className="flex items-center gap-1 hidden sm:flex">
+          <div className="hidden sm:flex items-center gap-1">
             <span className="text-white/30 text-xs">🔈</span>
             <input 
               type="range" min="0" max="1" step="0.01" 
@@ -328,7 +328,7 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
           <div className="flex items-center justify-between mb-0">
             <span className="text-white/50 text-sm md:text-base font-semibold flex items-center gap-3">
               <span>Question {question.index + 1} / {question.total}</span>
-              <div className="flex items-center gap-1 hidden sm:flex">
+              <div className="hidden sm:flex items-center gap-1">
                 <span className="text-white/30 text-xs">🔈</span>
                 <input 
                   type="range" min="0" max="1" step="0.01" 
