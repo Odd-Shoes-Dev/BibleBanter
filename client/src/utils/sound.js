@@ -1,4 +1,4 @@
-let _bgAudio = new Audio('/game-over.mpeg');
+let _bgAudio = new Audio('/game-over.mp3');
 _bgAudio.loop = true;
 let _fadeInterval = null;
 
@@ -63,11 +63,10 @@ export const sounds = {
       let currentVol = 0;
       _fadeInterval = setInterval(() => {
         currentVol += 0.05;
+        currentVol = Math.min(currentVol, targetVolume);
+        _bgAudio.volume = currentVol;
         if (currentVol >= targetVolume) {
-          _bgAudio.volume = targetVolume;
           clearInterval(_fadeInterval);
-        } else {
-          _bgAudio.volume = currentVol;
         }
       }, 200);
     } catch (e) {
@@ -84,6 +83,9 @@ export const sounds = {
   setBgVolume(vol) {
     if (_fadeInterval) clearInterval(_fadeInterval);
     _bgAudio.volume = vol;
+    if (_bgAudio.paused) {
+      _bgAudio.play().catch(e => console.log('Audio auto-play blocked', e));
+    }
     try {
       localStorage.setItem('bb_bg_volume', vol);
     } catch {}
