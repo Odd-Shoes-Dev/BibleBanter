@@ -202,28 +202,6 @@ const HeroSection = () => {
             </Button>
           </motion.div>
 
-          {/* Usage Stats (Live API) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="flex items-center justify-center text-center mb-8"
-          >
-            {stats.totalGames > 0 && (
-              <p className="text-white/80 font-bold bg-white/10 px-4 py-2 rounded-full border border-white/20 backdrop-blur-sm text-sm">
-                <span>💡 Join </span>
-                <span className="text-accent">
-                  {stats.totalPlayers.toLocaleString()}
-                </span>{" "}
-                players in over{" "}
-                <span className="text-accent">
-                  {stats.totalGames.toLocaleString()}
-                </span>{" "}
-                games globally!
-              </p>
-            )}
-          </motion.div>
-
           {/* Stats bar */}
           <motion.div
             initial={{ opacity: 0 }}
