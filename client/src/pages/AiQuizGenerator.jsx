@@ -255,7 +255,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
   const [step, setStep] = useState(0);
 
   // Step 0 — Content
-  const [inputType, setInputType] = useState("notes"); // 'notes' | 'reference'
+  const [inputType, setInputType] = useState("reference"); // 'notes' | 'reference'
   const [content, setContent] = useState("");
   const [reference, setReference] = useState("");
   const [file, setFile] = useState(null);
@@ -470,17 +470,17 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
               style={{ background: "rgba(255,255,255,0.05)" }}
             >
               <button
-                onClick={() => setInputType("notes")}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${inputType === "notes" ? "bg-purple-600 text-white" : "text-white/50"}`}
-              >
-                Paste Notes
-              </button>
-              <button
-                onClick={() => setInputType("reference")}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${inputType === "reference" ? "bg-purple-600 text-white" : "text-white/50"}`}
-              >
-                Bible Reference
-              </button>
+                  onClick={() => setInputType("reference")}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${inputType === "reference" ? "bg-purple-600 text-white" : "text-white/50"}`}
+                >
+                  Bible Reference
+                </button>
+                <button
+                  onClick={() => setInputType("notes")}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${inputType === "notes" ? "bg-purple-600 text-white" : "text-white/50"}`}
+                >
+                  Paste Notes
+                </button>
             </div>
 
             {inputType === "notes" ? (
