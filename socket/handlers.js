@@ -466,6 +466,9 @@ function setupSocketHandlers(io) {
       } else if (game.status === "results") {
         // We could emit show-results or just let them wait
       }
+
+      const isStarted = game.status !== "lobby";
+      callback({ success: true, pin, isStarted });
     });
 
     // ── HOST: Replace questions from upload ────────────────────────────────
