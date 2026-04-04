@@ -104,6 +104,6 @@ export const sounds = {
       const stored = localStorage.getItem('bb_bg_volume');
       if (stored !== null) return parseFloat(stored);
     } catch {}
-    return 0.3; // Default lower volume
+    return 0.75; // Default volume set to 75%
   }
 };

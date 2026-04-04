@@ -24,7 +24,7 @@ export default function GameScreen({
   const prevQuestionRef = useRef(null);
 
   // Initialize volume state
-  const [vol, setVol] = useState(() => sounds.getBgVolume ? sounds.getBgVolume() : 0.3);
+  const [vol, setVol] = useState(() => sounds.getBgVolume ? sounds.getBgVolume() : 0.75);
 
   const handleVolumeChange = (e) => {
     const newVol = parseFloat(e.target.value);
