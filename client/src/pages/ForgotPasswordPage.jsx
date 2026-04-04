@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
       setMessage(data.message || 'If an account with that email exists, we have sent a password reset link. Please check your spam folder if it doesn\'t appear in your inbox.');
       setEmail('');
     } catch (err) {
-      setError(err.message);
+      setError(getFriendlyError(err));
     } finally {
       setLoading(false);
     }

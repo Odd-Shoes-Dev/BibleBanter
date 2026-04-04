@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
   BookOpen,
   Gamepad2,
@@ -15,9 +16,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
+const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+
 const HeroSection = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("bb_token");
+  const [stats, setStats] = useState({
+    totalGames: 0,
+    totalPlayers: 0,
+    totalQuestions: 0,
+  });
+
+  useEffect(() => {
+    fetch(`${BACKEND}/api/stats`)
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .catch(console.error);
+  }, []);
 
   return (
     <section className="relative min-h-[95vh] pt-6 flex items-center justify-center overflow-hidden">
@@ -25,7 +40,7 @@ const HeroSection = () => {
         className="absolute inset-0 bg-cover bg-center scale-105"
         style={{ backgroundImage: "url('/bg-3.jpg')" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/50 via-primary/30 to-background/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/50 via-primary/30 to-black/90" />
 
       {/* Decorative neo-brutalist elements */}
       <motion.div
@@ -185,6 +200,28 @@ const HeroSection = () => {
               <BarChart2 className="mr-2 h-4 w-4 text-emerald-400 drop-shadow-sm" />{" "}
               <span className="drop-shadow-sm">Reports</span>
             </Button>
+          </motion.div>
+
+          {/* Usage Stats (Live API) */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="flex items-center justify-center text-center mb-8"
+          >
+            {stats.totalGames > 0 && (
+              <p className="text-white/80 font-bold bg-white/10 px-4 py-2 rounded-full border border-white/20 backdrop-blur-sm text-sm">
+                <span>💡 Join </span>
+                <span className="text-accent">
+                  {stats.totalPlayers.toLocaleString()}
+                </span>{" "}
+                players in over{" "}
+                <span className="text-accent">
+                  {stats.totalGames.toLocaleString()}
+                </span>{" "}
+                games globally!
+              </p>
+            )}
           </motion.div>
 
           {/* Stats bar */}

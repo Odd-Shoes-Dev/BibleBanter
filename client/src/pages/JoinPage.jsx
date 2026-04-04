@@ -1,27 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export default function JoinPage({ onJoin, onBack }) {
   const [pin, setPin] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('pin') || '';
+    return params.get("pin") || "";
   });
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
+  const [team, setTeam] = useState(""); // '' means No Team
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+
+  const teams = [
+    { id: "red", name: "Red Team", color: "#ef4444" },
+    { id: "blue", name: "Blue Team", color: "#3b82f6" },
+    { id: "green", name: "Green Team", color: "#22c55e" },
+    { id: "yellow", name: "Yellow Team", color: "#eab308" },
+  ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     if (!pin.trim() || pin.length !== 6) {
-      setError('Enter a valid 6-digit PIN');
+      setError("Enter a valid 6-digit PIN");
       return;
     }
     if (!name.trim() || name.length < 2) {
-      setError('Name must be at least 2 characters');
+      setError("Name must be at least 2 characters");
       return;
     }
     setLoading(true);
-    onJoin(pin.trim(), name.trim());
+    onJoin(pin.trim(), name.trim(), team);
     setTimeout(() => setLoading(false), 3000);
   };
 
@@ -43,8 +51,12 @@ export default function JoinPage({ onJoin, onBack }) {
         <div className="bg-glass-dark rounded-3xl p-8 shadow-2xl">
           <div className="text-center mb-8">
             <div className="text-5xl mb-3">🎮</div>
-            <h2 className="font-cinzel text-3xl font-black text-white mb-1">JOIN GAME</h2>
-            <p className="text-white/50 text-sm">Enter your PIN and pick a name</p>
+            <h2 className="font-cinzel text-3xl font-black text-white mb-1">
+              JOIN GAME
+            </h2>
+            <p className="text-white/50 text-sm">
+              Enter your PIN and pick a name
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -55,7 +67,9 @@ export default function JoinPage({ onJoin, onBack }) {
               <input
                 type="text"
                 value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) =>
+                  setPin(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
                 placeholder="6-digit PIN"
                 maxLength={6}
                 className="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white text-2xl font-bold text-center tracking-widest placeholder-white/30 focus:outline-none focus:border-amber-400 focus:bg-white/15 transition-all"
@@ -76,6 +90,33 @@ export default function JoinPage({ onJoin, onBack }) {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-semibold text-amber-400 mb-2 tracking-wide uppercase">
+                Team (Optional)
+              </label>
+              <div className="grid grid-cols-2 gap-3 mb-2">
+                {teams.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTeam(team === t.id ? "" : t.id)}
+                    className="py-3 rounded-2xl font-bold text-sm transition-all"
+                    style={{
+                      backgroundColor:
+                        team === t.id ? t.color : "rgba(255,255,255,0.05)",
+                      color: team === t.id ? "#fff" : t.color,
+                      border: `2px solid ${team === t.id ? t.color : "rgba(255,255,255,0.1)"}`,
+                    }}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+              <p className="text-white/40 text-xs text-center italic mt-2">
+                Deselect to play solo
+              </p>
+            </div>
+
             {error && (
               <div className="bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3 text-red-300 text-sm font-medium animate-bounce-in">
                 ⚠️ {error}
@@ -87,11 +128,15 @@ export default function JoinPage({ onJoin, onBack }) {
               disabled={loading}
               className="w-full py-4 rounded-2xl font-bold text-xl text-white transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:scale-100 font-cinzel tracking-wide"
               style={{
-                background: loading ? 'rgba(100,100,100,0.5)' : 'linear-gradient(135deg, #d97706, #b45309)',
-                boxShadow: loading ? 'none' : '0 8px 30px rgba(217, 119, 6, 0.4)',
+                background: loading
+                  ? "rgba(100,100,100,0.5)"
+                  : "linear-gradient(135deg, #d97706, #b45309)",
+                boxShadow: loading
+                  ? "none"
+                  : "0 8px 30px rgba(217, 119, 6, 0.4)",
               }}
             >
-              {loading ? '⏳ Joining...' : '⚔️ JOIN BATTLE'}
+              {loading ? "⏳ Joining..." : "⚔️ JOIN BATTLE"}
             </button>
           </form>
         </div>

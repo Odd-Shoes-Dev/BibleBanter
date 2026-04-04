@@ -9,10 +9,18 @@ const ANSWER_BG = [
   'bg-green-600/20 border-green-500/40 text-green-300',
 ];
 
-export default function ResultsScreen({ results, role, answerResult, onNext, playerName }) {
+export default function ResultsScreen({ results, teamLeaderboard, role, answerResult, onNext, playerName }) {
   if (!results) return null;
 
   const { correctAnswer, scripture, leaderboard, isLastQuestion, autoAdvanceIn = 7 } = results;
+  const tLeaderboard = teamLeaderboard || results.teamLeaderboard || [];
+
+  const teamColors = {
+    red: 'bg-red-500/20 border-red-500/40 text-red-400',
+    blue: 'bg-blue-500/20 border-blue-500/40 text-blue-400',
+    green: 'bg-green-500/20 border-green-500/40 text-green-400',
+    yellow: 'bg-yellow-500/20 border-yellow-500/40 text-yellow-400',
+  };
 
   const [countdown, setCountdown] = useState(autoAdvanceIn);
 
@@ -90,6 +98,22 @@ export default function ResultsScreen({ results, role, answerResult, onNext, pla
             style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
             <p className="text-amber-400/70 text-xs font-bold uppercase tracking-wider mb-2">📖 Scripture</p>
             <p className="text-white/75 text-sm leading-relaxed italic">{scripture}</p>
+          </div>
+        )}
+
+        {/* Team Leaderboard */}
+        {tLeaderboard && tLeaderboard.length > 0 && (
+          <div className="rounded-2xl p-4 animate-slide-up"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', animationDelay: '0.05s' }}>
+            <h3 className="font-nunito text-sm sm:text-base font-black text-white/60 mb-3 text-center tracking-wide uppercase">Group Standings</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {tLeaderboard.map((team, i) => (
+                <div key={team.team} className={`p-3 rounded-2xl text-center border ${teamColors[team.team] || 'bg-white/10'} flex items-center justify-between`}>
+                     <span className="text-xs font-bold uppercase">{team.team}</span>
+                     <span className="text-lg font-black">{team.score.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

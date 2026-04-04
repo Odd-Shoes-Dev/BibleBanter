@@ -51,6 +51,7 @@ export default function App() {
   const [answerResult, setAnswerResult] = useState(null);
   const [questionResults, setQuestionResults] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [teamLeaderboard, setTeamLeaderboard] = useState([]);
   const [answerProgress, setAnswerProgress] = useState({ answered: 0, total: 0 });
   const [liveLeaderboard, setLiveLeaderboard] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
@@ -174,14 +175,13 @@ export default function App() {
     socket.on('question-results', (results) => {
       setQuestionResults(results);
       setLeaderboard(results.leaderboard);
+      setTeamLeaderboard(results.teamLeaderboard || []);
       setGamePhase('results');
     });
 
-    socket.on('game-over', ({ leaderboard: lb, dbGameId, hasMore, nextOffset, setId, totalQuestions }) => {
+    socket.on('game-over', ({ leaderboard: lb, teamLeaderboard: tlb, dbGameId, hasMore, nextOffset, setId, totalQuestions }) => {
       setLeaderboard(lb);
-      if (dbGameId) setReportGameId(dbGameId);
-      setContinueData(hasMore ? { nextOffset, setId, totalQuestions } : null);
-      setGamePhase('over');
+      setTeamLeaderboard(tlb || []);
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
     });
@@ -260,16 +260,23 @@ export default function App() {
     });
   };
 
-  const handleJoinGame = (pin, name) => {
-    socket.emit('join-game', { pin, name }, ({ success, error }) => {
+  const handleJoinGame = (pin, name, team = '') => {
+    socket.emit('join-game', { pin, name, team }, ({ success, error, isStarted }) => {
       if (success) {
         setGamePin(pin);
         setPlayerName(name);
         setRole('player');
+        
         sessionStorage.setItem('bb_pin', pin);
         sessionStorage.setItem('bb_role', 'player');
         sessionStorage.setItem('bb_name', name);
-        navigate('/lobby');
+        if (team) sessionStorage.setItem('bb_team', team);
+
+        if (isStarted) {
+          navigate('/play');
+        } else {
+          navigate('/lobby');
+        }
       } else {
         setErrorMsg(error || 'Failed to join game.');
       }
@@ -405,6 +412,7 @@ export default function App() {
           gamePhase === 'over' ? (
             <GameOver
               leaderboard={leaderboard}
+              teamLeaderboard={teamLeaderboard}
               playerName={playerName}
               onPlayAgain={handlePlayAgain}
               role={role}
@@ -416,6 +424,7 @@ export default function App() {
           ) : gamePhase === 'results' ? (
             <ResultsScreen
               results={questionResults}
+              teamLeaderboard={teamLeaderboard}
               role={role}
               answerResult={answerResult}
               onNext={handleNextQuestion}

@@ -3,16 +3,16 @@ const { sanitize, sanitizePlayerName, sanitizeText } = require('../utils/sanitiz
 describe('sanitize()', () => {
   test('escapes HTML special characters', () => {
     expect(sanitize('<script>alert("xss")</script>')).toBe(
-      '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'
+      '&lt;script&gt;alert("xss")&lt;/script&gt;'
     );
   });
 
-  test('escapes ampersands', () => {
-    expect(sanitize('Tom & Jerry')).toBe('Tom &amp; Jerry');
+  test('does not escape ampersands', () => {
+    expect(sanitize('Tom & Jerry')).toBe('Tom & Jerry');
   });
 
-  test('escapes single quotes', () => {
-    expect(sanitize("it's")).toBe("it&#x27;s");
+  test('does not escape single quotes', () => {
+    expect(sanitize("it's")).toBe("it's");
   });
 
   test('returns empty string for non-string input', () => {

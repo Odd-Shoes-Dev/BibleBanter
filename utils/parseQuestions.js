@@ -1,5 +1,7 @@
+const { unescapeHtml } = require('./sanitize');
+
 /**
- * Parses free-text (from DOCX / PDF / TXT) into structured question objects.
+ * Parses free-text (from DOCX / PDF / TXT) into structured question objects.   
  * Looks for patterns like:
  *   Q: ...
  *   A) ...   B) ...   C) ...   D) ...
@@ -13,7 +15,7 @@ function parseTextToQuestions(text) {
   const blocks = text.split(/(?=Q:|Question:)/i).map(b => b.trim()).filter(Boolean);
 
   for (const block of blocks) {
-    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+    const lines = block.split('\n').map(l => unescapeHtml(l.trim())).filter(Boolean);
     const q = {};
     const options = [];
 

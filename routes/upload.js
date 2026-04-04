@@ -7,6 +7,7 @@ const { parse: csvParse } = require('csv-parse/sync');
 const prisma = require('../lib/prisma');
 const { optionalHost } = require('../middleware/auth');
 const { parseTextToQuestions } = require('../utils/parseQuestions');
+const { unescapeHtml } = require('../utils/sanitize');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -22,17 +23,17 @@ router.post('/parse-questions', upload.single('file'), optionalHost, async (req,
     if (ext === 'csv') {
       const records = csvParse(buffer.toString('utf8'), { columns: true, skip_empty_lines: true, trim: true });
       parsed = records.map((r) => ({
-        question: r.question || r.Question || '',
+        question: unescapeHtml(r.question || r.Question || ''),
         options: [
-          r.optionA || r.OptionA || r.A || '',
-          r.optionB || r.OptionB || r.B || '',
-          r.optionC || r.OptionC || r.C || '',
-          r.optionD || r.OptionD || r.D || '',
+          unescapeHtml(r.optionA || r.OptionA || r.A || ''),
+          unescapeHtml(r.optionB || r.OptionB || r.B || ''),
+          unescapeHtml(r.optionC || r.OptionC || r.C || ''),
+          unescapeHtml(r.optionD || r.OptionD || r.D || ''),
         ],
         answer: parseInt(r.answer ?? r.Answer ?? 0),
-        category: r.category || r.Category || 'General',
-        difficulty: (r.difficulty || r.Difficulty || 'medium').toLowerCase(),
-        scripture: r.scripture || r.Scripture || '',
+        category: unescapeHtml(r.category || r.Category || 'General'),
+        difficulty: unescapeHtml((r.difficulty || r.Difficulty || 'medium').toLowerCase()),   
+        scripture: unescapeHtml(r.scripture || r.Scripture || ''),
       })).filter(q => q.question && q.options.slice(0, 2).every(Boolean) && !isNaN(q.answer));
     } else if (ext === 'docx') {
       const result = await mammoth.extractRawText({ buffer });

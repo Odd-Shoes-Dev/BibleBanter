@@ -41,10 +41,19 @@ async function buildReportData(gameId) {
   const correctAnswers = totalAnswers.filter(a => a.isCorrect).length;
   const overallAccuracy = totalAnswers.length > 0 ? Math.round((correctAnswers / totalAnswers.length) * 100) : 0;
 
+  const playerStats = players.map(p => {
+    const pAnswers = p.answers || [];
+    const pCorrect = pAnswers.filter(a => a.isCorrect).length;
+    const pTotal = pAnswers.length;
+    const pAccuracy = pTotal > 0 ? Math.round((pCorrect / pTotal) * 100) : 0;
+    const avgTime = pTotal > 0 ? Math.round(pAnswers.reduce((s, a) => s + (a.responseTimeMs || 0), 0) / pTotal / 1000) : 0;
+    return { name: p.name, score: p.score, streak: p.streak, rank: p.rank, accuracy: pAccuracy, avgTimeSec: avgTime };
+  });
+
   const best = [...qStats].sort((a, b) => b.pct - a.pct)[0];
   const worst = [...qStats].sort((a, b) => a.pct - b.pct)[0];
 
-  return { totalPlayers, avgScore, overallAccuracy, questions: qStats, best, worst, setName: game.set?.name || 'Unknown Set' };
+  return { totalPlayers, avgScore, overallAccuracy, questions: qStats, best, worst, setName: game.set?.name || 'Unknown Set', playerStats };
 }
 
 async function generateAiSummary(reportData) {

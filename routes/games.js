@@ -3,6 +3,27 @@ const router = express.Router();
 const prisma = require('../lib/prisma');
 const { requireHost } = require('../middleware/auth');
 
+// GET /api/stats — Global aggregated usage stats
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = await prisma.systemStat.findUnique({ where: { id: 1 } });
+    const questionCount = await prisma.question.count();
+    
+    if (stats) {
+      res.json({
+        totalGames: stats.totalGames,
+        totalPlayers: stats.totalPlayers,
+        totalQuestions: questionCount
+      });
+    } else {
+      res.json({ totalGames: 0, totalPlayers: 0, totalQuestions: questionCount });
+    }
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Failed to fetch global stats.' });
+  }
+});
+
 // GET /api/leaderboard — Global leaderboard (top 10)
 router.get('/leaderboard', async (req, res) => {
   try {

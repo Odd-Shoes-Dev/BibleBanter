@@ -44,7 +44,7 @@ export default function RegisterPage({ onLogin, onBack }) {
       localStorage.setItem('bb_host', JSON.stringify(data.host));
       onLogin(data.host, data.token);
     } catch (err) {
-      setError(err.message);
+      setError(getFriendlyError(err));
     } finally {
       setLoading(false);
     }

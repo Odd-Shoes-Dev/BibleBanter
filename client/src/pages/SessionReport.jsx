@@ -161,7 +161,28 @@ export default function SessionReport({ gameId, token, onBack }) {
               </div>
             )}
 
-            <p className="text-white/20 text-xs text-center pb-4">
+            {/* Player Breakdown */}
+            {data.playerStats && data.playerStats.length > 0 && (
+              <div>
+                <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3 mt-6">Player Breakdown</p>
+                <div className="space-y-2">
+                  {data.playerStats.sort((a, b) => b.score - a.score).map((p, i) => (
+                    <div key={i} className="flex justify-between items-center rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div className="flex flex-col">
+                        <span className="text-white font-bold text-sm">#{i + 1} {p.name}</span>
+                        <span className="text-white/50 text-xs">{p.accuracy}% Correct • {p.avgTimeSec}s avg</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-white font-black text-lg">{p.score}</span>
+                        <p className="text-white/50 text-[10px]">pts</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-white/20 text-xs text-center pb-4 mt-6">
               Report generated {report.createdAt ? new Date(report.createdAt).toLocaleString() : ''}
             </p>
           </div>

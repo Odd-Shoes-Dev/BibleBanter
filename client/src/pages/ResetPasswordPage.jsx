@@ -49,7 +49,7 @@ export default function ResetPasswordPage() {
       setMessage(data.message || 'Password reset successfully.');
       setPassword('');
     } catch (err) {
-      setError(err.message);
+      setError(getFriendlyError(err));
     } finally {
       setLoading(false);
     }

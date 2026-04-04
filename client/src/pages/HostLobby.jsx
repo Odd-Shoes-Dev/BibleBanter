@@ -78,16 +78,19 @@ export default function HostLobby({ pin, players, onStart, onCancel, token }) {
             <p className="text-white/25 text-sm italic mt-4">Players will appear here as they join…</p>
           ) : (
             <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 w-full">
-              {players.map((p, i) => (
+              {players.map((p, i) => {
+                const teamBgColors = { red: '#ef4444', blue: '#3b82f6', green: '#22c55e', yellow: '#eab308' };
+                const bg = p.team ? teamBgColors[p.team] : AVATAR_COLORS[i % AVATAR_COLORS.length];
+                return (
                 <div key={p.id} className="flex flex-col items-center gap-1.5 animate-bounce-in"
                   style={{ animationDelay: `${i * 0.04}s` }}>
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-lg font-black text-white shadow-lg"
-                    style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-lg font-black text-white shadow-lg" 
+                    style={{ background: bg }}>
                     {p.name[0].toUpperCase()}
                   </div>
                   <span className="text-white/70 text-xs font-semibold truncate w-full text-center">{p.name}</span>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>

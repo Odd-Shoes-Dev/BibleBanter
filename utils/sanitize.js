@@ -4,15 +4,28 @@
 function sanitize(str) {
   if (typeof str !== 'string') return '';
   return str
-    .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+    .replace(/>/g, '&gt;');
 }
 
-/**
- * Sanitizes and trims a player display name.
+/** * Unescapes common HTML entities back to characters.
+ * Helpful for normalizing AI output or parsed documents.
+ */
+function unescapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#039;/g, "'")
+    .replace(/&#x22;/g, '"')
+    .replace(/&nbsp;/g, ' ');
+}
+
+/** * Sanitizes and trims a player display name.
  * Max 30 characters, HTML-escaped.
  */
 function sanitizePlayerName(name) {
@@ -29,4 +42,4 @@ function sanitizeText(text, maxLen = 500) {
   return sanitize(text.trim()).slice(0, maxLen);
 }
 
-module.exports = { sanitize, sanitizePlayerName, sanitizeText };
+module.exports = { sanitize, unescapeHtml, sanitizePlayerName, sanitizeText };

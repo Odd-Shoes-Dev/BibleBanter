@@ -34,16 +34,17 @@ model QuestionSet {
 }
 
 model Question {
-  id         String      @id @default(cuid())
-  question   String
-  options    String[]
-  answer     Int
-  category   String      @default("General")
-  difficulty String      @default("medium")
-  scripture  String?
-  setId      String
-  set        QuestionSet @relation(fields: [setId], references: [id], onDelete: Cascade)
-  createdAt  DateTime    @default(now())
+  id          String      @id @default(cuid())
+  question    String
+  options     String[]
+  answer      Int
+  category    String      @default("General")
+  difficulty  String      @default("medium")
+  scripture   String?
+  timesPlayed Int         @default(0) // Tracks how many times played
+  setId       String
+  set         QuestionSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
 }
 
 model Game {
@@ -64,6 +65,7 @@ model Player {
   name      String
   gameId    String
   game      Game           @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  team      String?        @default("")
   score     Int            @default(0)
   streak    Int            @default(0)
   rank      Int?
@@ -94,4 +96,12 @@ model SessionReport {
   summary   String
   data      Json
   createdAt DateTime @default(now())
+}
+
+model SystemStat {
+  id              Int      @id @default(1)
+  totalGames      Int      @default(0)
+  totalPlayers    Int      @default(0)
+  totalQuestions  Int      @default(0)
+  updatedAt       DateTime @updatedAt
 }
