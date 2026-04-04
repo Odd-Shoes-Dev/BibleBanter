@@ -438,7 +438,6 @@ function setupSocketHandlers(io) {
       });
 
       if (
-        isStarted &&
         game.status === "question" &&
         game.currentQuestion >= 0
       ) {
@@ -455,7 +454,7 @@ function setupSocketHandlers(io) {
               Math.floor((Date.now() - game.questionStartTime) / 1000),
           ),
         });
-      } else if (isStarted && game.status === "results") {
+      } else if (game.status === "results") {
         // We could emit show-results or just let them wait
       }
     });
