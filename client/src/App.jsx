@@ -228,6 +228,9 @@ export default function App() {
   // ── Game action handlers ────────────────────────────────────────────────
 
   const resetGame = () => {
+    if (roleRef.current === 'host') {
+      socket.emit('end-game');
+    }
     sessionStorage.removeItem('bb_pin');
     sessionStorage.removeItem('bb_role');
     sessionStorage.removeItem('bb_name');

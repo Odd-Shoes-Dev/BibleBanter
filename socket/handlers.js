@@ -699,6 +699,18 @@ function setupSocketHandlers(io) {
       });
     });
 
+    // ── HOST: End game explicitly ──────────────────────────────────────────
+    socket.on("end-game", () => {
+      const pin = socket.data.pin;
+      const game = games[pin];
+      if (game && game.hostId === socket.id) {
+        clearTimeout(game.timer);
+        clearTimeout(game.resultsTimer);
+        io.to(pin).emit("host-disconnected");
+        delete games[pin];
+      }
+    });
+
     // ── Disconnect with grace period ───────────────────────────────────────
     socket.on("disconnect", () => {
       const pin = socket.data.pin;
