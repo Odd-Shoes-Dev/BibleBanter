@@ -1,3 +1,7 @@
+let _bgAudio = new Audio('/game-over.mpeg');
+_bgAudio.loop = true;
+let _fadeInterval = null;
+
 let _ctx = null;
 function ctx() {
   if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -48,4 +52,47 @@ export const sounds = {
   countdown() {
     tone(660, 0.08, 'square', 0.2);
   },
+  playBg() {
+    try {
+      if (_fadeInterval) clearInterval(_fadeInterval);
+      _bgAudio.currentTime = 0;
+      _bgAudio.volume = 0;
+      const targetVolume = sounds.getBgVolume();
+      _bgAudio.play().catch(e => console.log('Audio auto-play blocked', e));
+      
+      let currentVol = 0;
+      _fadeInterval = setInterval(() => {
+        currentVol += 0.05;
+        if (currentVol >= targetVolume) {
+          _bgAudio.volume = targetVolume;
+          clearInterval(_fadeInterval);
+        } else {
+          _bgAudio.volume = currentVol;
+        }
+      }, 200);
+    } catch (e) {
+      console.log('Error playing background audio:', e);
+    }
+  },
+  stopBg() {
+    try {
+      if (_fadeInterval) clearInterval(_fadeInterval);
+      _bgAudio.pause();
+      _bgAudio.currentTime = 0;
+    } catch {}
+  },
+  setBgVolume(vol) {
+    if (_fadeInterval) clearInterval(_fadeInterval);
+    _bgAudio.volume = vol;
+    try {
+      localStorage.setItem('bb_bg_volume', vol);
+    } catch {}
+  },
+  getBgVolume() {
+    try {
+      const stored = localStorage.getItem('bb_bg_volume');
+      if (stored !== null) return parseFloat(stored);
+    } catch {}
+    return 0.3; // Default lower volume
+  }
 };

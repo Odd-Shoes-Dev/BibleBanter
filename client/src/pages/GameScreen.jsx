@@ -17,13 +17,40 @@ export default function GameScreen({
   const [timeUp, setTimeUp] = useState(false);
   const prevQuestionRef = useRef(null);
 
+  // Initialize volume state
+  const [vol, setVol] = useState(() => sounds.getBgVolume ? sounds.getBgVolume() : 0.3);
+
+  const handleVolumeChange = (e) => {
+    const newVol = parseFloat(e.target.value);
+    setVol(newVol);
+    if (sounds.setBgVolume) sounds.setBgVolume(newVol);
+  };
+
+  const handleLeave = () => {
+    if (sounds.stopBg) sounds.stopBg();
+    if (onLeave) onLeave();
+  };
+
   useEffect(() => {
     if (question && question.index !== prevQuestionRef.current) {
       setSelected(null);
       setTimeUp(false);
       prevQuestionRef.current = question.index;
+
+      // Ensure music starts if not playing, normally triggered by first question mount
+      if (sounds.playBg && question.index === 0) sounds.playBg();
     }
   }, [question]);
+
+  useEffect(() => {
+    // Play music when component mounts initially
+    if (sounds.playBg) sounds.playBg();
+    
+    // Stop music upon unmount
+    return () => {
+      if (sounds.stopBg) sounds.stopBg();
+    };
+  }, []);
 
   useEffect(() => {
     if (!answerResult) return;
@@ -78,7 +105,9 @@ export default function GameScreen({
       onNextQuestion={onNextQuestion}
       timeUp={timeUp}
       setTimeUp={setTimeUp}
-      onLeave={onLeave}
+      onLeave={handleLeave}
+      vol={vol}
+      handleVolumeChange={handleVolumeChange}
     />;
   }
 
@@ -160,12 +189,25 @@ export default function GameScreen({
           <p className="text-white/20 text-xs uppercase tracking-widest mt-2">Waiting for host...</p>
 
           {onLeave && (
-            <button onClick={onLeave}
+            <button onClick={handleLeave}
               className="mt-4 px-5 py-2 rounded-xl text-xs font-bold text-white/25 hover:text-white/50 transition-colors"
               style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
               ✕ Leave Game
             </button>
           )}
+
+          {/* Volume slider */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <span className="text-white/30 text-xs">🔈</span>
+            <input 
+              type="range" min="0" max="1" step="0.01" 
+              value={vol} onChange={handleVolumeChange} 
+              className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+              style={{ cursor: 'pointer' }}
+            />
+            <span className="text-white/30 text-xs">🔊</span>
+          </div>
+
         </div>
         </div>
       </div>
@@ -237,8 +279,19 @@ export default function GameScreen({
       </div>
 
       {onLeave && (
-        <div className="flex justify-center pb-3">
-          <button onClick={onLeave}
+        <div className="flex flex-col items-center pb-3 gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-white/30 text-xs">🔈</span>
+            <input 
+              type="range" min="0" max="1" step="0.01" 
+              value={vol} onChange={handleVolumeChange} 
+              className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+              style={{ cursor: 'pointer' }}
+            />
+            <span className="text-white/30 text-xs">🔊</span>
+          </div>
+
+          <button onClick={handleLeave}
             className="px-5 py-2 rounded-xl text-xs font-bold text-white/25 hover:text-white/50 transition-colors"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             ✕ Leave Game
@@ -250,7 +303,7 @@ export default function GameScreen({
   );
 }
 
-function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQuestion, timeUp, setTimeUp, onLeave }) {
+function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQuestion, timeUp, setTimeUp, onLeave, vol, handleVolumeChange }) {
   const pct = answerProgress.total > 0
     ? Math.round((answerProgress.answered / answerProgress.total) * 100)
     : 0;
@@ -323,17 +376,30 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
           </button>
           
           {onLeave && (
-            <button onClick={onLeave}
-              className="w-full py-3 rounded-xl font-bold text-sm text-red-300/80 hover:text-red-300 hover:bg-red-500/20 transition-colors"
-              style={{ border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-              🛑 END GAME EARLY
-            </button>
+            <div className="flex flex-col items-center gap-3">
+              <button onClick={onLeave}
+                className="w-full py-3 rounded-xl font-bold text-sm text-red-300/80 hover:text-red-300 hover:bg-red-500/20 transition-colors"
+                style={{ border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                🛑 END GAME EARLY
+              </button>
+
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-white/30 text-xs">🔈</span>
+                <input 
+                  type="range" min="0" max="1" step="0.01" 
+                  value={vol} onChange={handleVolumeChange} 
+                  className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+                  style={{ cursor: 'pointer' }}
+                />
+                <span className="text-white/30 text-xs">🔊</span>
+              </div>
+            </div>
           )}
         </div>
       </div>
 
       {/* Live leaderboard sidebar */}
-      <div className="w-56 lg:w-64 flex-shrink-0 flex flex-col py-3 pr-3 pl-2 hidden sm:flex"
+      <div className="w-56 lg:w-64 flex-shrink-0 hidden sm:flex flex-col py-3 pr-3 pl-2"
         style={{ borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
         <p className="text-white/40 text-xs font-black uppercase tracking-widest mb-3 text-center">🏆 Live Rankings</p>
         <div className="flex-1 space-y-1.5 overflow-y-auto">
