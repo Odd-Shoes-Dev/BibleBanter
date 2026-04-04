@@ -78,6 +78,7 @@ export default function GameScreen({
       onNextQuestion={onNextQuestion}
       timeUp={timeUp}
       setTimeUp={setTimeUp}
+      onLeave={onLeave}
     />;
   }
 
@@ -249,7 +250,7 @@ export default function GameScreen({
   );
 }
 
-function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQuestion, timeUp, setTimeUp }) {
+function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQuestion, timeUp, setTimeUp, onLeave }) {
   const pct = answerProgress.total > 0
     ? Math.round((answerProgress.answered / answerProgress.total) * 100)
     : 0;
@@ -312,7 +313,7 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
           )}
           <button
             onClick={onNextQuestion}
-            className="w-full py-3 md:py-4 rounded-xl font-black text-base md:text-lg text-white font-nunito tracking-wide transition-all duration-200 hover:brightness-110"
+            className="w-full py-3 md:py-4 rounded-xl font-black text-base md:text-lg text-white font-nunito tracking-wide transition-all duration-200 hover:brightness-110 mb-3"
             style={{
               background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
               boxShadow: '0 6px 24px rgba(124,58,237,0.4)'
@@ -320,6 +321,14 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
           >
             {question.index + 1 >= question.total ? '🏆 SHOW RESULTS' : '⏭️ NEXT QUESTION'}
           </button>
+          
+          {onLeave && (
+            <button onClick={onLeave}
+              className="w-full py-3 rounded-xl font-bold text-sm text-red-300/80 hover:text-red-300 hover:bg-red-500/20 transition-colors"
+              style={{ border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+              🛑 END GAME EARLY
+            </button>
+          )}
         </div>
       </div>
 

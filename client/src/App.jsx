@@ -441,7 +441,7 @@ export default function App() {
               players={players}
               onNextQuestion={handleNextQuestion}
               playerName={playerName}
-              onLeave={role !== 'host' ? () => { resetGame(); navigate('/'); } : undefined}
+              onLeave={() => { resetGame(); navigate('/'); }}
             />
           )
         } />
