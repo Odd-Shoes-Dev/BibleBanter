@@ -36,7 +36,15 @@ const Footer = () => {
           </a>
         </p>
         <p className="font-body text-xs text-muted-foreground pt-4 opacity-75">
-          Music: "Game Over" by Danijel Zambo
+          Music:{" "}
+          <a
+            href="https://uppbeat.io/track/danijel-zambo/game-over?rt=uc-referral"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline decoration-accent underline-offset-2 hover:text-accent transition-colors"
+          >
+            "Game Over" by Danijel Zambo
+          </a>
         </p>
       </div>
     </footer>

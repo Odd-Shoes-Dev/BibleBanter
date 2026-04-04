@@ -310,7 +310,17 @@ export default function GameOver({
 
         <div className="text-center text-white/25 text-xs font-nunito tracking-wide pb-4 space-y-1">
           <p>BIBLE BANTER — TEST YOUR SCRIPTURE KNOWLEDGE</p>
-          <p>Music: "Game Over" by Danijel Zambo</p>
+          <p>
+            Music:{" "}
+            <a
+              href="https://uppbeat.io/track/danijel-zambo/game-over?rt=uc-referral"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-white/50 transition-colors"
+            >
+              "Game Over" by Danijel Zambo
+            </a>
+          </p>
         </div>
       </div>
     </div>
