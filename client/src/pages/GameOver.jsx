@@ -308,9 +308,10 @@ export default function GameOver({
           </button>
         )}
 
-        <p className="text-center text-white/25 text-xs font-nunito tracking-wide pb-4">
-          BIBLE BANTER — TEST YOUR SCRIPTURE KNOWLEDGE
-        </p>
+        <div className="text-center text-white/25 text-xs font-nunito tracking-wide pb-4 space-y-1">
+          <p>BIBLE BANTER — TEST YOUR SCRIPTURE KNOWLEDGE</p>
+          <p>Music: "Game Over" by Danijel Zambo</p>
+        </div>
       </div>
     </div>
   );

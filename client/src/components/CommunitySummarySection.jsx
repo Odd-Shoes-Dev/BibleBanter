@@ -62,7 +62,7 @@ export default function CommunitySummarySection() {
             {/* Banner box */}
             <div
               className="relative p-8 border-[4px] border-black rotate-[-1.5deg]"
-              style={{ backgroundColor: "hsl(140 80% 60%)", color: "#000000" }}
+              style={{ backgroundColor: "#ff90e8", color: "#000000" }}
             >
               <h2 className="font-heading font-black text-4xl md:text-6xl uppercase tracking-wider mb-2">
                 <AnimatedCounter to={totalQuestions} />{" "}
@@ -88,7 +88,7 @@ export default function CommunitySummarySection() {
           >
             <span
               className="inline-block font-body font-bold text-xs uppercase tracking-wider px-3 py-1 mb-3 border-[3px] border-black rotate-[-2deg]"
-              style={{ backgroundColor: "hsl(270 80% 60%)", color: "#FFFFFF" }}
+              style={{ backgroundColor: "#ff4911", color: "#FFFFFF" }}
             >
               AI Curated
             </span>
@@ -97,7 +97,7 @@ export default function CommunitySummarySection() {
               <div
                 className="relative border-[4px] border-black p-6 rotate-[1.5deg] transition-transform duration-200 hover:-translate-y-1 hover:-translate-x-1 cursor-pointer"
                 style={{
-                  backgroundColor: "hsl(180 100% 45%)",
+                  backgroundColor: "#ccff00",
                   color: "#000000",
                 }}
               >
@@ -121,7 +121,7 @@ export default function CommunitySummarySection() {
           >
             <span
               className="inline-block font-body font-bold text-xs uppercase tracking-wider px-3 py-1 mb-3 border-[3px] border-black rotate-[2deg]"
-              style={{ backgroundColor: "hsl(0 0% 10%)", color: "#FFFFFF" }}
+              style={{ backgroundColor: "#7400b8", color: "#FFFFFF" }}
             >
               Global Effort
             </span>
@@ -130,7 +130,7 @@ export default function CommunitySummarySection() {
               <div
                 className="relative border-[4px] border-black p-6 rotate-[-1deg] transition-transform duration-200 hover:-translate-y-1 hover:-translate-x-1 cursor-pointer"
                 style={{
-                  backgroundColor: "hsl(50 100% 55%)",
+                  backgroundColor: "#06d6a0",
                   color: "#000000",
                 }}
               >

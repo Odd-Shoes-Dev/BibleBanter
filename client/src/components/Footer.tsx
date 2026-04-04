@@ -35,6 +35,9 @@ const Footer = () => {
             Shadrack
           </a>
         </p>
+        <p className="font-body text-xs text-muted-foreground pt-4 opacity-75">
+          Music: "Game Over" by Danijel Zambo
+        </p>
       </div>
     </footer>
   );
