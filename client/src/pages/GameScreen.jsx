@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import Timer from '../components/Timer';
 import { sounds } from '../utils/sound';
 
@@ -187,6 +187,18 @@ export default function GameScreen({
             </p>
           </div>
 
+          {/* Volume slider */}
+          <div className="mt-4 mb-2 flex items-center justify-center gap-2">
+            <span className="text-white/30 text-xs">🔈</span>
+            <input 
+              type="range" min="0" max="1" step="0.01" 
+              value={vol} onChange={handleVolumeChange} 
+              className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+              style={{ cursor: 'pointer' }}
+            />
+            <span className="text-white/30 text-xs">🔊</span>
+          </div>
+
           <p className="text-white/20 text-xs uppercase tracking-widest mt-2">Waiting for host...</p>
 
           {onLeave && (
@@ -196,18 +208,6 @@ export default function GameScreen({
               ✕ Leave Game
             </button>
           )}
-        </div>
-
-        {/* Volume slider */}
-        <div className="mt-4 flex items-center justify-center gap-2 pb-6">
-          <span className="text-white/30 text-xs">🔈</span>
-          <input 
-            type="range" min="0" max="1" step="0.01" 
-            value={vol} onChange={handleVolumeChange} 
-            className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-            style={{ cursor: 'pointer' }}
-          />
-          <span className="text-white/30 text-xs">🔊</span>
         </div>
 
         </div>
@@ -220,8 +220,18 @@ export default function GameScreen({
       <div className="w-full max-w-lg flex flex-col min-h-screen">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
-        <span className="text-white/50 text-sm font-semibold">
-          Question {question.index + 1} / {question.total}
+        <span className="text-white/50 text-sm font-semibold flex items-center gap-3">
+          <span>Question {question.index + 1} / {question.total}</span>
+          <div className="flex items-center gap-1 hidden sm:flex">
+            <span className="text-white/30 text-xs">🔈</span>
+            <input 
+              type="range" min="0" max="1" step="0.01" 
+              value={vol} onChange={handleVolumeChange} 
+              className="w-16 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+              style={{ cursor: 'pointer' }}
+            />
+            <span className="text-white/30 text-xs">🔊</span>
+          </div>
         </span>
         {/* Live rank badge */}
         {liveLeaderboard.length > 0 && playerName && (() => {
@@ -233,6 +243,17 @@ export default function GameScreen({
             </span>
           ) : null;
         })()}
+      </div>
+      {/* Mobile volume slider */}
+      <div className="flex items-center justify-center gap-2 sm:hidden pb-1">
+        <span className="text-white/30 text-xs">🔈</span>
+        <input 
+          type="range" min="0" max="1" step="0.01" 
+          value={vol} onChange={handleVolumeChange} 
+          className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+          style={{ cursor: 'pointer' }}
+        />
+        <span className="text-white/30 text-xs">🔊</span>
       </div>
 
       {/* Timer - centered */}
@@ -280,17 +301,6 @@ export default function GameScreen({
       </div>
 
       <div className="flex flex-col items-center pb-3 gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-white/30 text-xs">🔈</span>
-          <input 
-            type="range" min="0" max="1" step="0.01" 
-            value={vol} onChange={handleVolumeChange} 
-            className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-            style={{ cursor: 'pointer' }}
-          />
-          <span className="text-white/30 text-xs">🔊</span>
-        </div>
-
         {onLeave && (
           <button onClick={handleLeave}
             className="px-5 py-2 rounded-xl text-xs font-bold text-white/25 hover:text-white/50 transition-colors"
@@ -315,15 +325,35 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
       {/* Main question area */}
       <div className="flex-1 flex flex-col px-4 py-3 md:px-8 min-w-0">
         {/* Top bar */}
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-white/50 text-sm md:text-base font-semibold">
-            Question {question.index + 1} / {question.total}
-          </span>
-          <span className="text-white/50 text-sm md:text-base font-semibold">
-            {answerProgress.answered}/{answerProgress.total} answered
-          </span>
-        </div>
-
+          <div className="flex items-center justify-between mb-0">
+            <span className="text-white/50 text-sm md:text-base font-semibold flex items-center gap-3">
+              <span>Question {question.index + 1} / {question.total}</span>
+              <div className="flex items-center gap-1 hidden sm:flex">
+                <span className="text-white/30 text-xs">🔈</span>
+                <input 
+                  type="range" min="0" max="1" step="0.01" 
+                  value={vol} onChange={handleVolumeChange} 
+                  className="w-16 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+                  style={{ cursor: 'pointer' }}
+                />
+                <span className="text-white/30 text-xs">🔊</span>
+              </div>
+            </span>
+            <span className="text-white/50 text-sm md:text-base font-semibold">
+              {answerProgress.answered}/{answerProgress.total} answered
+            </span>
+          </div>
+          {/* Mobile volume slider */}
+          <div className="flex items-center justify-center gap-2 sm:hidden mb-2">
+            <span className="text-white/30 text-xs">🔈</span>
+            <input 
+              type="range" min="0" max="1" step="0.01" 
+              value={vol} onChange={handleVolumeChange} 
+              className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
+              style={{ cursor: 'pointer' }}
+            />
+            <span className="text-white/30 text-xs">🔊</span>
+          </div>
         {/* Circular timer — centered */}
         <div className="flex justify-center py-3">
           <Timer
@@ -384,20 +414,9 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
                 🛑 END GAME EARLY
               </button>
             )}
-
-            <div className="flex items-center gap-2 mt-2 pb-3">
-              <span className="text-white/30 text-xs">🔈</span>
-              <input 
-                type="range" min="0" max="1" step="0.01" 
-                value={vol} onChange={handleVolumeChange} 
-                className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-                style={{ cursor: 'pointer' }}
-              />
-              <span className="text-white/30 text-xs">🔊</span>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Live leaderboard sidebar */}
       <div className="w-56 lg:w-64 flex-shrink-0 hidden sm:flex flex-col py-3 pr-3 pl-2"
