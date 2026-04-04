@@ -45,6 +45,11 @@ export default function JoinPage({ onJoin, onBack }) {
       return;
     }
 
+    if (gameMode === 'Team mode' && !team) {
+      setError("Please select a team");
+      return;
+    }
+
     if (team === 'custom' && (!customTeamName.trim() || customTeamName.length < 2)) {
       setError("Please enter a valid Custom Team Name (at least 2 chars)");
       return;
@@ -116,7 +121,7 @@ export default function JoinPage({ onJoin, onBack }) {
             {gameMode === "Team mode" && (
               <div>
                 <label className="block text-sm font-semibold text-amber-400 mb-2 tracking-wide uppercase">
-                  Team (Optional)
+                  Select a Team
                 </label>
                 <div className="grid grid-cols-2 gap-3 mb-2">
                   {teams.map((t) => (
@@ -150,9 +155,6 @@ export default function JoinPage({ onJoin, onBack }) {
                     />
                   </div>
                 )}
-                <p className="text-white/40 text-xs text-center italic mt-2">
-                  Deselect to play solo
-                </p>
               </div>
             )}
 

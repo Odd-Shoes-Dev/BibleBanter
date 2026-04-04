@@ -396,6 +396,10 @@ function setupSocketHandlers(io) {
       if (!safeName)
         return callback({ success: false, error: "Invalid name." });
 
+      if (game.mode === "Team mode" && !team) {
+        return callback({ success: false, error: "You must select a team to join this game." });
+      }
+
       if (
         [...game.players.values()].find(
           (p) => p.name.toLowerCase() === safeName.toLowerCase(),
