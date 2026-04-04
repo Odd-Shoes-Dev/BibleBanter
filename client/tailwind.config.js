@@ -98,12 +98,17 @@ export default {
           "0%, 100%": { boxShadow: "0 0 0 0 hsl(38 92% 50% / 0.4)" },
           "50%": { boxShadow: "0 0 0 12px hsl(38 92% 50% / 0)" },
         },
+        "spin-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 3s ease-in-out infinite",
         "pulse-gold": "pulse-gold 2s ease-in-out infinite",
+        "spin-slow": "spin-slow 3s linear infinite",
       },
     },
   },
