@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 const ANSWER_SHAPES = ['▲', '◆', '●', '■'];
 const ANSWER_LABELS = ['A', 'B', 'C', 'D'];
@@ -139,7 +140,9 @@ export default function ResultsScreen({ results, teamLeaderboard, role, answerRe
             {leaderboard.slice(0, 8).map((player, i) => {
               const isMe = player.name === playerName;
               return (
-                <div
+                <motion.div
+                  layout
+                  transition={{ type: 'spring', bounce: 0.65, duration: 1.2 }}
                   key={player.name}
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 animate-slide-up ${
                     isMe
@@ -167,7 +170,7 @@ export default function ResultsScreen({ results, teamLeaderboard, role, answerRe
                   }`}>
                     {player.score.toLocaleString()}
                   </span>
-                </div>
+                </motion.div>
               );
             })}
           </div>

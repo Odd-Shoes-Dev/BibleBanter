@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import Timer from '../components/Timer';
 import { sounds } from '../utils/sound';
+import { motion } from 'framer-motion';
 
 const ANSWERS = [
   { bg: 'answer-a', label: 'A', shape: '▲', color: '#ef4444' },
@@ -21,6 +22,7 @@ export default function GameScreen({
 }) {
   const [selected, setSelected] = useState(null);
   const [timeUp, setTimeUp] = useState(false);
+  const [answersRevealed, setAnswersRevealed] = useState(false);
   const prevQuestionRef = useRef(null);
 
   // Initialize volume state
@@ -41,17 +43,22 @@ export default function GameScreen({
     if (question && question.index !== prevQuestionRef.current) {
       setSelected(null);
       setTimeUp(false);
+      setAnswersRevealed(false);
       prevQuestionRef.current = question.index;
 
+      const timerId = setTimeout(() => setAnswersRevealed(true), 10000);
+
       // Ensure music starts if not playing, normally triggered by first question mount
-      if (sounds.playBg && question.index === 0) sounds.playBg();
+      if (sounds.playBg && question.index === 0 && role === 'host') sounds.playBg();
+
+      return () => clearTimeout(timerId);
     }
-  }, [question]);
+  }, [question, role]);
 
   useEffect(() => {
     // Play music when entering game
-    if (sounds.playBg) sounds.playBg();
-  }, []);
+    if (sounds.playBg && role === 'host') sounds.playBg();
+  }, [role]);
 
   useEffect(() => {
     if (!answerResult) return;
@@ -261,7 +268,7 @@ export default function GameScreen({
         <Timer
           duration={question.timeLimit}
           onTimeUp={() => setTimeUp(true)}
-          paused={selected !== null}
+          paused={selected !== null || !answersRevealed}
           questionIndex={question.index}
           circular
         />
@@ -359,7 +366,7 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
           <Timer
             duration={question.timeLimit}
             onTimeUp={() => setTimeUp(true)}
-            paused={false}
+            paused={!answersRevealed}
             questionIndex={question.index}
             circular
           />
@@ -427,7 +434,9 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
             <p className="text-white/20 text-xs text-center mt-8">Waiting for answers...</p>
           ) : (
             liveLeaderboard.slice(0, 12).map((player, i) => (
-              <div
+              <motion.div
+                layout
+                transition={{ type: 'spring', bounce: 0.65, duration: 1.2 }}
                 key={player.name}
                 className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-300"
                 style={{
@@ -451,7 +460,7 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
                   style={{ color: i === 0 ? '#fbbf24' : '#ffffff70' }}>
                   {player.score.toLocaleString()}
                 </span>
-              </div>
+              </motion.div>
             ))
           )}
         </div>

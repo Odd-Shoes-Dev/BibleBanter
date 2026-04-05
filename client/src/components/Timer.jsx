@@ -5,10 +5,18 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
   const [timeLeft, setTimeLeft] = useState(duration);
   const intervalRef = useRef(null);
   const startTimeRef = useRef(Date.now());
+  const totalPausedTimeRef = useRef(0);
+  const lastPausedAtRef = useRef(null);
 
   useEffect(() => {
     setTimeLeft(duration);
     startTimeRef.current = Date.now();
+    totalPausedTimeRef.current = 0;
+    if (paused) {
+      lastPausedAtRef.current = Date.now();
+    } else {
+      lastPausedAtRef.current = null;
+    }
   }, [questionIndex, duration]);
 
   const lastTickRef = useRef(-1);
@@ -19,12 +27,20 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
 
   useEffect(() => {
     if (paused) {
+      if (!lastPausedAtRef.current) {
+        lastPausedAtRef.current = Date.now();
+      }
       clearInterval(intervalRef.current);
       return;
+    } else {
+      if (lastPausedAtRef.current) {
+        totalPausedTimeRef.current += (Date.now() - lastPausedAtRef.current);
+        lastPausedAtRef.current = null;
+      }
     }
 
     intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTimeRef.current) / 1000;
+      const elapsed = (Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000;
       const remaining = Math.max(0, duration - elapsed);
       setTimeLeft(remaining);
 
