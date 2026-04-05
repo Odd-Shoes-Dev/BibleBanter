@@ -279,10 +279,8 @@ export default function GameScreen({
             </button>
           ))
         ) : (
-          <div className="col-span-2 flex flex-col items-center justify-center gap-3 animate-pulse opacity-70">
-            <p className="text-white/60 font-semibold font-nunito tracking-wide">
-              Revealing answers...
-            </p>
+          <div className="col-span-2 flex flex-col items-center justify-center animate-pulse opacity-70">
+            <span className="text-6xl mb-2 inline-block animate-spin-slow" style={{ transformOrigin: "50% 48%", animationDuration: "2000ms" }}>⏳</span>
           </div>
         )}
       </div>
@@ -378,10 +376,7 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
             ))
           ) : (
             <div className="col-span-2 flex flex-col items-center justify-center animate-pulse opacity-60">
-              <span className="text-4xl mb-3">⏳</span>
-              <p className="text-xl md:text-2xl text-white/50 font-nunito font-black uppercase tracking-widest">
-                Revealing answers soon...
-              </p>
+              <span className="text-6xl mb-2 inline-block animate-spin-slow" style={{ transformOrigin: "50% 48%", animationDuration: "2000ms" }}>⏳</span>
             </div>
           )}
         </div>
