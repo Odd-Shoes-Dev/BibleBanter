@@ -66,7 +66,7 @@ function createGameFlowFunctions(io) {
     }
 
     game.status = "question";
-    game.questionStartTime = Date.now();
+    game.questionStartTime = Date.now() + 10000;
 
     // Reset player answered state
     game.players.forEach((p) => {
@@ -86,7 +86,7 @@ function createGameFlowFunctions(io) {
     });
 
     const qTime = game.questionTime || QUESTION_TIME;
-    game.timer = setTimeout(() => showResults(pin), qTime * 1000 + 500);
+    game.timer = setTimeout(() => showResults(pin), (qTime + 10) * 1000 + 500);
   }
 
   function showResults(pin) {
@@ -551,7 +551,7 @@ function setupSocketHandlers(io) {
       if (!player || player.answered) return;
 
       const q = game.questions[game.currentQuestion];
-      const timeElapsed = (Date.now() - game.questionStartTime) / 1000;
+      const timeElapsed = Math.max(0, (Date.now() - game.questionStartTime) / 1000);
       const isCorrect = answerIndex === q.answer;
 
       let pointsEarned = 0;
@@ -581,7 +581,7 @@ function setupSocketHandlers(io) {
       });
 
       // Persist answer to DB
-      const responseTimeMs = Date.now() - game.questionStartTime;
+      const responseTimeMs = Math.max(0, Date.now() - game.questionStartTime);
       if (game.dbGameId) {
         prisma.playerAnswer
           .create({
