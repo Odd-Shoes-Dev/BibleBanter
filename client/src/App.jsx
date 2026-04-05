@@ -20,6 +20,7 @@ import SessionReport from './pages/SessionReport';
 import ReportsPage from './pages/ReportsPage';
 import SoloPractice from './pages/SoloPractice';
 import Confetti from './components/Confetti';
+import PWAPrompts from './components/PWAPrompts';
 import { sounds } from './utils/sound';
 
 // ── Route wrapper components ─────────────────────────────────────────────────
@@ -320,6 +321,7 @@ export default function App() {
   return (
     <div className="min-h-screen stars-bg">
       {showConfetti && <Confetti />}
+      <PWAPrompts />
 
       {reconnecting && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
