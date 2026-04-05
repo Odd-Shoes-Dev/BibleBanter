@@ -112,7 +112,7 @@ export default function ResultsScreen({ results, teamLeaderboard, role, answerRe
           <div className="rounded-2xl p-4 animate-slide-up"
             style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
             <p className="text-amber-400/70 text-xs font-bold uppercase tracking-wider mb-2">📖 Scripture</p>
-            <p className="text-white/75 text-sm leading-relaxed italic">{scripture}</p>
+            <p className="text-white/75 text-sm leading-relaxed italic">{decodeHTML(scripture)}</p>
           </div>
         )}
 
