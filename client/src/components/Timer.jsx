@@ -40,7 +40,8 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
     }
 
     intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTimeRef.current - totalPausedTimeRef.current) / 1000;
+      const msElapsed = Date.now() - startTimeRef.current;
+      const elapsed = (msElapsed - totalPausedTimeRef.current) / 1000;
       const remaining = Math.max(0, duration - elapsed);
       setTimeLeft(remaining);
 
@@ -58,7 +59,7 @@ export default function Timer({ duration, onTimeUp, paused, questionIndex, hostM
     }, 100);
 
     return () => clearInterval(intervalRef.current);
-  }, [paused, questionIndex, duration, onTimeUp]);
+  }, [paused, duration, onTimeUp]);
 
   const percent = (timeLeft / duration) * 100;
   const isUrgent = timeLeft <= 5;

@@ -45,15 +45,19 @@ export default function GameScreen({
       setTimeUp(false);
       setAnswersRevealed(false);
       prevQuestionRef.current = question.index;
-
-      const timerId = setTimeout(() => setAnswersRevealed(true), 10000);
-
+      
       // Ensure music starts if not playing, normally triggered by first question mount
+      // role shouldn't practically change mid-game, but we check here.
       if (sounds.playBg && question.index === 0 && role === 'host') sounds.playBg();
-
-      return () => clearTimeout(timerId);
     }
-  }, [question, role]);
+  }, [question?.index, role]);
+
+  useEffect(() => {
+    if (!question) return;
+    setAnswersRevealed(false);
+    const timerId = setTimeout(() => setAnswersRevealed(true), 10000);
+    return () => clearTimeout(timerId);
+  }, [question?.index]);
 
   useEffect(() => {
     // Play music when entering game
@@ -116,6 +120,7 @@ export default function GameScreen({
       onLeave={handleLeave}
       vol={vol}
       handleVolumeChange={handleVolumeChange}
+      answersRevealed={answersRevealed}
     />;
   }
 
@@ -194,18 +199,6 @@ export default function GameScreen({
             </p>
           </div>
 
-          {/* Volume slider */}
-          <div className="mt-4 mb-2 flex items-center justify-center gap-2">
-            <span className="text-white/30 text-xs">🔈</span>
-            <input 
-              type="range" min="0" max="1" step="0.01" 
-              value={vol} onChange={handleVolumeChange} 
-              className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-              style={{ cursor: 'pointer' }}
-            />
-            <span className="text-white/30 text-xs">🔊</span>
-          </div>
-
           <p className="text-white/20 text-xs uppercase tracking-widest mt-2">Waiting for host...</p>
 
           {onLeave && (
@@ -229,16 +222,6 @@ export default function GameScreen({
       <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
         <span className="text-white/50 text-sm font-semibold flex items-center gap-3">
           <span>Question {question.index + 1} / {question.total}</span>
-          <div className="hidden sm:flex items-center gap-1">
-            <span className="text-white/30 text-xs">🔈</span>
-            <input 
-              type="range" min="0" max="1" step="0.01" 
-              value={vol} onChange={handleVolumeChange} 
-              className="w-16 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-              style={{ cursor: 'pointer' }}
-            />
-            <span className="text-white/30 text-xs">🔊</span>
-          </div>
         </span>
         {/* Live rank badge */}
         {liveLeaderboard.length > 0 && playerName && (() => {
@@ -250,17 +233,6 @@ export default function GameScreen({
             </span>
           ) : null;
         })()}
-      </div>
-      {/* Mobile volume slider */}
-      <div className="flex items-center justify-center gap-2 sm:hidden pb-1">
-        <span className="text-white/30 text-xs">🔈</span>
-        <input 
-          type="range" min="0" max="1" step="0.01" 
-          value={vol} onChange={handleVolumeChange} 
-          className="w-24 h-1 bg-white/10 rounded-full appearance-none outline-none accent-amber-300"
-          style={{ cursor: 'pointer' }}
-        />
-        <span className="text-white/30 text-xs">🔊</span>
       </div>
 
       {/* Timer - centered */}
@@ -287,24 +259,32 @@ export default function GameScreen({
 
       {/* Answer grid */}
       <div className="grid grid-cols-2 gap-3 px-4 pb-4 flex-1">
-        {question.options.map((opt, i) => (
-          <button
-            key={i}
-            onClick={() => handleAnswer(i)}
-            disabled={selected !== null || timeUp}
-            className={`${getButtonClass(i)} rounded-2xl font-black text-white transition-all duration-200 active:scale-95 flex items-center justify-center gap-2.5 px-4 animate-slide-up`}
-            style={{
-              animationDelay: `${i * 0.07}s`,
-              minHeight: 'clamp(70px, 13vh, 130px)',
-              boxShadow: selected === i
-                ? '0 0 0 4px rgba(255,255,255,0.85), 0 8px 30px rgba(0,0,0,0.5)'
-                : undefined
-            }}
-          >
-            <span className="text-xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
-            <span className="text-base font-black leading-tight text-center">{decodeHTML(opt)}</span>
-          </button>
-        ))}
+        {answersRevealed ? (
+          question.options.map((opt, i) => (
+            <button
+              key={i}
+              onClick={() => handleAnswer(i)}
+              disabled={selected !== null || timeUp}
+              className={`${getButtonClass(i)} rounded-2xl font-black text-white transition-all duration-200 active:scale-95 flex items-center justify-center gap-2.5 px-4 animate-slide-up`}
+              style={{
+                animationDelay: `${i * 0.07}s`,
+                minHeight: 'clamp(70px, 13vh, 130px)',
+                boxShadow: selected === i
+                  ? '0 0 0 4px rgba(255,255,255,0.85), 0 8px 30px rgba(0,0,0,0.5)'
+                  : undefined
+              }}
+            >
+              <span className="text-xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
+              <span className="text-base font-black leading-tight text-center">{decodeHTML(opt)}</span>
+            </button>
+          ))
+        ) : (
+          <div className="col-span-2 flex flex-col items-center justify-center gap-3 animate-pulse opacity-70">
+            <p className="text-white/60 font-semibold font-nunito tracking-wide">
+              Revealing answers...
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col items-center pb-3 gap-3">
@@ -321,7 +301,7 @@ export default function GameScreen({
   );
 }
 
-function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQuestion, timeUp, setTimeUp, onLeave, vol, handleVolumeChange }) {
+function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQuestion, timeUp, setTimeUp, onLeave, vol, handleVolumeChange, answersRevealed }) {
   const pct = answerProgress.total > 0
     ? Math.round((answerProgress.answered / answerProgress.total) * 100)
     : 0;
@@ -385,16 +365,25 @@ function HostGameView({ question, answerProgress, liveLeaderboard = [], onNextQu
 
         {/* Answer grid */}
         <div className="grid grid-cols-2 gap-3 md:gap-5 flex-1">
-          {question.options.map((opt, i) => (
-            <div
-              key={i}
-              className={`${ANSWERS[i].bg} rounded-2xl flex items-center justify-center gap-3 px-4 md:px-6 font-black text-white shadow-lg`}
-              style={{ minHeight: 'clamp(80px, 12vh, 160px)' }}
-            >
-              <span className="text-2xl md:text-3xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
-              <span className="text-lg md:text-xl lg:text-2xl leading-tight text-center">{decodeHTML(opt)}</span>
+          {answersRevealed ? (
+            question.options.map((opt, i) => (
+              <div
+                key={i}
+                className={`${ANSWERS[i].bg} rounded-2xl flex items-center justify-center gap-3 px-4 md:px-6 font-black text-white shadow-lg`}
+                style={{ minHeight: 'clamp(80px, 12vh, 160px)' }}
+              >
+                <span className="text-2xl md:text-3xl leading-none flex-shrink-0">{ANSWERS[i].shape}</span>
+                <span className="text-lg md:text-xl lg:text-2xl leading-tight text-center">{decodeHTML(opt)}</span>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-2 flex flex-col items-center justify-center animate-pulse opacity-60">
+              <span className="text-4xl mb-3">⏳</span>
+              <p className="text-xl md:text-2xl text-white/50 font-nunito font-black uppercase tracking-widest">
+                Revealing answers soon...
+              </p>
             </div>
-          ))}
+          )}
         </div>
 
         {/* Next button */}
