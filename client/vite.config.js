@@ -18,7 +18,7 @@ export default defineConfig({
         'hero-bg.jpg',
       ],
       manifest: {
-        name: 'Bible Banter',
+        name: ' ',
         short_name: 'Bible Banter',
         description: 'AI-powered live Bible trivia for churches, fellowships, and youth groups.',
         theme_color: '#1a2744',
