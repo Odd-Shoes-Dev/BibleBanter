@@ -21,6 +21,7 @@ import ReportsPage from './pages/ReportsPage';
 import SoloPractice from './pages/SoloPractice';
 import Confetti from './components/Confetti';
 import PWAPrompts from './components/PWAPrompts';
+import LoadingScreen from './components/LoadingScreen';
 import { sounds } from './utils/sound';
 
 // ── Route wrapper components ─────────────────────────────────────────────────
@@ -316,10 +317,18 @@ export default function App() {
 
   const clearError = () => setErrorMsg('');
 
+  // ── Loading screen (first visit only per session) ──────────────────────
+  const [showLoading, setShowLoading] = useState(() => !sessionStorage.getItem('bb_loaded'));
+  const handleLoadingFinished = () => {
+    sessionStorage.setItem('bb_loaded', '1');
+    setShowLoading(false);
+  };
+
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen stars-bg">
+      {showLoading && <LoadingScreen onFinished={handleLoadingFinished} />}
       {showConfetti && <Confetti />}
       <PWAPrompts />
 
