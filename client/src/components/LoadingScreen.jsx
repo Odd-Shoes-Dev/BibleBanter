@@ -13,7 +13,7 @@ export default function LoadingScreen({ onFinished }) {
     <div
       className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#1a2744] transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
     >
-      <span className="text-[8rem] sm:text-[10rem] font-bold font-serif text-[#F5A623] leading-none">
+      <span className="text-[8rem] sm:text-[10rem] font-bold font-serif text-[#FFB830] leading-none">
         B
       </span>
       <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-white tracking-tight">
