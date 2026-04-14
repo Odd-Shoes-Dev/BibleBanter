@@ -108,10 +108,8 @@ export default function SoloPractice({ onBack, authToken }) {
     let pts = 0;
     let newStreak = streak;
     if (isCorrect) {
-      const bonus = Math.max(0, 1 - timeUsed / QUESTION_TIME);
-      pts = Math.round(1000 * (0.5 + 0.5 * bonus));
+      pts = timeUsed <= 5 ? 6 : 5;
       newStreak = streak + 1;
-      if (newStreak >= 3) pts = Math.round(pts * 1.2);
       setScore(s => s + pts);
       setStreak(newStreak);
     } else {

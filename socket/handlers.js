@@ -5,7 +5,7 @@ const { sanitizePlayerName } = require("../utils/sanitize");
 
 const QUESTION_TIME = 20; // seconds per question (default)
 const RESULTS_TIME = 7; // seconds to show results before auto-advancing
-const MAX_POINTS = 1000;
+
 
 // In-memory game store  —  lives for the lifetime of the Node process
 const games = {};
@@ -556,13 +556,8 @@ function setupSocketHandlers(io) {
 
       let pointsEarned = 0;
       if (isCorrect) {
-        const timeBonus = Math.max(
-          0,
-          1 - timeElapsed / (game.questionTime || QUESTION_TIME),
-        );
-        pointsEarned = Math.round(MAX_POINTS * (0.5 + 0.5 * timeBonus));
+        pointsEarned = timeElapsed <= 5 ? 6 : 5;
         player.streak = (player.streak || 0) + 1;
-        if (player.streak >= 3) pointsEarned = Math.round(pointsEarned * 1.2);
         player.score += pointsEarned;
       } else {
         player.streak = 0;
