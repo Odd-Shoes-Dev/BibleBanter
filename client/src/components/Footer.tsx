@@ -27,7 +27,7 @@ const Footer = () => {
         <p className="font-body text-sm text-muted-foreground pt-2">
           Open source contributions by{" "}
           <a
-            href="https://github.com/shadrack-ss"
+            href="https://www.linkedin.com/in/shadrack-ssenkaayi-0580bb2b7/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-foreground underline decoration-accent underline-offset-4 hover:text-accent transition-colors font-bold"
