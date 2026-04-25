@@ -65,7 +65,6 @@ export default function HostSetup({ onSelect, onBack, onEditSet, onAiGenerator, 
       <div className="w-full max-w-md">
 
         <div className="text-center mb-6 animate-fade-in">
-          <div className="text-4xl mb-3">⚔️</div>
           <h1 className="font-anton text-3xl mb-1" style={{ color: '#f5a623', letterSpacing: '0.04em' }}>
             CONFIGURE GAME
           </h1>
