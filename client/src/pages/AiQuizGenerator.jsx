@@ -260,6 +260,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
   const [reference, setReference] = useState("");
   const [file, setFile] = useState(null);
   const [fileLoading, setFileLoading] = useState(false);
+  const [fileRawText, setFileRawText] = useState("");
   const fileRef = useRef();
 
   // Step 1 — Settings
@@ -299,7 +300,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
       });
       const d = await res.json();
       if (d.rawText) {
-        setContent(d.rawText);
+        setFileRawText(d.rawText);
       } else if (d.questions?.length) {
         setContent(
           d.questions
@@ -318,7 +319,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
   };
 
   const generate = async () => {
-    if (inputType === "notes" && !content.trim()) {
+    if (inputType === "notes" && !content.trim() && !fileRawText) {
       setGenError("Please add some sermon notes or content first.");
       return;
     }
@@ -336,7 +337,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
           : "/api/ai/generate-from-reference";
       const bodyPayload =
         inputType === "notes"
-          ? { content, audience, tone, customPrompt, count, testament }
+          ? { content: fileRawText || content, audience, tone, customPrompt, count, testament }
           : { reference, audience, tone, count };
 
       const res = await fetch(`${BACKEND}${endpoint}`, {
@@ -449,7 +450,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
             className="font-anton text-lg text-white"
             style={{ letterSpacing: "0.05em" }}
           >
-            ✨ AI QUIZ GENERATOR
+            AI QUIZ GENERATOR
           </h1>
         </div>
         {step === 2 && (
@@ -485,54 +486,75 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
 
             {inputType === "notes" ? (
               <>
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Paste your sermon notes, Bible study outline, or fellowship notes here...&#10;&#10;Example:&#10;Today's sermon focused on John 3:16 and the meaning of God's love for humanity. Key points: 1) God's love is unconditional, 2) Jesus came to save not to judge, 3) Eternal life is a gift..."
-                  rows={10}
-                  className="w-full rounded-2xl px-4 py-3 text-sm text-white resize-none outline-none leading-relaxed"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
-                />
-
-                <div className="text-center text-white/30 text-xs">
-                  — or upload a file —
-                </div>
-
-                <div
-                  onClick={() => fileRef.current.click()}
-                  className="rounded-2xl border-dashed border-2 py-4 flex flex-col items-center cursor-pointer transition-all hover:brightness-110"
-                  style={{
-                    borderColor: "rgba(124,58,237,0.35)",
-                    background: "rgba(124,58,237,0.05)",
-                  }}
-                >
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept=".pdf,.docx,.txt"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e.target.files[0])}
+                {!fileRawText && (
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Paste your sermon notes, Bible study outline, or fellowship notes here...&#10;&#10;Example:&#10;Today's sermon focused on John 3:16 and the meaning of God's love for humanity. Key points: 1) God's love is unconditional, 2) Jesus came to save not to judge, 3) Eternal life is a gift..."
+                    rows={10}
+                    className="w-full rounded-2xl px-4 py-3 text-sm text-white resize-none outline-none leading-relaxed"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
                   />
-                  {fileLoading ? (
-                    <p className="text-purple-300 text-sm">
-                      Extracting text...
-                    </p>
-                  ) : (
-                    <>
-                      <p className="text-purple-400 font-bold text-sm">
-                        {file
-                          ? `✓ ${file.name}`
-                          : "📄 Upload PDF, DOCX, or TXT"}
+                )}
+
+                {!fileRawText && (
+                  <div className="text-center text-white/30 text-xs">
+                    — or upload a file —
+                  </div>
+                )}
+
+                {fileRawText ? (
+                  <div
+                    className="rounded-2xl border-2 py-4 px-4 flex items-center justify-between"
+                    style={{
+                      borderColor: "rgba(124,58,237,0.5)",
+                      background: "rgba(124,58,237,0.1)",
+                    }}
+                  >
+                    <div>
+                      <p className="text-purple-300 font-bold text-sm">✓ {file?.name}</p>
+                      <p className="text-white/40 text-xs mt-0.5">Ready — AI will generate questions from this file</p>
+                    </div>
+                    <button
+                      onClick={() => { setFile(null); setFileRawText(""); if (fileRef.current) fileRef.current.value = ""; }}
+                      className="text-white/40 hover:text-white/80 text-lg font-bold ml-3 transition-colors"
+                    >×</button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileRef.current.click()}
+                    className="rounded-2xl border-dashed border-2 py-4 flex flex-col items-center cursor-pointer transition-all hover:brightness-110"
+                    style={{
+                      borderColor: "rgba(124,58,237,0.35)",
+                      background: "rgba(124,58,237,0.05)",
+                    }}
+                  >
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept=".pdf,.docx,.txt"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e.target.files[0])}
+                    />
+                    {fileLoading ? (
+                      <p className="text-purple-300 text-sm">
+                        Extracting text...
                       </p>
-                      <p className="text-white/30 text-xs mt-0.5">
-                        Text will be extracted automatically
-                      </p>
-                    </>
-                  )}
-                </div>
+                    ) : (
+                      <>
+                        <p className="text-purple-400 font-bold text-sm">
+                          📄 Upload PDF, DOCX, or TXT
+                        </p>
+                        <p className="text-white/30 text-xs mt-0.5">
+                          No formatting needed — AI reads your notes directly
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <div className="space-y-3">
@@ -559,7 +581,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
 
             <button
               onClick={() => {
-                if (inputType === "notes" && !content.trim()) {
+                if (inputType === "notes" && !content.trim() && !fileRawText) {
                   setGenError("Please add content first.");
                   return;
                 }
@@ -644,7 +666,7 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
                 Question Count
               </label>
               <div className="flex gap-3">
-                {[5, 10].map((n) => (
+                {[5, 10, 15, 25, 30, 40].map((n) => (
                   <button
                     key={n}
                     onClick={() => setCount(n)}

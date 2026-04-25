@@ -66,7 +66,7 @@ JSON format:
 ]
 
 CONTENT TO USE:
-${content.slice(0, 8000)}`;
+${content.slice(0, 20000)}`;
 }
 
 function buildRegeneratePrompt(content, audience, tone, existingQuestions) {
