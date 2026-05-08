@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a2744" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Bible Banter" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Bible Banter" />
+  <meta name="msapplication-TileColor" content="#1a2744" />
+  <meta name="description" content="Bible Banter — the free, AI-powered live quiz platform for churches. Turn sermons and Bible studies into interactive multiplayer trivia with instant understanding reports." />
+
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="/pwa-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+
+  <title>Bible Banter — Live Bible Trivia for Churches ✝️</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Fonts: Nunito (UI), DM Sans (body), Bangers (display/stats), Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,700;1,9..40,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary-fixed": "#ffddb4",
+            "on-primary-fixed-variant": "#5700c9",
+            "on-secondary-container": "#6b4500",
+            "primary": "#6218d9",
+            "on-surface": "#1d1a24",
+            "secondary": "#835500",
+            "on-secondary-fixed": "#291800",
+            "background": "#fef7ff",
+            "surface-container-highest": "#e7e0ee",
+            "on-tertiary-container": "#99ffc9",
+            "primary-fixed-dim": "#d1bcff",
+            "on-tertiary-fixed-variant": "#005234",
+            "on-primary-container": "#f0e6ff",
+            "inverse-primary": "#d1bcff",
+            "surface-tint": "#7030e6",
+            "secondary-container": "#feae2c",
+            "surface-container-high": "#ede5f4",
+            "primary-fixed": "#e9ddff",
+            "on-primary-fixed": "#23005b",
+            "surface-variant": "#e7e0ee",
+            "surface-container-lowest": "#ffffff",
+            "on-primary": "#ffffff",
+            "surface-bright": "#fef7ff",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#002113",
+            "surface-container": "#f3ebfa",
+            "outline-variant": "#ccc3d8",
+            "secondary-fixed-dim": "#ffb955",
+            "tertiary": "#005e3d",
+            "error-container": "#ffdad6",
+            "on-tertiary": "#ffffff",
+            "error": "#ba1a1a",
+            "on-secondary": "#ffffff",
+            "surface-dim": "#dfd7e6",
+            "inverse-on-surface": "#f6eefd",
+            "tertiary-container": "#007950",
+            "primary-container": "#7b3ff2",
+            "on-secondary-fixed-variant": "#633f00",
+            "tertiary-fixed": "#77fbbb",
+            "surface-container-low": "#f9f1ff",
+            "on-background": "#1d1a24",
+            "surface": "#fef7ff",
+            "outline": "#7b7487",
+            "inverse-surface": "#322f39",
+            "tertiary-fixed-dim": "#58dea1",
+            "on-surface-variant": "#4a4455"
+          },
+          fontFamily: {
+            "headline-lg": ["Nunito", "sans-serif"],
+            "headline-md": ["Nunito", "sans-serif"],
+            "display-lg": ["Bangers", "cursive"],
+            "body-lg": ["DM Sans", "sans-serif"],
+            "label-bold": ["DM Sans", "sans-serif"],
+            "body-md": ["DM Sans", "sans-serif"],
+            "stat": ["Bangers", "cursive"]
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ── Material Symbols ── */
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ── Stat / Counter font ── */
+    .font-stat { font-family: 'Bangers', cursive; letter-spacing: 0.04em; }
+
+    /* ── Mobile menu ── */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: flex; }
+
+    /* ═══════════════════════════════════════
+       HERO — worship-style radial light scene
+    ═══════════════════════════════════════ */
+    .hero-bg {
+      background:
+        radial-gradient(ellipse 70% 55% at 50% -10%, rgba(255,200,60,0.28) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 50% at 80% 100%, rgba(114,0,255,0.35) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 10% 90%,  rgba(0,200,120,0.18) 0%, transparent 55%),
+        linear-gradient(160deg, #5c1dc5 0%, #7b3ff2 45%, #4a0fa8 100%);
+    }
+    /* Animated light rays behind the hero content */
+    .hero-rays {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    }
+    .hero-rays::before,
+    .hero-rays::after {
+      content: '';
+      position: absolute;
+      width: 200%; height: 200%;
+      top: -50%; left: -50%;
+      background: conic-gradient(
+        from 0deg at 50% 30%,
+        transparent 0deg,
+        rgba(255,255,255,0.04) 10deg,
+        transparent 20deg,
+        rgba(255,255,255,0.03) 30deg,
+        transparent 40deg,
+        rgba(255,255,255,0.05) 50deg,
+        transparent 60deg
+      );
+      animation: rotateSlow 40s linear infinite;
+    }
+    .hero-rays::after {
+      animation-duration: 65s;
+      animation-direction: reverse;
+      opacity: 0.6;
+    }
+    @keyframes rotateSlow { to { transform: rotate(360deg); } }
+
+    /* ── Floating orb accents in hero ── */
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(48px); pointer-events: none;
+      animation: floatOrb 8s ease-in-out infinite;
+    }
+    .orb-amber {
+      width: 260px; height: 260px;
+      background: rgba(251,191,36,0.22);
+      top: -60px; right: 8%;
+      animation-delay: 0s;
+    }
+    .orb-green {
+      width: 180px; height: 180px;
+      background: rgba(0,200,130,0.18);
+      bottom: 20px; left: 5%;
+      animation-delay: -3s;
+    }
+    .orb-white {
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.12);
+      top: 40%; right: 15%;
+      animation-delay: -5s;
+    }
+    @keyframes floatOrb {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50%       { transform: translateY(-24px) scale(1.08); }
+    }
+
+    /* ═══════════════════════════════════════
+       FEATURE SECTION — subtle glow backdrop
+    ═══════════════════════════════════════ */
+    .features-bg {
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 0%, rgba(98,24,217,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 30% at 90% 100%, rgba(254,174,44,0.10) 0%, transparent 60%),
+        #f0ebfb;
+    }
+
+    /* ═══════════════════════════════════════
+       CTA BANNER — rich worship gradient
+    ═══════════════════════════════════════ */
+    .cta-bg {
+      background:
+        radial-gradient(ellipse 60% 80% at 20% 50%, rgba(255,200,60,0.20) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 50%, rgba(120,0,255,0.25) 0%, transparent 60%),
+        linear-gradient(135deg, #4c0faa 0%, #6218d9 50%, #3d0d8c 100%);
+    }
+
+    /* ═══════════════════════════════════════
+       CARD ANIMATIONS
+    ═══════════════════════════════════════ */
+    .feature-card {
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1),
+                  box-shadow 0.25s ease;
+      will-change: transform;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px) scale(1.025);
+      box-shadow: 10px 10px 0 0 rgba(0,0,0,1);
+    }
+
+    .how-card {
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1),
+                  box-shadow 0.3s ease;
+    }
+    .how-card:hover {
+      transform: translateY(-8px) rotate(-0.5deg) scale(1.02);
+      box-shadow: 12px 12px 0 0 rgba(0,0,0,1);
+    }
+
+    .tech-pill {
+      transition: transform 0.2s cubic-bezier(.34,1.56,.64,1),
+                  box-shadow 0.2s ease, background 0.2s;
+    }
+    .tech-pill:hover {
+      transform: translateY(-3px) scale(1.06);
+      box-shadow: 6px 6px 0 0 rgba(0,0,0,1);
+      background: #ede5f4;
+    }
+
+    /* ═══════════════════════════════════════
+       ENTRANCE ANIMATIONS (scroll-based via IntersectionObserver)
+    ═══════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.25,.8,.25,1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
+    .reveal-delay-5 { transition-delay: 0.40s; }
+    .reveal-delay-6 { transition-delay: 0.48s; }
+    .reveal-delay-7 { transition-delay: 0.56s; }
+    .reveal-delay-8 { transition-delay: 0.64s; }
+
+    /* ═══════════════════════════════════════
+       HERO TEXT — staggered fade-in on load
+    ═══════════════════════════════════════ */
+    .hero-badge  { animation: heroFade 0.5s ease 0.1s both; }
+    .hero-title  { animation: heroFade 0.6s ease 0.25s both; }
+    .hero-sub    { animation: heroFade 0.6s ease 0.4s both; }
+    .hero-desc   { animation: heroFade 0.6s ease 0.5s both; }
+    .hero-ctas   { animation: heroFade 0.6s ease 0.65s both; }
+    .hero-social { animation: heroFade 0.6s ease 0.8s both; }
+    @keyframes heroFade {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════
+       BUTTON PRESS EFFECT
+    ═══════════════════════════════════════ */
+    .btn-press {
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s;
+    }
+    .btn-press:hover  { filter: brightness(1.06); }
+    .btn-press:active { transform: translate(3px,3px) !important; box-shadow: none !important; }
+
+    /* ── Nav link underline animation ── */
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: ''; position: absolute; left: 0; bottom: -2px;
+      width: 0; height: 2px;
+      background: #fbbf24;
+      transition: width 0.2s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    /* ── Glow pulse on icon circles ── */
+    .icon-circle {
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+    }
+    .how-card:hover .icon-circle {
+      box-shadow: 0 0 0 6px rgba(254,174,44,0.30), 4px 4px 0 0 rgba(0,0,0,1);
+      transform: scale(1.1) rotate(-4deg);
+    }
+
+    /* ── Stat number pop ── */
+    .stat-num {
+      font-family: 'Bangers', cursive;
+      letter-spacing: 0.04em;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), color 0.25s;
+    }
+    .stat-block:hover .stat-num {
+      transform: scale(1.12);
+      color: #6218d9;
+    }
+
+    /* ── Background icon pattern (hero) ── */
+    .hero-pattern {
+      position: absolute; inset: 0;
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 2rem; padding: 1rem;
+      transform: rotate(12deg) scale(1.6);
+      opacity: 0.07; pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* ── Scrollbar styling ── */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #fef7ff; }
+    ::-webkit-scrollbar-thumb { background: #7b3ff2; border-radius: 4px; }
+  </style>
+</head>
+
+<body class="bg-background font-body-md text-on-background overflow-x-hidden">
+
+  <!-- ══════════════════════════════════════════
+       TOP NAV
+  ══════════════════════════════════════════ -->
+  <nav class="bg-violet-700 text-white font-['Nunito'] font-black uppercase tracking-wider sticky top-0 z-50 border-b-4 border-black shadow-[0_4px_0_0_rgba(0,0,0,1)] w-full">
+    <div class="flex justify-between items-center px-5 sm:px-8 py-3 sm:py-4 max-w-7xl mx-auto">
+
+      <!-- Logo -->
+      <a href="#" class="shrink-0 flex items-baseline gap-0 leading-none" style="text-decoration:none;">
+        <span class="font-['Nunito'] font-black text-xl sm:text-2xl text-white tracking-tight">Bible</span><span class="font-['Nunito'] font-black text-xl sm:text-2xl text-amber-400 tracking-tight">&nbsp;Banter</span>
+      </a>
+
+      <!-- Desktop links -->
+      <div class="hidden lg:flex gap-6 xl:gap-8 items-center">
+        <a class="nav-link text-white hover:text-amber-300 transition-colors text-sm xl:text-base" href="#">Play</a>
+        <a class="nav-link text-white hover:text-amber-300 transition-colors text-sm xl:text-base" href="#">Leaderboard</a>
+        <a class="nav-link text-white hover:text-amber-300 transition-colors text-sm xl:text-base" href="#">Study</a>
+        <a class="nav-link text-white hover:text-amber-300 transition-colors text-sm xl:text-base" href="#">About</a>
+      </div>
+
+      <!-- Right side -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button class="hidden sm:block bg-secondary-container text-on-secondary-container border-2 border-black px-4 xl:px-6 py-2 rounded-lg font-black text-sm shadow-[4px_4px_0_0_rgba(0,0,0,1)] btn-press hover:scale-105 transition-transform">
+          Host Game
+        </button>
+        <span class="material-symbols-outlined cursor-pointer hover:text-amber-300 hover:scale-110 transition-all text-white">account_circle</span>
+        <span class="material-symbols-outlined cursor-pointer hover:text-amber-300 hover:scale-110 transition-all text-white hidden sm:inline">settings</span>
+        <button id="hamburger" class="lg:hidden text-white hover:text-amber-300 transition-colors ml-1"
+          onclick="document.getElementById('mobile-menu').classList.toggle('open')">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="flex-col gap-3 px-5 pb-5 pt-2 bg-violet-800 border-t-2 border-black lg:hidden">
+      <a class="text-white hover:text-amber-200 block py-1 text-sm font-bold" href="#">Play</a>
+      <a class="text-white hover:text-amber-200 block py-1 text-sm font-bold" href="#">Leaderboard</a>
+      <a class="text-white hover:text-amber-200 block py-1 text-sm font-bold" href="#">Study</a>
+      <a class="text-white hover:text-amber-200 block py-1 text-sm font-bold" href="#">About</a>
+      <button class="w-full bg-secondary-container text-on-secondary-container border-2 border-black px-6 py-2 rounded-lg font-black text-sm shadow-[4px_4px_0_0_rgba(0,0,0,1)] mt-1">
+        Host Game
+      </button>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════ -->
+  <section class="hero-bg relative overflow-hidden py-16 sm:py-20 lg:py-28 px-5 sm:px-8 flex flex-col items-center text-center border-b-4 border-black">
+    <!-- Light rays -->
+    <div class="hero-rays"></div>
+    <!-- Floating orbs -->
+    <div class="orb orb-amber"></div>
+    <div class="orb orb-green"></div>
+    <div class="orb orb-white"></div>
+    <!-- Background icon grid -->
+    <div class="hero-pattern">
+      <span class="material-symbols-outlined" style="font-size:6rem;">auto_awesome</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">menu_book</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">celebration</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">church</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">lightbulb</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">groups</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">emoji_events</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">bolt</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">local_fire_department</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">star</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">psychology</span>
+      <span class="material-symbols-outlined" style="font-size:6rem;">military_tech</span>
+    </div>
+
+    <!-- Hero content -->
+    <div class="relative z-10 max-w-4xl w-full">
+
+      <!-- Badge -->
+      <div class="hero-badge inline-flex items-center gap-2 bg-amber-400 border-2 border-black px-4 py-1.5 rounded-full mb-6 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+        <span class="material-symbols-outlined text-sm text-black">bolt</span>
+        <span class="font-black text-xs sm:text-sm text-black uppercase tracking-wider">Free · AI-Powered · Real-Time Multiplayer</span>
+      </div>
+
+      <!-- Headline — Nunito Black, consistent with site typography -->
+      <h1 class="hero-title font-['Nunito'] font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-amber-300 mb-5 leading-tight tracking-tight uppercase"
+          style="text-shadow: 3px 3px 0 rgba(0,0,0,0.55);">
+        Live Bible Trivia<br/>
+        <span class="text-white">for Churches</span>
+      </h1>
+
+      <p class="hero-sub font-['Nunito'] text-base sm:text-lg lg:text-xl text-amber-100 mb-3 max-w-2xl mx-auto font-bold leading-snug">
+        Turn sermons, Bible studies, and youth group sessions into real-time multiplayer trivia — powered by AI.
+      </p>
+      <p class="hero-desc font-body-md text-sm sm:text-base text-white/70 mb-10 sm:mb-12 max-w-xl mx-auto">
+        Unlimited players join via 6-digit PIN or QR code. No app install needed.
+      </p>
+
+      <!-- CTAs -->
+      <div class="hero-ctas flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-10">
+        <button class="btn-press w-full sm:w-auto bg-secondary-container text-on-secondary-container font-['Nunito'] font-black text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-xl border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:scale-105 hover:-rotate-1 uppercase">
+          Join a Game
+        </button>
+        <button class="btn-press w-full sm:w-auto bg-white text-primary font-['Nunito'] font-black text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-xl border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:scale-105 hover:rotate-1 uppercase">
+          Host a Game
+        </button>
+        <button class="btn-press w-full sm:w-auto bg-tertiary text-white font-['Nunito'] font-black text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-xl border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:scale-105 uppercase">
+          Solo Practice
+        </button>
+      </div>
+
+      <!-- Social proof -->
+      <div class="hero-social flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+        <div class="flex -space-x-3">
+          <div class="w-11 h-11 rounded-full border-4 border-black bg-violet-400 flex items-center justify-center font-bold text-white text-xs shadow-md">JN</div>
+          <div class="w-11 h-11 rounded-full border-4 border-black bg-amber-400 flex items-center justify-center font-bold text-black text-xs shadow-md">MK</div>
+          <div class="w-11 h-11 rounded-full border-4 border-black bg-emerald-500 flex items-center justify-center font-bold text-white text-xs shadow-md">PA</div>
+          <div class="w-11 h-11 rounded-full border-4 border-black bg-secondary-container flex items-center justify-center font-stat text-on-secondary-container text-xs shadow-md">+12k</div>
+        </div>
+        <p class="font-body-md font-bold text-white/80 text-sm">Over 12,000 players across churches worldwide</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       HOW IT WORKS
+  ══════════════════════════════════════════ -->
+  <section class="py-16 sm:py-20 px-5 sm:px-8 max-w-7xl mx-auto">
+    <div class="text-center mb-12 sm:mb-16 reveal">
+      <h2 class="font-['Nunito'] text-3xl sm:text-4xl font-black uppercase tracking-tighter italic mb-3">How to Get in the Game</h2>
+      <p class="font-body-lg text-on-surface-variant max-w-xl mx-auto text-sm sm:text-base">Three ways to play — pick yours and start in seconds.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+      <!-- Join -->
+      <div class="how-card reveal reveal-delay-1 bg-surface border-4 border-black p-6 sm:p-8 rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div class="icon-circle bg-primary text-white w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-black flex items-center justify-center mb-5 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-3xl sm:text-4xl">rocket_launch</span>
+        </div>
+        <h3 class="font-['Nunito'] text-lg sm:text-xl font-black mb-3 uppercase">Join a Game</h3>
+        <p class="font-body-md text-on-surface-variant text-sm sm:text-base mb-5">Enter the 6-digit PIN or scan the host's QR code. No account needed — just your name and you're in.</p>
+        <ul class="font-body-md text-sm text-on-surface space-y-2 mb-6">
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> Works on any smartphone</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> No app install required</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> Unlimited players per room</li>
+        </ul>
+        <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden border-2 border-black">
+          <div class="h-full bg-secondary-container w-1/3 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- Host -->
+      <div class="how-card reveal reveal-delay-2 bg-surface border-4 border-black p-6 sm:p-8 rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div class="icon-circle bg-tertiary text-white w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-black flex items-center justify-center mb-5 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-3xl sm:text-4xl">cast</span>
+        </div>
+        <h3 class="font-['Nunito'] text-lg sm:text-xl font-black mb-3 uppercase">Host a Game</h3>
+        <p class="font-body-md text-on-surface-variant text-sm sm:text-base mb-5">Log in, select or upload a question set, configure the timer, and share the PIN. Project it for the whole room.</p>
+        <ul class="font-body-md text-sm text-on-surface space-y-2 mb-6">
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> AI quiz generator built in</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> Upload CSV, PDF, DOCX, or TXT</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> Live leaderboard every question</li>
+        </ul>
+        <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden border-2 border-black">
+          <div class="h-full bg-tertiary-fixed w-2/3 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- Practice -->
+      <div class="how-card reveal reveal-delay-3 sm:col-span-2 lg:col-span-1 bg-surface border-4 border-black p-6 sm:p-8 rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+        <div class="icon-circle bg-secondary text-white w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-black flex items-center justify-center mb-5 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-3xl sm:text-4xl">school</span>
+        </div>
+        <h3 class="font-['Nunito'] text-lg sm:text-xl font-black mb-3 uppercase">Solo Practice</h3>
+        <p class="font-body-md text-on-surface-variant text-sm sm:text-base mb-5">No host needed. Choose your testament and difficulty, tackle timed questions and track your personal score.</p>
+        <ul class="font-body-md text-sm text-on-surface space-y-2 mb-6">
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> No login required</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> Filter by testament &amp; difficulty</li>
+          <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-tertiary">check_circle</span> Compete on global leaderboard</li>
+        </ul>
+        <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden border-2 border-black">
+          <div class="h-full bg-secondary-container w-full rounded-full"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       FEATURES GRID — subtle glow backdrop
+  ══════════════════════════════════════════ -->
+  <section class="features-bg py-16 sm:py-20 border-y-4 border-black px-5 sm:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-12 sm:mb-14 reveal">
+        <h2 class="font-['Nunito'] text-3xl sm:text-4xl font-black uppercase tracking-tighter italic mb-3">Everything Your Group Needs</h2>
+        <p class="font-body-lg text-on-surface-variant max-w-xl mx-auto text-sm sm:text-base">Packed with features that make Bible study genuinely fun.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+
+        <div class="feature-card reveal reveal-delay-1 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-primary mb-3 block">smart_toy</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">AI Quiz Generator</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">Paste a sermon, upload a PDF, or enter any Bible topic — Gemini AI writes the questions for you instantly.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-2 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-tertiary mb-3 block">qr_code_scanner</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">QR Code Join</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">Players scan the QR code to join instantly — no typing, no friction. Works on any smartphone camera.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-3 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-secondary mb-3 block">local_fire_department</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">Streak Multiplier 🔥</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">3+ correct answers in a row earns a 1.2× bonus. Speed scoring rewards fast thinkers even more.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-4 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-primary mb-3 block">insert_chart</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">Understanding Reports</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">AI-generated post-game analysis shows what your group understood and what needs revisiting.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-5 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-tertiary mb-3 block">history</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">Game History</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">Full archive of past games with per-session report links. Never lose a result.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-6 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-secondary mb-3 block">leaderboard</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">Global Leaderboard</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">All-time top scorers displayed on the landing page. Who in your church reigns supreme?</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-7 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-primary mb-3 block">upload_file</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">Custom Uploads</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">Upload questions via CSV, PDF, Word (.docx), or plain text. Max 10 MB per file.</p>
+        </div>
+
+        <div class="feature-card reveal reveal-delay-8 bg-white border-4 border-black p-5 sm:p-6 rounded-2xl shadow-[6px_6px_0_0_rgba(0,0,0,1)]">
+          <span class="material-symbols-outlined text-4xl text-tertiary mb-3 block">wifi_tethering</span>
+          <h4 class="font-['Nunito'] font-black text-base sm:text-lg uppercase mb-2">Reconnection</h4>
+          <p class="font-body-md text-sm text-on-surface-variant">Players and hosts can rejoin within a 20-second grace period if they lose connection mid-game.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       COMMUNITY IMPACT — stats with Bangers font
+  ══════════════════════════════════════════ -->
+  <section class="py-16 sm:py-20 px-5 sm:px-8 border-b-4 border-black">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+      <!-- Visual side -->
+      <div class="relative reveal">
+        <div class="bg-black rounded-3xl p-2 rotate-2 shadow-2xl">
+          <div class="rounded-2xl border-4 border-black h-56 sm:h-72 flex items-center justify-center overflow-hidden relative"
+               style="background: linear-gradient(135deg, #4a0fa8 0%, #7b3ff2 50%, #005e3d 100%);">
+            <!-- Glowing orb overlay -->
+            <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 40%, rgba(255,200,60,0.25) 0%, transparent 70%);"></div>
+            <div class="text-center relative z-10">
+              <span class="material-symbols-outlined text-white" style="font-size:5rem;opacity:0.9;">groups</span>
+              <p class="font-stat text-3xl sm:text-4xl text-amber-300 mt-2 tracking-wide" style="text-shadow:2px 2px 0 rgba(0,0,0,0.5);">Church Communities</p>
+            </div>
+          </div>
+        </div>
+        <!-- Sticker badge -->
+        <div class="absolute -bottom-8 sm:-bottom-10 -right-2 sm:-right-8 bg-amber-400 border-4 border-black p-4 sm:p-5 rounded-2xl shadow-[8px_8px_0_0_rgba(0,0,0,1)] -rotate-3 z-10">
+          <span class="font-stat text-xl sm:text-2xl block text-black uppercase tracking-wide">Weekly Recap</span>
+          <span class="font-['Nunito'] font-bold text-primary italic text-sm">#BibleBanter</span>
+        </div>
+      </div>
+
+      <!-- Stats side -->
+      <div class="pt-14 sm:pt-16 lg:pt-0 reveal reveal-delay-2">
+        <h2 class="font-['Nunito'] text-3xl sm:text-4xl font-black text-primary mb-8 uppercase leading-tight">
+          Spreading Joy,<br/>One Question at a Time.
+        </h2>
+
+        <div class="grid grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">
+          <div class="stat-block flex flex-col border-l-4 border-secondary-container pl-5 sm:pl-6 cursor-default">
+            <span class="stat-num text-4xl sm:text-5xl text-black">2.5M+</span>
+            <span class="font-['DM_Sans'] text-xs uppercase text-on-surface-variant tracking-wider font-bold">Questions Answered</span>
+          </div>
+          <div class="stat-block flex flex-col border-l-4 border-primary pl-5 sm:pl-6 cursor-default">
+            <span class="stat-num text-4xl sm:text-5xl text-black">150+</span>
+            <span class="font-['DM_Sans'] text-xs uppercase text-on-surface-variant tracking-wider font-bold">Game Categories</span>
+          </div>
+          <div class="stat-block flex flex-col border-l-4 border-tertiary pl-5 sm:pl-6 cursor-default">
+            <span class="stat-num text-4xl sm:text-5xl text-black">98%</span>
+            <span class="font-['DM_Sans'] text-xs uppercase text-on-surface-variant tracking-wider font-bold">Smile Rate</span>
+          </div>
+          <div class="stat-block flex flex-col border-l-4 border-black pl-5 sm:pl-6 cursor-default">
+            <span class="stat-num text-4xl sm:text-5xl text-black">450k</span>
+            <span class="font-['DM_Sans'] text-xs uppercase text-on-surface-variant tracking-wider font-bold">Monthly Players</span>
+          </div>
+        </div>
+
+        <p class="font-body-lg text-on-surface mb-6 text-sm sm:text-base">
+          Bible Banter isn't just about knowledge — it's about building bridges. Join thousands of youth groups, families, and friends who have turned Sunday afternoons into an energetic celebration of faith.
+        </p>
+
+        <div class="flex flex-wrap gap-2 sm:gap-3">
+          <span class="bg-primary-fixed border-2 border-black px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-['Nunito'] font-bold text-xs sm:text-sm uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)]">Youth Groups</span>
+          <span class="bg-tertiary-fixed border-2 border-black px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-['Nunito'] font-bold text-xs sm:text-sm uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)]">Fellowships</span>
+          <span class="bg-secondary-container border-2 border-black px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-['Nunito'] font-bold text-xs sm:text-sm text-on-secondary-container uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)]">Bible Studies</span>
+          <span class="bg-surface-container-high border-2 border-black px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-['Nunito'] font-bold text-xs sm:text-sm uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)]">Church Events</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       TECH STACK
+  ══════════════════════════════════════════ -->
+  <section class="py-16 sm:py-20 px-5 sm:px-8 bg-surface-container-low border-b-4 border-black">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-10 sm:mb-12 reveal">
+        <h2 class="font-['Nunito'] text-2xl sm:text-3xl font-black uppercase tracking-tighter italic mb-2">Built for Reliability</h2>
+        <p class="font-body-lg text-on-surface-variant max-w-lg mx-auto text-sm sm:text-base">Open source. MIT licensed. Free for church events, Bible studies, and educational use.</p>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-3 sm:gap-4 reveal reveal-delay-2">
+        <div class="tech-pill bg-white border-2 border-black px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex items-center gap-2 cursor-default">
+          <span class="material-symbols-outlined text-primary text-xl sm:text-2xl">code</span>
+          <span class="font-['Nunito'] font-bold text-xs sm:text-sm">React 18 + Vite</span>
+        </div>
+        <div class="tech-pill bg-white border-2 border-black px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex items-center gap-2 cursor-default">
+          <span class="material-symbols-outlined text-tertiary text-xl sm:text-2xl">hub</span>
+          <span class="font-['Nunito'] font-bold text-xs sm:text-sm">Socket.IO Real-Time</span>
+        </div>
+        <div class="tech-pill bg-white border-2 border-black px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex items-center gap-2 cursor-default">
+          <span class="material-symbols-outlined text-secondary text-xl sm:text-2xl">storage</span>
+          <span class="font-['Nunito'] font-bold text-xs sm:text-sm">PostgreSQL / Neon</span>
+        </div>
+        <div class="tech-pill bg-white border-2 border-black px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex items-center gap-2 cursor-default">
+          <span class="material-symbols-outlined text-primary text-xl sm:text-2xl">psychology</span>
+          <span class="font-['Nunito'] font-bold text-xs sm:text-sm">Google Gemini 2.0 AI</span>
+        </div>
+        <div class="tech-pill bg-white border-2 border-black px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex items-center gap-2 cursor-default">
+          <span class="material-symbols-outlined text-tertiary text-xl sm:text-2xl">lock</span>
+          <span class="font-['Nunito'] font-bold text-xs sm:text-sm">JWT + Google OAuth</span>
+        </div>
+        <div class="tech-pill bg-white border-2 border-black px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-[4px_4px_0_0_rgba(0,0,0,1)] flex items-center gap-2 cursor-default">
+          <span class="material-symbols-outlined text-secondary text-xl sm:text-2xl">cloud</span>
+          <span class="font-['Nunito'] font-bold text-xs sm:text-sm">Vercel + Render</span>
+        </div>
+      </div>
+
+      <p class="text-center mt-8 font-body-md text-xs sm:text-sm text-on-surface-variant reveal reveal-delay-3">
+        MIT License — Free to use for church events, Bible studies, and educational purposes.
+        <a href="https://github.com/shadrack-ss/BitbleBattle" target="_blank" class="text-primary font-bold hover:underline ml-1">View on GitHub →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       CTA BANNER — worship gradient
+  ══════════════════════════════════════════ -->
+  <section class="cta-bg py-14 sm:py-20 px-5 sm:px-8 border-b-4 border-black text-center relative overflow-hidden">
+    <!-- Subtle rays -->
+    <div style="position:absolute;inset:0;background:conic-gradient(from 180deg at 50% 50%, transparent 0deg, rgba(255,255,255,0.04) 20deg, transparent 40deg, rgba(255,255,255,0.03) 60deg, transparent 80deg);pointer-events:none;"></div>
+    <div class="relative z-10 max-w-2xl mx-auto reveal">
+      <div class="inline-flex items-center gap-2 bg-amber-400 border-2 border-black px-4 py-1.5 rounded-full mb-6 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+        <span class="material-symbols-outlined text-sm text-black">emoji_events</span>
+        <span class="font-['Nunito'] font-black text-xs text-black uppercase tracking-wider">Start in under 60 seconds</span>
+      </div>
+      <h2 class="font-stat text-4xl sm:text-5xl md:text-6xl text-amber-300 uppercase mb-4 tracking-wide"
+          style="text-shadow: 3px 3px 0 rgba(0,0,0,0.6);">Ready to Play?</h2>
+      <p class="font-body-lg text-white/80 mb-8 sm:mb-10 text-sm sm:text-base">No setup, no downloads, no stress. Just open a browser and go.</p>
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+        <button class="btn-press w-full sm:w-auto bg-secondary-container text-on-secondary-container font-['Nunito'] font-black text-base sm:text-lg px-8 sm:px-10 py-4 rounded-xl border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:scale-105 hover:-rotate-1 uppercase">
+          Join a Game
+        </button>
+        <button class="btn-press w-full sm:w-auto bg-white text-primary font-['Nunito'] font-black text-base sm:text-lg px-8 sm:px-10 py-4 rounded-xl border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:scale-105 hover:rotate-1 uppercase">
+          Host a Game
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer class="bg-violet-900 text-amber-400 font-['Nunito'] font-bold text-sm w-full border-t-4 border-black">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+
+      <!-- Brand -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-baseline gap-0 leading-none">
+          <span class="font-['Nunito'] font-black text-xl text-white">Bible</span><span class="font-['Nunito'] font-black text-xl text-amber-400">&nbsp;Banter</span>
+        </div>
+        <p class="text-violet-200 text-xs">© 2024 Bible Banter. Spread the Joy.</p>
+        <p class="text-violet-300 text-xs max-w-xs leading-relaxed">
+          Built with ❤️ by
+          <a href="https://www.oddshoes.dev" class="underline hover:text-amber-300 transition-colors" target="_blank">Odd Shoes</a>
+          in partnership with
+          <a href="https://betweenhisshoulders.org" class="underline hover:text-amber-300 transition-colors" target="_blank">Kingdom Chaplain</a>
+        </p>
+      </div>
+
+      <!-- Links -->
+      <div class="flex flex-wrap gap-x-5 gap-y-2">
+        <a class="text-violet-200 hover:text-amber-300 transition-colors underline" href="#">Privacy Policy</a>
+        <a class="text-violet-200 hover:text-amber-300 transition-colors" href="#">Terms of Service</a>
+        <a class="text-violet-200 hover:text-amber-300 transition-colors" href="#">Contact Us</a>
+        <a class="text-violet-200 hover:text-amber-300 transition-colors" href="#">Help Center</a>
+        <a class="text-violet-200 hover:text-amber-300 transition-colors" href="https://github.com/shadrack-ss/BitbleBattle" target="_blank">GitHub</a>
+      </div>
+
+      <!-- Social -->
+      <div class="flex gap-3">
+        <div class="w-10 h-10 border-2 border-amber-400 rounded-lg flex items-center justify-center hover:bg-amber-400 hover:text-violet-900 transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-xl">share</span>
+        </div>
+        <div class="w-10 h-10 border-2 border-amber-400 rounded-lg flex items-center justify-center hover:bg-amber-400 hover:text-violet-900 transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-xl">public</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════════════
+       INTERSECTION OBSERVER — scroll reveals
+  ══════════════════════════════════════════ -->
+  <script>
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>

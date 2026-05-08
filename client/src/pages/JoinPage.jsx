@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import JoinGameIcon from "../components/icons/JoinGameIcon";
 
 export default function JoinPage({ onJoin, onBack }) {
   const [pin, setPin] = useState(() => {
@@ -78,7 +79,7 @@ export default function JoinPage({ onJoin, onBack }) {
 
         <div className="bg-glass-dark rounded-3xl p-8 shadow-2xl">
           <div className="text-center mb-8">
-            <div className="text-5xl mb-3">🎮</div>
+            <JoinGameIcon className="w-16 h-16 mx-auto mb-3" />
             <h2 className="font-cinzel text-3xl font-black text-white mb-1">
               JOIN GAME
             </h2>

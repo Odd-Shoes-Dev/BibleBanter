@@ -116,8 +116,8 @@
   body {
     margin: 0;
     font-family: 'Inter', sans-serif;
-    background: #0d0918;
-    color: white;
+    background: #ffffff;
+    color: #1e1b4b;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -312,4 +312,386 @@
 /* Mobile responsive */
 @media (max-width: 640px) {
   .answer-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Bible Banter v2 landing styles (scoped with bbv2-* classes)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.bbv2-material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.bbv2-font-stat {
+  font-family: 'Bangers', cursive;
+  letter-spacing: 0.04em;
+}
+
+.bbv2-hero-bg {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -10%, rgba(255,200,60,0.28) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(114,0,255,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 10% 90%,  rgba(0,200,120,0.18) 0%, transparent 55%),
+    linear-gradient(160deg, #5c1dc5 0%, #7b3ff2 45%, #4a0fa8 100%);
+}
+
+.bbv2-hero-rays {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bbv2-hero-rays::before,
+.bbv2-hero-rays::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: conic-gradient(
+    from 0deg at 50% 30%,
+    transparent 0deg,
+    rgba(255,255,255,0.04) 10deg,
+    transparent 20deg,
+    rgba(255,255,255,0.03) 30deg,
+    transparent 40deg,
+    rgba(255,255,255,0.05) 50deg,
+    transparent 60deg
+  );
+  animation: bbv2-rotateSlow 40s linear infinite;
+}
+.bbv2-hero-rays::after {
+  animation-duration: 65s;
+  animation-direction: reverse;
+  opacity: 0.6;
+}
+@keyframes bbv2-rotateSlow {
+  to { transform: rotate(360deg); }
+}
+
+.bbv2-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+  animation: bbv2-floatOrb 8s ease-in-out infinite;
+}
+.bbv2-orb-amber {
+  width: 260px;
+  height: 260px;
+  background: rgba(251,191,36,0.22);
+  top: -60px;
+  right: 8%;
+}
+.bbv2-orb-green {
+  width: 180px;
+  height: 180px;
+  background: rgba(0,200,130,0.18);
+  bottom: 20px;
+  left: 5%;
+  animation-delay: -3s;
+}
+.bbv2-orb-white {
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.12);
+  top: 40%;
+  right: 15%;
+  animation-delay: -5s;
+}
+@keyframes bbv2-floatOrb {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-24px) scale(1.08); }
+}
+
+.bbv2-hero-pattern {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2rem;
+  padding: 1rem;
+  transform: rotate(12deg) scale(1.6);
+  opacity: 0.07;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bbv2-btn-press {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s;
+}
+.bbv2-btn-press:hover { filter: brightness(1.06); }
+.bbv2-btn-press:active { transform: translate(3px,3px) !important; box-shadow: none !important; }
+
+.bbv2-nav-link { position: relative; }
+.bbv2-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 2px;
+  background: #fbbf24;
+  transition: width 0.2s ease;
+}
+.bbv2-nav-link:hover::after { width: 100%; }
+
+.bbv2-features-bg {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(98,24,217,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 90% 100%, rgba(254,174,44,0.10) 0%, transparent 60%),
+    #f0ebfb;
+}
+
+.bbv2-cta-bg {
+  background:
+    radial-gradient(ellipse 60% 80% at 20% 50%, rgba(255,200,60,0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 50%, rgba(120,0,255,0.25) 0%, transparent 60%),
+    linear-gradient(135deg, #4c0faa 0%, #6218d9 50%, #3d0d8c 100%);
+}
+
+/* Hero background video layer (hero section only) */
+.bbv2-hero-video,
+.bbv2-hero-fallback,
+.bbv2-hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bbv2-hero-video {
+  z-index: 0;
+  object-fit: cover;
+}
+
+.bbv2-hero-fallback {
+  z-index: 0;
+  display: none;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.bbv2-hero-overlay {
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Keep decorative layers above overlay */
+.bbv2-hero-rays,
+.bbv2-orb,
+.bbv2-hero-pattern {
+  z-index: 2;
+}
+
+/* Ensure hero content stays above everything */
+section#play > .relative.z-10 {
+  z-index: 3;
+}
+
+/* Mobile: disable video and use fallback image */
+@media (max-width: 768px) {
+  .bbv2-hero-video {
+    display: none;
+  }
+  .bbv2-hero-fallback {
+    display: block;
+  }
+}
+
+.bbv2-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.25,.8,.25,1);
+}
+.bbv2-reveal.bbv2-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.bbv2-reveal-delay-1 { transition-delay: 0.08s; }
+.bbv2-reveal-delay-2 { transition-delay: 0.16s; }
+.bbv2-reveal-delay-3 { transition-delay: 0.24s; }
+.bbv2-reveal-delay-4 { transition-delay: 0.32s; }
+.bbv2-reveal-delay-5 { transition-delay: 0.40s; }
+.bbv2-reveal-delay-6 { transition-delay: 0.48s; }
+.bbv2-reveal-delay-7 { transition-delay: 0.56s; }
+.bbv2-reveal-delay-8 { transition-delay: 0.64s; }
+
+/* ─── Bible Banter — Light Premium UI ───────────────────────────────────── */
+
+/* Navbar */
+.bb-nav {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  box-shadow: 0 1px 12px rgba(139, 92, 246, 0.06);
+}
+
+/* Hero fallback bg (shown under video on mobile) */
+.bb-hero {
+  background: linear-gradient(135deg, #f5f3ff 0%, #fdfcff 50%, #fff8f0 100%);
+}
+
+/* Subtle dot grid overlay */
+.bb-grid {
+  background-image: radial-gradient(circle, rgba(139,92,246,0.12) 1px, transparent 1px);
+  background-size: 32px 32px;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Ambient floating orbs — pastel on light bg */
+.bb-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  will-change: transform;
+}
+.bb-orb-v {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+  animation: bbOrb 14s ease-in-out infinite;
+}
+.bb-orb-a {
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, rgba(251,191,36,0.16) 0%, transparent 70%);
+  animation: bbOrb 18s ease-in-out infinite reverse;
+}
+.bb-orb-e {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(16,185,129,0.14) 0%, transparent 70%);
+  animation: bbOrb 22s ease-in-out infinite;
+  animation-delay: -7s;
+}
+@keyframes bbOrb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(28px, -36px) scale(1.06); }
+  66%       { transform: translate(-18px, 22px) scale(0.94); }
+}
+
+/* Light glass card */
+.bb-glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  box-shadow: 0 4px 24px rgba(139,92,246,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.bb-glass:hover {
+  border-color: rgba(139, 92, 246, 0.28);
+  box-shadow: 0 0 0 4px rgba(139,92,246,0.06), 0 12px 40px rgba(139,92,246,0.12);
+}
+.bb-glass-amber:hover {
+  border-color: rgba(245,158,11,0.35) !important;
+  box-shadow: 0 0 0 4px rgba(245,158,11,0.06), 0 12px 40px rgba(245,158,11,0.12) !important;
+}
+.bb-glass-emerald:hover {
+  border-color: rgba(5,150,105,0.35) !important;
+  box-shadow: 0 0 0 4px rgba(5,150,105,0.06), 0 12px 40px rgba(5,150,105,0.12) !important;
+}
+
+/* Icon pill */
+.bb-icon-pill {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Buttons */
+.bb-btn-amber {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #451a03;
+  font-weight: 900;
+  border: none;
+  box-shadow: 0 0 20px rgba(251,191,36,0.35), 0 4px 14px rgba(245,158,11,0.25);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.bb-btn-amber:hover {
+  box-shadow: 0 0 36px rgba(251,191,36,0.55), 0 6px 20px rgba(245,158,11,0.35);
+  transform: translateY(-2px) scale(1.03);
+}
+.bb-btn-amber:active { transform: translateY(0) scale(0.98); }
+
+.bb-btn-violet {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: #fff;
+  font-weight: 900;
+  border: none;
+  box-shadow: 0 0 20px rgba(139,92,246,0.35), 0 4px 14px rgba(109,40,217,0.25);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.bb-btn-violet:hover {
+  box-shadow: 0 0 36px rgba(139,92,246,0.55), 0 6px 20px rgba(109,40,217,0.35);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.bb-btn-ghost {
+  background: rgba(124,58,237,0.06);
+  color: #6d28d9;
+  font-weight: 700;
+  border: 1.5px solid rgba(124,58,237,0.22);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.bb-btn-ghost:hover {
+  background: rgba(124,58,237,0.1);
+  border-color: rgba(124,58,237,0.4);
+  transform: translateY(-2px);
+}
+
+/* Soft glow text */
+.bb-glow-amber { text-shadow: 0 2px 20px rgba(251,191,36,0.35); }
+.bb-glow-violet { text-shadow: 0 2px 20px rgba(139,92,246,0.3); }
+
+/* Section backgrounds */
+.bb-feat-bg {
+  background: linear-gradient(180deg, #f5f3ff 0%, #fdfcff 100%);
+}
+.bb-impact-bg { background: #ffffff; }
+.bb-cta-bg {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 40%, #fef3c7 100%);
+}
+
+/* Stat number */
+.bb-stat { font-family: 'Bangers', cursive; letter-spacing: 0.04em; }
+
+/* Pulse ring */
+@keyframes bbPulse {
+  0%   { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.bb-pulse  { animation: bbPulse 2.4s ease-out infinite; }
+.bb-pulse-2 { animation: bbPulse 2.4s ease-out infinite 0.8s; }
+
+/* Floating particles */
+@keyframes bbParticle {
+  0%, 100% { transform: translateY(0) translateX(0);   opacity: 0.5; }
+  50%       { transform: translateY(-18px) translateX(6px); opacity: 1; }
+}
+.bb-dot {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: bbParticle ease-in-out infinite;
+}
+
+/* Tech badge */
+.bb-badge {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(139,92,246,0.14);
+  box-shadow: 0 2px 10px rgba(139,92,246,0.06);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.bb-badge:hover {
+  border-color: rgba(139,92,246,0.32);
+  box-shadow: 0 0 16px rgba(139,92,246,0.14);
+  transform: translateY(-2px);
 }

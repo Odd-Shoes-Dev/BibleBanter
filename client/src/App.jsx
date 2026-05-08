@@ -324,6 +324,17 @@ export default function App() {
     setShowLoading(false);
   };
 
+  // Scroll to hash anchor once the page is rendered and loading screen is gone
+  useEffect(() => {
+    if (showLoading) return;
+    const { hash } = location;
+    if (!hash) return;
+    const timer = setTimeout(() => {
+      document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' });
+    }, 80);
+    return () => clearTimeout(timer);
+  }, [showLoading, location.hash]);
+
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (

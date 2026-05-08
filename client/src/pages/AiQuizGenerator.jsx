@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import ConfirmModal from "../components/ConfirmModal";
+import AiQuizGeneratorIcon from "../components/icons/AiQuizGeneratorIcon";
 import { getFriendlyError } from "../utils/errors";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
@@ -445,7 +446,8 @@ export default function AiQuizGenerator({ token, onBack, onSaved }) {
         >
           ← Back
         </button>
-        <div className="flex-1">
+        <div className="flex items-center gap-2 flex-1">
+          <AiQuizGeneratorIcon className="w-7 h-7 shrink-0" />
           <h1
             className="font-anton text-lg text-white"
             style={{ letterSpacing: "0.05em" }}
