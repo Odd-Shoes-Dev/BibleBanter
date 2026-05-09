@@ -546,6 +546,12 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
                 Kingdom Chaplain
               </a>.
             </p>
+            <p className="text-xs" style={{ color: "#9ca3af" }}>
+              Open source contributions by{" "}
+              <a href="https://www.linkedin.com/in/shadrack-ssenkaayi-0580bb2b7/" className="underline hover:text-violet-600 transition-colors" target="_blank" rel="noreferrer">
+                Shadrack
+              </a>
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-x-5 gap-y-2">

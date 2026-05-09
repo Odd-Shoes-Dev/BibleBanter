@@ -24,9 +24,9 @@ if (!schemaPath) {
 
 console.log(`[postinstall] Found Prisma schema at ${path.relative(repoRoot, schemaPath)}. Running \`prisma generate\`...`);
 const res = spawnSync(
-  process.platform === 'win32' ? 'npx.cmd' : 'npx',
+  'npx',
   ['prisma', 'generate', '--schema', schemaPath],
-  { stdio: 'inherit' }
+  { stdio: 'inherit', shell: true }
 );
 
 process.exit(res.status ?? 1);
