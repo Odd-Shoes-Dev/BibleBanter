@@ -400,13 +400,15 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
               <p className="text-sm mt-1" style={{ color: "#9ca3af" }}>Play a game to claim the top spot!</p>
             </motion.div>
           ) : (
-            <motion.div className="space-y-3"
-              initial="hidden" whileInView="visible" viewport={viewOpts} variants={stagger}>
+            <div className="space-y-3">
               {leaderboard.map((player, i) => {
                 const isTop3 = i < 3;
                 const medalColor = MEDAL_COLORS[i] ?? "#6b7280";
                 return (
-                  <motion.div key={player.name} variants={fadeUp} custom={i * 0.05}
+                  <motion.div key={player.name}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: i * 0.06, ease: [0.25, 0.8, 0.25, 1] }}
                     className={`bb-glass ${i === 0 ? "bb-glass-amber" : ""} rounded-2xl px-5 py-4 flex items-center gap-4`}
                     style={i === 0 ? { border: "1px solid rgba(245,158,11,0.3)" } : {}}>
                     {/* Rank */}
@@ -446,7 +448,7 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
                   </motion.div>
                 );
               })}
-            </motion.div>
+            </div>
           )}
         </div>
       </section>
