@@ -50,7 +50,26 @@ if (require('fs').existsSync(distPath)) {
 
 // ── Socket.IO real-time handlers ─────────────────────────────────────────────
 const setupSocketHandlers = require('./socket/handlers');
-setupSocketHandlers(io);
+
+setupSocketHandlers(io).then((shutdownAllGames) => {
+  const gracefulShutdown = async (signal) => {
+    console.log(`[${signal}] Graceful shutdown initiated`);
+    try {
+      await shutdownAllGames();
+    } catch (e) {
+      console.error('[shutdown] Error saving games:', e.message);
+    }
+    server.close(async () => {
+      await prisma.$disconnect();
+      process.exit(0);
+    });
+    // Force-exit if server.close stalls (e.g. keep-alive connections)
+    setTimeout(() => process.exit(1), 10_000).unref();
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
+});
 
 // ── SPA fallback (client-side routing) ───────────────────────────────────────
 app.get('*', (req, res) => {

@@ -105,3 +105,10 @@ model SystemStat {
   totalQuestions  Int      @default(0)
   updatedAt       DateTime @updatedAt
 }
+
+model GameSnapshot {
+  pin      String   @id
+  dbGameId String
+  state    Json
+  savedAt  DateTime @updatedAt
+}

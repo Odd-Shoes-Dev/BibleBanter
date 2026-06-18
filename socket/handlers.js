@@ -6,12 +6,92 @@ const { sanitizePlayerName } = require("../utils/sanitize");
 const QUESTION_TIME = 20; // seconds per question (default)
 const RESULTS_TIME = 7; // seconds to show results before auto-advancing
 
-
 // In-memory game store  —  lives for the lifetime of the Node process
 const games = {};
 
 // Grace-period timers: brief disconnects don't immediately kick players/hosts
 const disconnectTimers = new Map(); // key: `${pin}:${name}` for players, `host:${pin}` for hosts
+
+// ── Snapshot helpers (crash recovery) ────────────────────────────────────────
+
+function serializeGame(game) {
+  return {
+    pin: game.pin,
+    dbGameId: game.dbGameId,
+    questions: game.questions,
+    currentQuestion: game.currentQuestion,
+    setId: game.setId,
+    questionOffset: game.questionOffset,
+    nextOffset: game.nextOffset,
+    hasMore: game.hasMore,
+    totalQuestions: game.totalQuestions,
+    mode: game.mode,
+    questionTime: game.questionTime,
+    rounds: game.rounds,
+    players: [...game.players.values()].map((p) => ({
+      name: p.name,
+      team: p.team || '',
+      score: p.score,
+      streak: p.streak,
+    })),
+  };
+}
+
+function deserializeGame(state) {
+  return {
+    ...state,
+    // Restore players Map keyed by name (rejoin flow re-keys to socket ID)
+    players: new Map(
+      (state.players || []).map((p) => [
+        p.name,
+        { ...p, id: p.name, answered: false, lastAnswer: null },
+      ])
+    ),
+    status: 'lobby', // safe state: host clicks Start to resume from next question
+    hostId: null,
+    timer: null,
+    resultsTimer: null,
+    questionStartTime: null,
+  };
+}
+
+async function saveSnapshot(pin) {
+  const game = games[pin];
+  if (!game || !game.dbGameId) return;
+  try {
+    const state = serializeGame(game);
+    await prisma.gameSnapshot.upsert({
+      where: { pin },
+      update: { state },
+      create: { pin, dbGameId: game.dbGameId, state },
+    });
+  } catch (e) {
+    console.error(`[snapshot] save failed for ${pin}:`, e.message);
+  }
+}
+
+async function deleteSnapshot(pin) {
+  try {
+    await prisma.gameSnapshot.deleteMany({ where: { pin } });
+  } catch (_) {}
+}
+
+async function restoreSnapshots() {
+  try {
+    const snapshots = await prisma.gameSnapshot.findMany();
+    for (const s of snapshots) {
+      const state = s.state;
+      games[s.pin] = deserializeGame(state);
+      console.log(
+        `[restore] game ${s.pin} — Q${(state.currentQuestion || 0) + 1}, ${state.players?.length || 0} player(s)`
+      );
+    }
+    if (snapshots.length > 0)
+      console.log(`[restore] ${snapshots.length} game(s) restored from previous session`);
+  } catch (e) {
+    console.error('[restore] failed:', e.message);
+  }
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -109,6 +189,9 @@ function createGameFlowFunctions(io) {
       autoAdvanceIn: RESULTS_TIME,
     });
 
+    // Checkpoint game state so a crash here doesn't lose progress
+    saveSnapshot(pin);
+
     game.resultsTimer = setTimeout(() => {
       if (game.status !== "results") return;
       if (isLast) endGame(pin);
@@ -186,6 +269,9 @@ function createGameFlowFunctions(io) {
         console.error("DB endGame error:", e.message);
       }
     }
+
+    // Remove snapshot — game ended cleanly
+    await deleteSnapshot(pin);
   }
 
   return { sendQuestion, showResults, endGame };
@@ -193,8 +279,29 @@ function createGameFlowFunctions(io) {
 
 // ── Main setup ───────────────────────────────────────────────────────────────
 
-function setupSocketHandlers(io) {
+async function setupSocketHandlers(io) {
+  await restoreSnapshots();
+
   const { sendQuestion, showResults, endGame } = createGameFlowFunctions(io);
+
+  // Called by server.js on SIGTERM/SIGINT — saves all active games before exit
+  async function shutdownAllGames() {
+    const pins = Object.keys(games).filter((p) => games[p]?.status !== 'ended');
+    if (pins.length === 0) return;
+    console.log(`[shutdown] saving ${pins.length} active game(s)...`);
+    for (const pin of pins) {
+      const game = games[pin];
+      clearTimeout(game.timer);
+      clearTimeout(game.resultsTimer);
+      io.to(pin).emit('server-restart', {
+        message: 'Server is restarting — your progress is saved. Please rejoin in a moment.',
+        leaderboard: getLeaderboard(game),
+      });
+      await saveSnapshot(pin);
+    }
+    for (const [, { timerId }] of disconnectTimers) clearTimeout(timerId);
+    disconnectTimers.clear();
+  }
 
   io.on("connection", (socket) => {
     console.log("Connected:", socket.id);
@@ -382,6 +489,7 @@ function setupSocketHandlers(io) {
           totalQuestions: allQuestions.length,
           players: playerList,
         });
+        saveSnapshot(pin);
         callback?.({ success: true });
       } catch (e) {
         callback?.({ success: false, error: e.message });
@@ -556,8 +664,10 @@ function setupSocketHandlers(io) {
 
       let pointsEarned = 0;
       if (isCorrect) {
-        pointsEarned = timeElapsed <= 5 ? 6 : 5;
+        const base = timeElapsed <= 5 ? 6 : 5;
         player.streak = (player.streak || 0) + 1;
+        const multiplier = player.streak >= 3 ? 1.2 : 1;
+        pointsEarned = Math.round(base * multiplier);
         player.score += pointsEarned;
       } else {
         player.streak = 0;
@@ -721,6 +831,7 @@ function setupSocketHandlers(io) {
         clearTimeout(game.timer);
         clearTimeout(game.resultsTimer);
         io.to(pin).emit("host-disconnected");
+        deleteSnapshot(pin);
         delete games[pin];
       }
     });
@@ -741,6 +852,7 @@ function setupSocketHandlers(io) {
           clearTimeout(games[pin].timer);
           clearTimeout(games[pin].resultsTimer);
           io.to(pin).emit("host-disconnected");
+          deleteSnapshot(pin);
           delete games[pin];
         }, 20000);
         disconnectTimers.set(hostKey, { timerId, oldSocketId: socket.id });
@@ -761,6 +873,8 @@ function setupSocketHandlers(io) {
       }
     });
   });
+
+  return shutdownAllGames;
 }
 
 module.exports = setupSocketHandlers;

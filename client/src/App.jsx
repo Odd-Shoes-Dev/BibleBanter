@@ -106,6 +106,7 @@ export default function App() {
 
     socket.on('connect', () => {
       setReconnecting(false);
+      setErrorMsg('');
       const savedPin = sessionStorage.getItem('bb_pin');
       const savedRole = sessionStorage.getItem('bb_role');
       const savedName = sessionStorage.getItem('bb_name');
@@ -213,6 +214,11 @@ export default function App() {
       navRef.current('/');
     });
 
+    socket.on('server-restart', ({ message }) => {
+      if (sounds.stopBg) sounds.stopBg();
+      setErrorMsg(message || 'Server is restarting — please wait to rejoin.');
+    });
+
     socket.on('error-msg', (msg) => setErrorMsg(msg));
 
     return () => {
@@ -228,6 +234,7 @@ export default function App() {
       socket.off('question-results');
       socket.off('game-over');
       socket.off('host-disconnected');
+      socket.off('server-restart');
       socket.off('error-msg');
     };
   }, []);
