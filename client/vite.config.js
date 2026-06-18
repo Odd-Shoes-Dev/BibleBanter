@@ -89,6 +89,11 @@ export default defineConfig({
             },
           },
           {
+            // Leaderboard — always fresh, never serve from cache
+            urlPattern: /\/api\/leaderboard/i,
+            handler: 'NetworkOnly',
+          },
+          {
             // API calls — network first, fall back to cache
             urlPattern: /^.*\/api\/.*/i,
             handler: 'NetworkFirst',

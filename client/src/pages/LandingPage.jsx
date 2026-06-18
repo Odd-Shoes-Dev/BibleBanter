@@ -47,8 +47,8 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
 
   const [leaderboard, setLeaderboard] = useState([]);
   useEffect(() => {
-    fetch(`${BACKEND}/api/leaderboard`)
-      .then(r => r.json())
+    fetch(`${BACKEND}/api/leaderboard`, { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(d => setLeaderboard(d.leaderboard || []))
       .catch(() => {});
   }, []);
