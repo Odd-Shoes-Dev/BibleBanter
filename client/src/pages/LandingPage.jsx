@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Brain, Zap, BarChart3, History, Trophy,
@@ -6,6 +6,8 @@ import {
   Menu, X, LogIn, LogOut, Users,
   Target, Star, ChevronRight,
 } from "lucide-react";
+
+const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 import worshipVideo from "../assets/worship.mp4";
 import JoinGameIcon from "../components/icons/JoinGameIcon";
 import AiQuizGeneratorIcon from "../components/icons/AiQuizGeneratorIcon";
@@ -32,6 +34,9 @@ const DOTS = [
   { size: 4,  top: "88%", left: "22%", color: "rgba(139,92,246,0.18)",  dur: "10s", delay: "4s"   },
 ];
 
+const MEDAL_COLORS = ["#f59e0b", "#94a3b8", "#b45309"];
+const MEDAL_LABELS = ["🥇", "🥈", "🥉"];
+
 const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) => {
   const isLoggedIn = useMemo(
     () => !!localStorage.getItem("bb_token") || !!hostUser,
@@ -39,6 +44,14 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
   );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const handleHost = () => (isLoggedIn ? onHost?.() : onLogin?.());
+
+  const [leaderboard, setLeaderboard] = useState([]);
+  useEffect(() => {
+    fetch(`${BACKEND}/api/leaderboard`)
+      .then(r => r.json())
+      .then(d => setLeaderboard(d.leaderboard || []))
+      .catch(() => {});
+  }, []);
 
   /* ── HOW-TO cards ──────────────────────────────────────────────────────── */
   const howCards = [
@@ -116,7 +129,7 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
           </button>
 
           <div className="hidden lg:flex gap-7 items-center">
-            {[["#play","Play"],["#features","Features"],["#impact","About"],["#tech","Tech"]].map(([h,l]) => (
+            {[["#play","Play"],["#features","Features"],["#leaderboard","Leaderboard"],["#impact","About"],["#tech","Tech"]].map(([h,l]) => (
               <a key={h} href={h}
                 className="relative group text-sm font-semibold tracking-wide transition-colors"
                 style={{ color: "#6b7280" }}
@@ -153,7 +166,7 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
             className="lg:hidden px-5 pb-5 pt-2 flex flex-col gap-3"
             style={{ borderTop: "1px solid rgba(139,92,246,0.1)" }}>
-            {[["#play","Play"],["#features","Features"],["#impact","About"],["#tech","Tech"]].map(([h,l]) => (
+            {[["#play","Play"],["#features","Features"],["#leaderboard","Leaderboard"],["#impact","About"],["#tech","Tech"]].map(([h,l]) => (
               <a key={h} href={h} onClick={() => setMobileMenuOpen(false)}
                 className="text-sm font-semibold py-1 block" style={{ color: "#6b7280" }}>{l}</a>
             ))}
@@ -357,6 +370,84 @@ const LandingPage = ({ hostUser, onJoin, onHost, onSolo, onLogin, onLogout }) =>
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── GLOBAL LEADERBOARD ──────────────────────────────────────────── */}
+      <section id="leaderboard" className="py-20 sm:py-28 px-5 sm:px-8"
+        style={{ background: "#f9f8ff", borderTop: "1px solid rgba(139,92,246,0.08)" }}>
+        <div className="max-w-3xl mx-auto">
+          <motion.div className="text-center mb-12"
+            initial="hidden" whileInView="visible" viewport={viewOpts} variants={stagger}>
+            <motion.p variants={fadeUp} className="text-xs font-bold tracking-[0.2em] uppercase mb-3" style={{ color: "#d97706" }}>
+              Hall of Fame
+            </motion.p>
+            <motion.h2 variants={fadeUp}
+              className="font-nunito font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight mb-4"
+              style={{ color: "#1e1b4b" }}>
+              Top Players
+            </motion.h2>
+            <motion.p variants={fadeUp} className="max-w-md mx-auto text-sm sm:text-base" style={{ color: "#6b7280" }}>
+              All-time scores across every game ever played.
+            </motion.p>
+          </motion.div>
+
+          {leaderboard.length === 0 ? (
+            <motion.div initial="hidden" whileInView="visible" viewport={viewOpts} variants={fadeUp}
+              className="bb-glass rounded-2xl p-10 text-center">
+              <Trophy size={40} className="mx-auto mb-3" style={{ color: "#d97706" }} />
+              <p className="font-nunito font-black text-lg uppercase" style={{ color: "#1e1b4b" }}>No games yet</p>
+              <p className="text-sm mt-1" style={{ color: "#9ca3af" }}>Play a game to claim the top spot!</p>
+            </motion.div>
+          ) : (
+            <motion.div className="space-y-3"
+              initial="hidden" whileInView="visible" viewport={viewOpts} variants={stagger}>
+              {leaderboard.map((player, i) => {
+                const isTop3 = i < 3;
+                const medalColor = MEDAL_COLORS[i] ?? "#6b7280";
+                return (
+                  <motion.div key={player.name} variants={fadeUp} custom={i * 0.05}
+                    className={`bb-glass ${i === 0 ? "bb-glass-amber" : ""} rounded-2xl px-5 py-4 flex items-center gap-4`}
+                    style={i === 0 ? { border: "1px solid rgba(245,158,11,0.3)" } : {}}>
+                    {/* Rank */}
+                    <div className="w-10 shrink-0 text-center">
+                      {isTop3 ? (
+                        <span className="text-2xl leading-none">{MEDAL_LABELS[i]}</span>
+                      ) : (
+                        <span className="font-nunito font-black text-base" style={{ color: "#9ca3af" }}>
+                          #{player.rank}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Avatar */}
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center font-nunito font-black text-sm text-white shrink-0"
+                      style={{ background: isTop3 ? `linear-gradient(135deg, ${medalColor}, ${medalColor}99)` : "linear-gradient(135deg,#6d28d9,#7c3aed)" }}>
+                      {player.name.slice(0, 2).toUpperCase()}
+                    </div>
+
+                    {/* Name */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-nunito font-black text-base truncate" style={{ color: "#1e1b4b" }}>
+                        {player.name}
+                      </p>
+                      <p className="text-xs" style={{ color: "#9ca3af" }}>
+                        {player.gamesPlayed} {player.gamesPlayed === 1 ? "game" : "games"}
+                      </p>
+                    </div>
+
+                    {/* Score */}
+                    <div className="text-right shrink-0">
+                      <p className="bb-stat text-xl" style={{ color: isTop3 ? medalColor : "#7c3aed" }}>
+                        {player.totalScore.toLocaleString()}
+                      </p>
+                      <p className="text-xs uppercase tracking-wider font-bold" style={{ color: "#9ca3af" }}>pts</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
         </div>
       </section>
 
