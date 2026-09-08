@@ -103,7 +103,7 @@ question,optionA,optionB,optionC,optionD,answer,category,difficulty,scripture
 
 ## 4. AI Quiz Generator
 
-> Powered by **Google Gemini 2.0 Flash** (free tier — 1,500 requests/day).
+> Powered by **Groq** (`openai/gpt-oss-120b`, free tier).
 
 ### How It Works
 Access via **My Sets → ✨ Generate with AI**
@@ -163,7 +163,7 @@ After every finished game, an **Understanding Report** is automatically generate
 | Avg Score | Average final score across all players |
 
 **AI Written Summary**
-- 3–4 sentence plain-language paragraph written by Gemini
+- 3–4 sentence plain-language paragraph written by Groq
 - Describes what the group understood well, what they struggled with, and suggests follow-up topics
 - Written in warm, church-friendly language (not corporate)
 
@@ -192,7 +192,7 @@ Each question shows:
 2. Host clicks report button → `GET /api/games/:id/report` is called
 3. Server fetches all `PlayerAnswer` rows for the game (including `responseTimeMs`)
 4. Per-question statistics are computed
-5. Gemini Flash generates the AI summary paragraph
+5. Groq generates the AI summary paragraph
 6. Report is saved to the `SessionReport` table (cached — regenerating the same game returns the stored report)
 
 ---
@@ -252,7 +252,7 @@ Each question shows:
 | Database | PostgreSQL (Neon serverless) |
 | ORM | Prisma 5 |
 | Auth | JWT + bcryptjs |
-| AI | Google Gemini 2.0 Flash (`@google/generative-ai`) |
+| AI | Groq (`openai/gpt-oss-120b`, OpenAI-compatible REST API) |
 | File Parsing | `pdf-parse`, `mammoth`, `csv-parse` |
 | QR Codes | `qrcode.react` |
 | Deployment | Vercel (frontend) + Render (backend) |
@@ -279,7 +279,7 @@ Each question shows:
 DATABASE_URL="postgresql://..."        # Neon PostgreSQL connection string
 JWT_SECRET="your-secret-here"          # Long random string for JWT signing
 PORT=3001                               # Server port (optional, defaults to 3001)
-GEMINI_API_KEY=AIza...                 # Google AI Studio API key (free)
+GROQ_API_KEY=gsk_...                   # Groq API key (free, console.groq.com)
 ```
 
 ### Frontend (`client/.env.production`)
@@ -287,9 +287,9 @@ GEMINI_API_KEY=AIza...                 # Google AI Studio API key (free)
 VITE_BACKEND_URL=https://biblebanter.onrender.com
 ```
 
-### Getting a Gemini API Key (Free)
-1. Go to [aistudio.google.com](https://aistudio.google.com)
-2. Click **Get API Key** → **Create API Key**
+### Getting a Groq API Key (Free)
+1. Go to [console.groq.com](https://console.groq.com)
+2. Open **API Keys** → **Create API Key**
 3. Copy the key and add it to your environment
 
 ---
@@ -303,7 +303,7 @@ VITE_BACKEND_URL=https://biblebanter.onrender.com
 - **Required environment variables on Render:**
   - `DATABASE_URL`
   - `JWT_SECRET`
-  - `GEMINI_API_KEY` ← **must be added manually for AI features to work**
+  - `GROQ_API_KEY` ← **must be added manually for AI features to work**
 
 ### Frontend — Vercel
 - Auto-deploys from `main` branch

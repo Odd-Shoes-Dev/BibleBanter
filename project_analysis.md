@@ -33,7 +33,7 @@ graph TB
     end
 
     subgraph AI_Service["AI Layer"]
-        Gemini["Google Gemini 2.5 Flash"]
+        Gemini["Groq (openai/gpt-oss-120b)"]
     end
 
     Frontend -- HTTP --> REST
@@ -75,7 +75,7 @@ graph TB
 | **Real-time** | Socket.IO Server | 4.7 |
 | **Database** | PostgreSQL (Neon) via Prisma | Prisma 5.22 |
 | **Auth** | JWT (`jsonwebtoken`) + `bcryptjs` | — |
-| **AI** | Google Gemini 2.5 Flash (`@google/generative-ai`) | 0.24 |
+| **AI** | Groq (`openai/gpt-oss-120b`, OpenAI-compatible REST API) | — |
 | **File Parsing** | `multer` + `mammoth` + `pdf-parse` + `csv-parse` | — |
 | **Deployment** | Vercel (frontend) + Render (backend) | — |
 
@@ -208,9 +208,9 @@ erDiagram
 
 ---
 
-## 🧠 AI Integration (Gemini 2.5 Flash)
+## 🧠 AI Integration (Groq — openai/gpt-oss-120b)
 
-Two AI features powered by Google Gemini:
+Two AI features powered by Groq:
 
 1. **Quiz Generation** — Paste sermon notes / upload PDF/DOCX → AI generates 5-10 multiple-choice questions with configurable audience (Gen Z, Youth, Children, Adults, General Church) and tone (Playful, Conversational, Formal, Energetic, Simple).
 
@@ -315,4 +315,4 @@ npm install
 npm run dev                # starts on :5173
 ```
 
-**Required env vars**: `DATABASE_URL`, `JWT_SECRET`, `GEMINI_API_KEY` (optional for AI), `GOOGLE_CLIENT_ID` (optional for Google sign-in)
+**Required env vars**: `DATABASE_URL`, `JWT_SECRET`, `GROQ_API_KEY` (optional for AI), `GROQ_MODEL` (optional), `GOOGLE_CLIENT_ID` (optional for Google sign-in)

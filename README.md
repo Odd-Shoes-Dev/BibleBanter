@@ -2,14 +2,14 @@
 
 A real-time multiplayer Bible trivia platform for churches, fellowships, and youth groups — Kahoot-style, powered by AI.
 
-![Stack](https://img.shields.io/badge/Stack-React%20%2B%20Socket.IO%20%2B%20Prisma-blue) ![AI](https://img.shields.io/badge/AI-Google%20Gemini%202.0-purple) ![DB](https://img.shields.io/badge/DB-PostgreSQL%20%2F%20Neon-teal) ![License](https://img.shields.io/badge/License-MIT-green)
+![Stack](https://img.shields.io/badge/Stack-React%20%2B%20Socket.IO%20%2B%20Prisma-blue) ![AI](https://img.shields.io/badge/AI-Groq-purple) ![DB](https://img.shields.io/badge/DB-PostgreSQL%20%2F%20Neon-teal) ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
 ## ✨ Features
 
 - **Real-time multiplayer** — unlimited players join via 6-digit PIN or QR code scan
-- **AI quiz generator** — generate questions from sermon text, PDFs, or any Bible topic using Google Gemini
+- **AI quiz generator** — generate questions from sermon text, PDFs, or any Bible topic using Groq
 - **Custom question upload** — upload via CSV, PDF, Word (.docx), or Plain Text (.txt)
 - **Understanding reports** — AI-generated post-game analysis showing what stuck, per question
 - **Game history** — full archive of past games with per-session report links
@@ -31,7 +31,7 @@ A real-time multiplayer Bible trivia platform for churches, fellowships, and you
 - [Node.js](https://nodejs.org/) v18 or higher
 - npm
 - A [Neon](https://neon.tech) PostgreSQL database (free tier)
-- A [Google AI Studio](https://aistudio.google.com) Gemini API key (free tier)
+- A [Groq](https://console.groq.com) API key (free tier)
 
 ### Installation
 
@@ -55,7 +55,7 @@ Create a `.env` file in the project root:
 DATABASE_URL="postgresql://..."       # Neon PostgreSQL connection string
 JWT_SECRET="your-long-random-secret"  # Any long random string
 PORT=3001
-GEMINI_API_KEY=AIza...                # From aistudio.google.com
+GROQ_API_KEY=gsk_...                  # From console.groq.com
 ```
 
 Create `client/.env` for local development:
@@ -207,7 +207,7 @@ question,optionA,optionB,optionC,optionD,answer,category,difficulty,scripture
 | Database | PostgreSQL via [Neon](https://neon.tech) (serverless) |
 | ORM | Prisma 5 |
 | Auth | JWT + bcryptjs + Google OAuth (`@react-oauth/google`) |
-| AI | Google Gemini 2.0 Flash (`@google/generative-ai`) |
+| AI | Groq (`openai/gpt-oss-120b`, OpenAI-compatible REST API) |
 | File Parsing | multer, mammoth, pdf-parse, csv-parse |
 | Deployment | Vercel (frontend) + Render (backend) |
 
@@ -218,7 +218,7 @@ question,optionA,optionB,optionC,optionD,answer,category,difficulty,scripture
 ### Backend — Render
 - Build command: `npm install && npx prisma generate`
 - Start command: `node server.js`
-- Required env vars: `DATABASE_URL`, `JWT_SECRET`, `GEMINI_API_KEY`, `ALLOWED_ORIGINS`
+- Required env vars: `DATABASE_URL`, `JWT_SECRET`, `GROQ_API_KEY`, `ALLOWED_ORIGINS`
 
 ### Frontend — Vercel
 - Root directory: `client`

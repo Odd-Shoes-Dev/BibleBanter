@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const gemini = require("../lib/gemini");
+const groq = require("../lib/groq");
 const { requireHost } = require("../middleware/auth");
 const { createRateLimit } = require("../utils/rateLimit");
 const { unescapeHtml } = require("../utils/sanitize");
@@ -120,11 +120,11 @@ router.post("/generate-quiz", requireHost, aiLimiter, async (req, res) => {
   try {
     const { content, audience = "General Church", tone = "Conversational", customPrompt = "", count = 10 } = req.body;
     if (!content?.trim()) return res.status(400).json({ error: "Content is required." });
-    if (!process.env.GEMINI_API_KEY)
-      return res.status(503).json({ error: "AI not configured. Add GEMINI_API_KEY to environment." });
+    if (!process.env.GROQ_API_KEY)
+      return res.status(503).json({ error: "AI not configured. Add GROQ_API_KEY to environment." });
 
     const prompt = buildQuizPrompt(content.trim(), audience, tone, customPrompt, count);
-    const result = await gemini.generateContent(prompt);
+    const result = await groq.generateContent(prompt);
     const questions = parseJsonFromAI(result.response.text().trim());
 
     if (!Array.isArray(questions)) throw new Error("AI returned unexpected format");
@@ -144,7 +144,7 @@ router.post("/regenerate-question", requireHost, aiLimiter, async (req, res) => 
     if (!content?.trim()) return res.status(400).json({ error: "Content is required." });
 
     const prompt = buildRegeneratePrompt(content.trim(), audience, tone, existingQuestions);
-    const result = await gemini.generateContent(prompt);
+    const result = await groq.generateContent(prompt);
     const q = parseJsonFromAI(result.response.text().trim());
 
     res.json({ question: validateQuestion(q) });
@@ -159,7 +159,7 @@ router.post("/generate-from-reference", requireHost, aiLimiter, async (req, res)
   try {
     const { reference, audience = "General Church", tone = "Conversational", count = 10 } = req.body;
     if (!reference?.trim()) return res.status(400).json({ error: "Bible reference is required." });
-    if (!process.env.GEMINI_API_KEY) return res.status(503).json({ error: "AI not configured." });
+    if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: "AI not configured." });
 
     const response = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}`);
     if (!response.ok)
@@ -168,7 +168,7 @@ router.post("/generate-from-reference", requireHost, aiLimiter, async (req, res)
 
     const content = `Scripture Reference: ${data.reference}\n\n${data.text}`;
     const prompt = buildQuizPrompt(content.trim(), audience, tone, "", count);
-    const result = await gemini.generateContent(prompt);
+    const result = await groq.generateContent(prompt);
     const questions = parseJsonFromAI(result.response.text().trim());
 
     if (!Array.isArray(questions)) throw new Error("AI returned unexpected format");

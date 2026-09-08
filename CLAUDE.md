@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Bible Banter — a real-time multiplayer Bible trivia platform (Kahoot-style). Hosts create games, players join via 6-digit PIN, and questions are answered live with speed-based scoring and streak multipliers. AI-powered quiz generation uses Google Gemini.
+Bible Banter — a real-time multiplayer Bible trivia platform (Kahoot-style). Hosts create games, players join via 6-digit PIN, and questions are answered live with speed-based scoring and streak multipliers. AI-powered quiz generation uses Groq (OpenAI-compatible API).
 
 ## Commands
 
@@ -44,9 +44,9 @@ Disconnection handling uses a grace-period timer map (`disconnectTimers`) that g
 ### Backend structure
 - `server.js` — Express app, Socket.IO server, CORS config, keep-alive pings
 - `socket/handlers.js` — All socket event handlers and in-memory game state (this is the largest and most critical file)
-- `routes/` — REST API: `auth.js` (JWT + Google OAuth), `sets.js` (question set CRUD), `games.js` (game history), `ai.js` (Gemini quiz generation + reports), `upload.js` (file upload parsing), `reports.js` (session reports)
+- `routes/` — REST API: `auth.js` (JWT + Google OAuth), `sets.js` (question set CRUD), `games.js` (game history), `ai.js` (Groq quiz generation + reports), `upload.js` (file upload parsing), `reports.js` (session reports)
 - `middleware/auth.js` — JWT auth middleware (`requireHost`, `optionalHost`)
-- `lib/gemini.js` — Google Gemini client (gemini-2.5-flash model)
+- `lib/groq.js` — Groq chat-completions client (default model `openai/gpt-oss-120b`, override with `GROQ_MODEL`); exposes `generateContent(prompt)` returning `{ response: { text() } }`
 - `lib/prisma.js` — Prisma client singleton
 - `utils/` — `parseQuestions.js` (CSV/PDF/DOCX/TXT parsing), `sanitize.js`, `rateLimit.js`, `email.js`
 - `questions.js` — Default question bank (fallback when no set is selected)
@@ -68,7 +68,7 @@ Schema in `prisma/schema.prisma`. Key models: `Host`, `QuestionSet`, `Question`,
 
 ## Environment Variables
 
-Backend `.env`: `DATABASE_URL`, `JWT_SECRET`, `PORT`, `GEMINI_API_KEY`, `ALLOWED_ORIGINS`
+Backend `.env`: `DATABASE_URL`, `JWT_SECRET`, `PORT`, `GROQ_API_KEY`, `GROQ_MODEL` (optional), `ALLOWED_ORIGINS`
 Frontend `client/.env`: `VITE_BACKEND_URL`
 
 ## Deployment

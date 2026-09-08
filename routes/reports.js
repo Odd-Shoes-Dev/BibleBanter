@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../lib/prisma');
-const gemini = require('../lib/gemini');
+const groq = require('../lib/groq');
 const { requireHost } = require('../middleware/auth');
 
 // ── Report builder ───────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ async function buildReportData(gameId) {
 }
 
 async function generateAiSummary(reportData) {
-  if (!process.env.GEMINI_API_KEY) return 'Report generated. Review the breakdown below for details.';
+  if (!process.env.GROQ_API_KEY) return 'Report generated. Review the breakdown below for details.';
   const { totalPlayers, overallAccuracy, questions, best, worst, setName } = reportData;
   const needsFollowup = questions.filter(q => q.label === 'needs_followup').map(q => `"${q.question}"`).join(', ');
   const prompt = `You are a helpful assistant for a church pastor or fellowship leader. Write a short 3-4 sentence understanding summary for a Bible quiz session.
@@ -72,7 +72,7 @@ ${needsFollowup ? `Questions needing follow-up: ${needsFollowup}` : ''}
 Write in plain, warm, church-friendly language. No bullet points. No headings. Just a short paragraph. Mention what people understood well, what they struggled with, and suggest a follow-up if needed. Use language like "participants", "the group", "may need reinforcement", "strongest area". Avoid corporate jargon.`;
 
   try {
-    const result = await gemini.generateContent(prompt);
+    const result = await groq.generateContent(prompt);
     return result.response.text().trim();
   } catch (e) {
     return `The session had ${totalPlayers} participants with ${overallAccuracy}% overall accuracy. Review the breakdown below to see which questions may need follow-up.`;
