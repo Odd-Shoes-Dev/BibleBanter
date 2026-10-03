@@ -45,7 +45,7 @@ export default function GameHistory({ token, onBack, onViewReport }) {
           <div className="text-center mb-6">
             <p className="text-white/40 text-xs uppercase tracking-widest">Game PIN</p>
             <p className="font-anton text-4xl" style={{ color: '#f5a623' }}>{selected.pin}</p>
-            <p className="text-white/40 text-sm mt-1">{selected.set?.name || 'Default Questions'} · {new Date(selected.createdAt).toLocaleDateString()}</p>
+            <p className="text-white/40 text-sm mt-1">{selected.title || selected.set?.name || 'Default Questions'} · {new Date(selected.createdAt).toLocaleDateString()}</p>
           </div>
 
           <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -99,7 +99,7 @@ export default function GameHistory({ token, onBack, onViewReport }) {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-nunito font-black text-white text-base">PIN: {g.pin}</p>
-                    <p className="text-white/40 text-xs mt-0.5">{g.set?.name || 'Default Questions'} · {g._count?.players ?? 0} players</p>
+                    <p className="text-white/40 text-xs mt-0.5">{g.title || g.set?.name || 'Default Questions'} · {g._count?.players ?? 0} players</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-bold" style={{ color: statusColor(g.status) }}>{statusLabel(g.status)}</p>

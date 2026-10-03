@@ -3,6 +3,7 @@ const router = express.Router();
 const prisma = require('../lib/prisma');
 const groq = require('../lib/groq');
 const { requireHost } = require('../middleware/auth');
+const { gameTitle } = require('../utils/gameTitle');
 
 // ── Report builder ───────────────────────────────────────────────────────────
 
@@ -56,7 +57,7 @@ async function buildReportData(gameId) {
   const best = [...qStats].sort((a, b) => b.pct - a.pct)[0];
   const worst = [...qStats].sort((a, b) => a.pct - b.pct)[0];
 
-  return { totalPlayers, avgScore, overallAccuracy, questions: qStats, best, worst, setName: game.set?.name || 'Unknown Set', playerStats };
+  return { totalPlayers, avgScore, overallAccuracy, questions: qStats, best, worst, setName: gameTitle(game), playerStats };
 }
 
 async function generateAiSummary(reportData) {
@@ -117,14 +118,14 @@ router.get('/reports', requireHost, async (req, res) => {
       include: {
         game: {
           select: {
-            pin: true, finishedAt: true,
+            pin: true, finishedAt: true, testament: true,
             set: { select: { name: true } },
             _count: { select: { players: true } },
           },
         },
       },
     });
-    res.json({ reports });
+    res.json({ reports: reports.map(r => ({ ...r, game: r.game && { ...r.game, title: gameTitle(r.game) } })) });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch reports.' });
   }

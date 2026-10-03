@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../lib/prisma');
 const { requireHost } = require('../middleware/auth');
+const { gameTitle } = require('../utils/gameTitle');
 
 // GET /api/stats — Global aggregated usage stats
 router.get('/stats', async (req, res) => {
@@ -55,12 +56,12 @@ router.get('/games', requireHost, async (req, res) => {
       orderBy: { createdAt: 'desc' },
       take: 50,
       select: {
-        id: true, pin: true, status: true, createdAt: true, finishedAt: true,
+        id: true, pin: true, status: true, createdAt: true, finishedAt: true, testament: true,
         set: { select: { name: true } },
         _count: { select: { players: true } },
       },
     });
-    res.json({ games: dbGames });
+    res.json({ games: dbGames.map(g => ({ ...g, title: gameTitle(g) })) });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch games.' });
   }
@@ -74,7 +75,7 @@ router.get('/games/:id', requireHost, async (req, res) => {
       include: { set: { select: { name: true } }, players: { orderBy: { score: 'desc' } } },
     });
     if (!game) return res.status(404).json({ error: 'Game not found.' });
-    res.json({ game });
+    res.json({ game: { ...game, title: gameTitle(game) } });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch game.' });
   }

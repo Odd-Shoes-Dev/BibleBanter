@@ -58,6 +58,7 @@ model Game {
   players       Player[]
   sessionReport SessionReport?
   questionsPlayed Json? // snapshot of the questions actually played, in order
+  testament       String? // quick-start pick: 'both' | 'Old Testament' | 'New Testament'
   createdAt     DateTime       @default(now())
   finishedAt    DateTime?
 }

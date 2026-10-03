@@ -63,7 +63,7 @@ export default function ReportsPage({ token, onBack, onViewReport }) {
                     📊
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">{r.game?.set?.name || 'Unnamed Set'}</p>
+                    <p className="text-white font-bold text-sm truncate">{r.game?.title || r.game?.set?.name || 'Unnamed Set'}</p>
                     <p className="text-white/40 text-xs mt-0.5">{fmt(r.game?.finishedAt || r.createdAt)}</p>
                     <div className="flex gap-3 mt-1.5">
                       <span className="text-xs" style={{ color: '#a78bfa' }}>👥 {r.game?._count?.players ?? d?.totalPlayers ?? 0} players</span>

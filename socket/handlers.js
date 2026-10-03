@@ -422,7 +422,7 @@ async function setupSocketHandlers(io) {
           let dbGameId = null;
           try {
             const dbGame = await prisma.game.create({
-              data: { pin, hostId: hostDbId, setId: resolvedSetId || null },
+              data: { pin, hostId: hostDbId, setId: resolvedSetId || null, testament: testament || null },
             });
             dbGameId = dbGame.id;
           } catch (e) {
