@@ -28,6 +28,7 @@ function serializeGame(game) {
     mode: game.mode,
     questionTime: game.questionTime,
     rounds: game.rounds,
+    playedQuestions: game.playedQuestions || [],
     players: [...game.players.values()].map((p) => ({
       name: p.name,
       team: p.team || '',
@@ -210,9 +211,22 @@ function createGameFlowFunctions(io) {
 
   async function endGame(pin) {
     const game = games[pin];
-    if (!game) return;
+    if (!game || game.status === "ended") return;
     game.status = "ended";
     clearTimeout(game.timer);
+
+    // Remember the questions actually played (across rounds) so the session
+    // report doesn't depend on the game being tied to a saved question set.
+    const playedNow = Array.isArray(game.questions)
+      ? game.questions.slice(0, game.currentQuestion + 1).map((q) => ({
+          question: q.question,
+          options: q.options,
+          answer: q.answer,
+          category: q.category || "",
+          scripture: q.scripture || "",
+        }))
+      : [];
+    game.playedQuestions = [...(game.playedQuestions || []), ...playedNow];
 
     const leaderboard = getLeaderboard(game);
     const teamLeaderboard = getTeamLeaderboard(game);
@@ -230,6 +244,14 @@ function createGameFlowFunctions(io) {
 
     // Persist final scores to DB
     if (game.dbGameId) {
+      // Separate from the update below so a failure here can't block it
+      await prisma.game
+        .update({
+          where: { id: game.dbGameId },
+          data: { questionsPlayed: game.playedQuestions },
+        })
+        .catch((e) => console.error("DB questionsPlayed err:", e.message));
+
       try {
         await prisma.game.update({
           where: { id: game.dbGameId },
@@ -704,7 +726,8 @@ async function setupSocketHandlers(io) {
             data: {
               playerName: player.name,
               gameId: game.dbGameId,
-              questionIndex: game.currentQuestion,
+              // Global index across rounds (matches game.playedQuestions order)
+              questionIndex: (game.playedQuestions?.length || 0) + game.currentQuestion,
               answerIndex,
               isCorrect,
               pointsEarned,

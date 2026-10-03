@@ -57,6 +57,7 @@ model Game {
   set           QuestionSet?   @relation(fields: [setId], references: [id], onDelete: SetNull)
   players       Player[]
   sessionReport SessionReport?
+  questionsPlayed Json? // snapshot of the questions actually played, in order
   createdAt     DateTime       @default(now())
   finishedAt    DateTime?
 }

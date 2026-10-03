@@ -17,7 +17,10 @@ async function buildReportData(gameId) {
   if (!game) return null;
 
   const players = game.players;
-  const questions = game.set?.questions || [];
+  // Prefer the snapshot of questions actually played; fall back to the set for older games
+  const questions = Array.isArray(game.questionsPlayed) && game.questionsPlayed.length > 0
+    ? game.questionsPlayed
+    : game.set?.questions || [];
   const totalPlayers = players.length;
   if (totalPlayers === 0 || questions.length === 0) return null;
 
