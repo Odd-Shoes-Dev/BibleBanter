@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { sounds } from "../utils/sound";
+import { isLastPlace } from "../utils/lastPlace";
 
 export default function GameOver({
   leaderboard,
@@ -57,15 +58,11 @@ export default function GameOver({
 
   const myResult = myRank > 0 ? rankMsg(myRank) : null;
 
-  // Play the game-over sound for whoever scored the least, once the whole
-  // session is done (not between rounds, and not when everyone is tied).
+  // Play the last-place sound for whoever failed the most questions, once the
+  // whole session is done (not for the host, not between rounds).
   useEffect(() => {
-    if (role === "host" || continueInfo || !myEntry || leaderboard.length < 2) return;
-    const scores = leaderboard.map((p) => p.score);
-    const minScore = Math.min(...scores);
-    if (myEntry.score === minScore && minScore < Math.max(...scores)) {
-      sounds.lastPlace();
-    }
+    if (role === "host" || continueInfo) return;
+    if (isLastPlace(myEntry, leaderboard)) sounds.lastPlace();
   }, []);
 
   return (

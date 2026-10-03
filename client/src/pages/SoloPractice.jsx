@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { sounds } from '../utils/sound';
+import { isLastPlace } from '../utils/lastPlace';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const ANSWER_COLORS = ['answer-a', 'answer-b', 'answer-c', 'answer-d'];
@@ -115,6 +117,7 @@ export default function SoloPractice({ onBack, authToken }) {
     } else {
       newStreak = 0;
       setStreak(0);
+      sounds.wrong();
     }
     setSelected(index);
     setRevealed(true);
@@ -123,9 +126,13 @@ export default function SoloPractice({ onBack, authToken }) {
 
   const handleNext = () => {
     const next = qIndex + 1;
+    sounds.stopWrong();
     if (next >= questions.length) {
       setPhase('results');
       stopTimer();
+      const correct = answers.filter(a => a.isCorrect).length;
+      const me = { correct, wrong: questions.length - correct };
+      if (isLastPlace(me, [me])) sounds.lastPlace();
       return;
     }
     setQIndex(next);

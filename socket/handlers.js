@@ -33,6 +33,8 @@ function serializeGame(game) {
       team: p.team || '',
       score: p.score,
       streak: p.streak,
+      correct: p.correct || 0,
+      wrong: p.wrong || 0,
     })),
   };
 }
@@ -117,6 +119,8 @@ function getLeaderboard(game) {
       team: p.team || "",
       score: p.score,
       streak: p.streak,
+      correct: p.correct || 0,
+      wrong: p.wrong || 0,
     }));
 }
 
@@ -171,8 +175,13 @@ function createGameFlowFunctions(io) {
 
   function showResults(pin) {
     const game = games[pin];
-    if (!game) return;
+    if (!game || game.status === "results") return;
     game.status = "results";
+
+    // Players who never answered (timed out) count as having failed this question
+    game.players.forEach((p) => {
+      if (!p.answered) p.wrong = (p.wrong || 0) + 1;
+    });
 
     const q = game.questions[game.currentQuestion];
     const leaderboard = getLeaderboard(game);
@@ -669,8 +678,10 @@ async function setupSocketHandlers(io) {
         const multiplier = player.streak >= 3 ? 1.2 : 1;
         pointsEarned = Math.round(base * multiplier);
         player.score += pointsEarned;
+        player.correct = (player.correct || 0) + 1;
       } else {
         player.streak = 0;
+        player.wrong = (player.wrong || 0) + 1;
       }
 
       player.answered = true;
