@@ -2,6 +2,20 @@ let _bgAudio = new Audio('/game-over.mp3');
 _bgAudio.loop = true;
 let _fadeInterval = null;
 
+const _wrongAudio = new Audio('/sounds/wrong-answer.mp3');
+_wrongAudio.preload = 'auto';
+const _lastPlaceAudio = new Audio('/sounds/last-place.mp3');
+_lastPlaceAudio.preload = 'auto';
+
+function playClip(audio, onFail) {
+  try {
+    audio.currentTime = 0;
+    audio.play().catch(() => onFail && onFail());
+  } catch {
+    if (onFail) onFail();
+  }
+}
+
 let _ctx = null;
 function ctx() {
   if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -33,8 +47,20 @@ export const sounds = {
     tone(784, 0.25, 'sine', 0.35, 0.2);
   },
   wrong() {
-    tone(220, 0.15, 'sawtooth', 0.2);
-    tone(180, 0.25, 'sawtooth', 0.15, 0.12);
+    // Falls back to the synthesized buzz if the clip can't play
+    playClip(_wrongAudio, () => {
+      tone(220, 0.15, 'sawtooth', 0.2);
+      tone(180, 0.25, 'sawtooth', 0.15, 0.12);
+    });
+  },
+  stopWrong() {
+    try {
+      _wrongAudio.pause();
+      _wrongAudio.currentTime = 0;
+    } catch {}
+  },
+  lastPlace() {
+    playClip(_lastPlaceAudio);
   },
   tick() {
     tone(880, 0.04, 'square', 0.08);
