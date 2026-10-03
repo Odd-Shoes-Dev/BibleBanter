@@ -114,6 +114,7 @@ export default function SoloPractice({ onBack, authToken }) {
       newStreak = streak + 1;
       setScore(s => s + pts);
       setStreak(newStreak);
+      sounds.correct();
     } else {
       newStreak = 0;
       setStreak(0);
@@ -126,7 +127,7 @@ export default function SoloPractice({ onBack, authToken }) {
 
   const handleNext = () => {
     const next = qIndex + 1;
-    sounds.stopWrong();
+    sounds.stopFeedback();
     if (next >= questions.length) {
       setPhase('results');
       stopTimer();

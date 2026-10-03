@@ -5,7 +5,7 @@
 | Layer | Service | Location |
 |-------|---------|----------|
 | Frontend | Vercel | `https://bible-banter.vercel.app` |
-| Backend | Docker on DigitalOcean VPS | `https://178-128-249-159.sslip.io` |
+| Backend | Docker on VPS (Ubuntu 24.04) | `https://45-56-120-81.sslip.io` |
 | Database | PostgreSQL (Docker) | Local on VPS |
 | Reverse proxy | Nginx + Let's Encrypt SSL | VPS port 80/443 |
 | Chat (separate) | Rocket.Chat + MongoDB | `/root/odd-shoes-chat/` on VPS |
@@ -14,11 +14,10 @@
 
 ## VPS Details
 
-- **Provider:** DigitalOcean
-- **IP:** `178.128.249.159`
-- **OS:** Ubuntu 22.04 LTS
-- **Domain:** `178-128-249-159.sslip.io` (free SSL via sslip.io + Let's Encrypt)
-- **SSL expires:** 2026-08-07 (auto-renews via certbot)
+- **Provider:** Linode/Akamai (unverified — inferred from the IP block)
+- **IP:** `45.56.120.81`
+- **OS:** Ubuntu 24.04 LTS
+- **Domain:** `45-56-120-81.sslip.io` (free SSL via sslip.io + Let's Encrypt)
 
 ---
 
@@ -148,7 +147,7 @@ docker system prune -a   # remove unused images/cache
 /etc/nginx/sites-available/bible-banter
 ```
 
-Proxies all traffic on `178-128-249-159.sslip.io` → `localhost:3001`.
+Proxies all traffic on `45-56-120-81.sslip.io` → `localhost:3001`.
 SSL managed by certbot (auto-renews).
 
 ---
@@ -156,7 +155,7 @@ SSL managed by certbot (auto-renews).
 ## Frontend (Vercel)
 
 - **Repo:** `github.com/shadrack-ss/BibleBanter` (client/ directory)
-- **Env var:** `VITE_BACKEND_URL=https://178-128-249-159.sslip.io`
+- **Env var:** `VITE_BACKEND_URL=https://45-56-120-81.sslip.io`
 - Redeploy: push to `main` branch (auto-deploys) or trigger manually in Vercel dashboard
 
 ---

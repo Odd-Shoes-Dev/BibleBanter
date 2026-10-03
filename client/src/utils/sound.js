@@ -9,6 +9,8 @@ const _wrongClips = ['/sounds/wrong-answer-1.mp3', '/sounds/wrong-answer-2.mp3']
   return a;
 });
 let _wrongNext = 0;
+const _applauseAudio = new Audio('/sounds/applause.mp3');
+_applauseAudio.preload = 'auto';
 const _lastPlaceAudio = new Audio('/sounds/last-place.mp3');
 _lastPlaceAudio.preload = 'auto';
 
@@ -47,13 +49,16 @@ function tone(freq, dur, type = 'sine', vol = 0.25, delay = 0) {
 
 export const sounds = {
   correct() {
-    tone(523, 0.12, 'sine', 0.3);
-    tone(659, 0.12, 'sine', 0.3, 0.1);
-    tone(784, 0.25, 'sine', 0.35, 0.2);
+    // Falls back to the synthesized chime if the clip can't play
+    playClip(_applauseAudio, () => {
+      tone(523, 0.12, 'sine', 0.3);
+      tone(659, 0.12, 'sine', 0.3, 0.1);
+      tone(784, 0.25, 'sine', 0.35, 0.2);
+    });
   },
   wrong() {
     // Falls back to the synthesized buzz if the clip can't play
-    sounds.stopWrong();
+    sounds.stopFeedback();
     const clip = _wrongClips[_wrongNext];
     _wrongNext = (_wrongNext + 1) % _wrongClips.length;
     playClip(clip, () => {
@@ -61,9 +66,10 @@ export const sounds = {
       tone(180, 0.25, 'sawtooth', 0.15, 0.12);
     });
   },
-  stopWrong() {
+  // Stops the per-question feedback clips (applause / wrong-answer)
+  stopFeedback() {
     try {
-      _wrongClips.forEach((a) => {
+      [_applauseAudio, ..._wrongClips].forEach((a) => {
         a.pause();
         a.currentTime = 0;
       });

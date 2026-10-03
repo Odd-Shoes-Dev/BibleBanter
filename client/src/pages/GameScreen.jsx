@@ -45,7 +45,7 @@ export default function GameScreen({
       setTimeUp(false);
       setAnswersRevealed(false);
       prevQuestionRef.current = question.index;
-      sounds.stopWrong();
+      sounds.stopFeedback();
       
       // Ensure music starts if not playing, normally triggered by first question mount
       // role shouldn't practically change mid-game, but we check here.
