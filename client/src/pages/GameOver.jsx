@@ -58,11 +58,10 @@ export default function GameOver({
 
   const myResult = myRank > 0 ? rankMsg(myRank) : null;
 
-  // Play the last-place sound for whoever failed the most questions, once the
-  // whole session is done (not for the host, not between rounds).
   useEffect(() => {
     if (role === "host" || continueInfo) return;
-    if (isLastPlace(myEntry, leaderboard)) sounds.lastPlace();
+    if (myRank === 1) sounds.firstPlace();
+    else if (isLastPlace(myEntry, leaderboard)) sounds.lastPlace();
   }, []);
 
   return (

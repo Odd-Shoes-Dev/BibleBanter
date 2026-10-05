@@ -14,6 +14,7 @@ let _fadeInterval = null;
 
 const APPLAUSE = '/sounds/applause.mp3';
 const LAST_PLACE = '/sounds/last-place.mp3';
+const FIRST_PLACE = '/sounds/first-one.mp3';
 // Wrong-answer clips are used interchangeably: shuffled, no repeats until all have played
 const WRONG_CLIPS = [
   '/sounds/wrong-answer-1.mp3',
@@ -109,6 +110,7 @@ function unlockAudio() {
     }
     loadClip(APPLAUSE);
     loadClip(LAST_PLACE);
+    loadClip(FIRST_PLACE);
     prefetchNextWrong();
   }
 }
@@ -212,6 +214,9 @@ export const sounds = {
   },
   lastPlace() {
     playClip(LAST_PLACE);
+  },
+  firstPlace() {
+    playClip(FIRST_PLACE);
   },
   tick() {
     tone(880, 0.04, 'square', 0.08);
