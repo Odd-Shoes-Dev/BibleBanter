@@ -2,37 +2,154 @@ let _bgAudio = new Audio('/game-over.mp3');
 _bgAudio.loop = true;
 let _fadeInterval = null;
 
-// Wrong-answer clips are used interchangeably (alternating)
-const _wrongClips = ['/sounds/wrong-answer-1.mp3', '/sounds/wrong-answer-2.mp3'].map((src) => {
-  const a = new Audio(src);
-  a.preload = 'auto';
-  return a;
-});
-let _wrongNext = 0;
-const _applauseAudio = new Audio('/sounds/applause.mp3');
-_applauseAudio.preload = 'auto';
-const _lastPlaceAudio = new Audio('/sounds/last-place.mp3');
-_lastPlaceAudio.preload = 'auto';
+// ── Clips & iOS audio unlock ─────────────────────────────────────────────────
+// iPad/iPhone only let a page play sound when playback starts from a tap, and
+// our sounds are triggered by server events instead. So on the user's first
+// tap we switch on a Web Audio context and play every clip through it; once
+// running, iOS lets it play at any time.
+//
+// Clips are fetched lazily (applause + last-place + the next wrong-answer clip
+// on the first tap, then one wrong-answer clip ahead) so players don't download
+// every clip up front.
 
-function playClip(audio, onFail) {
+const APPLAUSE = '/sounds/applause.mp3';
+const LAST_PLACE = '/sounds/last-place.mp3';
+// Wrong-answer clips are used interchangeably: shuffled, no repeats until all have played
+const WRONG_CLIPS = [
+  '/sounds/wrong-answer-1.mp3',
+  '/sounds/wrong-answer-2.mp3',
+  ...[
+    'jesus-1', 'iweee', 'eeeeeh', 'hahahaha', 'have-mercy-upon-us', 'dururu',
+    'haha-good-bye', 'mind-their-business', 'mubs', 'laughing-men', 'jehova',
+  ].map((name) => `/sounds/wrong/${name}.mp3`),
+];
+
+let _wrongBag = [];
+let _lastPulled = null;
+let _upNext = null; // wrong-answer clip chosen for the next failure (prefetched)
+
+function pullWrong() {
+  if (_wrongBag.length === 0) {
+    _wrongBag = [...WRONG_CLIPS];
+    for (let i = _wrongBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [_wrongBag[i], _wrongBag[j]] = [_wrongBag[j], _wrongBag[i]];
+    }
+    // Don't repeat the clip that was just pulled when the bag refills
+    const last = _wrongBag.length - 1;
+    if (_wrongBag[last] === _lastPulled && last > 0) {
+      [_wrongBag[last], _wrongBag[0]] = [_wrongBag[0], _wrongBag[last]];
+    }
+  }
+  _lastPulled = _wrongBag.pop();
+  return _lastPulled;
+}
+
+// Plain audio elements, created on demand as a fallback when a decoded clip
+// isn't ready (fine on Android/desktop)
+const _elements = {};
+function getElement(src) {
+  if (!_elements[src]) {
+    _elements[src] = new Audio(src);
+  }
+  return _elements[src];
+}
+
+let _ctx = null;
+const _buffers = {};
+const _loading = new Set();
+let _feedbackSources = [];
+
+function getCtx() {
+  if (!_ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    _ctx = new AC();
+  }
+  return _ctx;
+}
+
+function loadClip(src) {
+  const c = _ctx;
+  if (!c || !src || _buffers[src] || _loading.has(src)) return;
+  _loading.add(src);
+  fetch(src)
+    .then((r) => r.arrayBuffer())
+    // Callback form: older Safari's decodeAudioData doesn't return a promise
+    .then((data) => new Promise((resolve, reject) => c.decodeAudioData(data, resolve, reject)))
+    .then((buffer) => {
+      _buffers[src] = buffer;
+    })
+    .catch(() => {})
+    .finally(() => _loading.delete(src));
+}
+
+function prefetchNextWrong() {
+  if (!_upNext) _upNext = pullWrong();
+  loadClip(_upNext);
+}
+
+function unlockAudio() {
+  const c = getCtx();
+  if (c) {
+    // Runs on every tap so it also recovers after iOS suspends the context
+    // (e.g. the app was backgrounded)
+    if (c.state !== 'running') {
+      c.resume().catch(() => {});
+      // Older iOS versions also need a sound started within the tap
+      try {
+        const src = c.createBufferSource();
+        src.buffer = c.createBuffer(1, 1, 22050);
+        src.connect(c.destination);
+        src.start(0);
+      } catch {}
+    }
+    loadClip(APPLAUSE);
+    loadClip(LAST_PLACE);
+    prefetchNextWrong();
+  }
+}
+
+// Treat our audio as media so the iOS mute toggle doesn't silence it (Safari 16.4+)
+try {
+  if (navigator.audioSession) navigator.audioSession.type = 'playback';
+} catch {}
+['touchend', 'click', 'keydown'].forEach((ev) =>
+  window.addEventListener(ev, unlockAudio, { capture: true, passive: true })
+);
+
+function playClip(src, { feedback = false, onFail } = {}) {
+  const c = _ctx;
+  const buffer = _buffers[src];
+  if (c && c.state === 'running' && buffer) {
+    try {
+      const source = c.createBufferSource();
+      source.buffer = buffer;
+      source.connect(c.destination);
+      if (feedback) {
+        _feedbackSources.push(source);
+        source.onended = () => {
+          _feedbackSources = _feedbackSources.filter((s) => s !== source);
+        };
+      }
+      source.start(0);
+      return;
+    } catch {}
+  }
+  const el = getElement(src);
   try {
-    audio.currentTime = 0;
-    audio.play().catch(() => onFail && onFail());
+    el.currentTime = 0;
+    el.play().catch(() => onFail && onFail());
   } catch {
     if (onFail) onFail();
   }
 }
 
-let _ctx = null;
-function ctx() {
-  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (_ctx.state === 'suspended') _ctx.resume();
-  return _ctx;
-}
-
 function tone(freq, dur, type = 'sine', vol = 0.25, delay = 0) {
   try {
-    const c = ctx();
+    const c = getCtx();
+    if (!c) return;
+    if (c.state === 'suspended') c.resume().catch(() => {});
     const osc = c.createOscillator();
     const gain = c.createGain();
     osc.connect(gain);
@@ -49,34 +166,49 @@ function tone(freq, dur, type = 'sine', vol = 0.25, delay = 0) {
 
 export const sounds = {
   correct() {
+    sounds.stopFeedback();
     // Falls back to the synthesized chime if the clip can't play
-    playClip(_applauseAudio, () => {
-      tone(523, 0.12, 'sine', 0.3);
-      tone(659, 0.12, 'sine', 0.3, 0.1);
-      tone(784, 0.25, 'sine', 0.35, 0.2);
+    playClip(APPLAUSE, {
+      feedback: true,
+      onFail: () => {
+        tone(523, 0.12, 'sine', 0.3);
+        tone(659, 0.12, 'sine', 0.3, 0.1);
+        tone(784, 0.25, 'sine', 0.35, 0.2);
+      },
     });
   },
   wrong() {
-    // Falls back to the synthesized buzz if the clip can't play
     sounds.stopFeedback();
-    const clip = _wrongClips[_wrongNext];
-    _wrongNext = (_wrongNext + 1) % _wrongClips.length;
-    playClip(clip, () => {
-      tone(220, 0.15, 'sawtooth', 0.2);
-      tone(180, 0.25, 'sawtooth', 0.15, 0.12);
+    const src = _upNext || pullWrong();
+    _upNext = pullWrong();
+    loadClip(_upNext);
+    // Falls back to the synthesized buzz if the clip can't play
+    playClip(src, {
+      feedback: true,
+      onFail: () => {
+        tone(220, 0.15, 'sawtooth', 0.2);
+        tone(180, 0.25, 'sawtooth', 0.15, 0.12);
+      },
     });
   },
   // Stops the per-question feedback clips (applause / wrong-answer)
   stopFeedback() {
-    try {
-      [_applauseAudio, ..._wrongClips].forEach((a) => {
-        a.pause();
-        a.currentTime = 0;
-      });
-    } catch {}
+    _feedbackSources.forEach((s) => {
+      try {
+        s.stop();
+      } catch {}
+    });
+    _feedbackSources = [];
+    Object.entries(_elements).forEach(([src, el]) => {
+      if (src === LAST_PLACE) return;
+      try {
+        el.pause();
+        el.currentTime = 0;
+      } catch {}
+    });
   },
   lastPlace() {
-    playClip(_lastPlaceAudio);
+    playClip(LAST_PLACE);
   },
   tick() {
     tone(880, 0.04, 'square', 0.08);
@@ -97,20 +229,20 @@ export const sounds = {
   playBg() {
     try {
       if (_fadeInterval) clearInterval(_fadeInterval);
-      
-      const audioCtx = ctx();
-      if (audioCtx.state === 'suspended') {
+
+      const audioCtx = getCtx();
+      if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume().catch(() => {});
       }
-      
+
       const targetVolume = sounds.getBgVolume();
-      
+
       if (_bgAudio.paused) {
         _bgAudio.currentTime = 0;
         _bgAudio.volume = 0;
         _bgAudio.play().catch(e => console.log('Audio auto-play blocked', e));
       }
-      
+
       let currentVol = _bgAudio.volume;
       _fadeInterval = setInterval(() => {
         currentVol += 0.05;
