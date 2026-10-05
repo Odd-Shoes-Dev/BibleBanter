@@ -12,7 +12,9 @@ let _fadeInterval = null;
 // on the first tap, then one wrong-answer clip ahead) so players don't download
 // every clip up front.
 
-const APPLAUSE = '/sounds/applause.mp3';
+const CORRECT_CLIPS = [
+  'applause', 'oh-my-god-wow',
+].map((name) => `/sounds/correct/${name}.mp3`);
 const LAST_PLACE = '/sounds/last-place.mp3';
 const FIRST_PLACE = '/sounds/first-one.mp3';
 // Wrong-answer clips are used interchangeably: shuffled, no repeats until all have played
@@ -27,6 +29,25 @@ const WRONG_CLIPS = [
     'mad-man',
   ].map((name) => `/sounds/wrong/${name}.mp3`),
 ];
+
+let _correctBag = [];
+let _lastCorrect = null;
+
+function pullCorrect() {
+  if (_correctBag.length === 0) {
+    _correctBag = [...CORRECT_CLIPS];
+    for (let i = _correctBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [_correctBag[i], _correctBag[j]] = [_correctBag[j], _correctBag[i]];
+    }
+    const last = _correctBag.length - 1;
+    if (_correctBag[last] === _lastCorrect && last > 0) {
+      [_correctBag[last], _correctBag[0]] = [_correctBag[0], _correctBag[last]];
+    }
+  }
+  _lastCorrect = _correctBag.pop();
+  return _lastCorrect;
+}
 
 let _wrongBag = [];
 let _lastPulled = null;
@@ -108,7 +129,7 @@ function unlockAudio() {
         src.start(0);
       } catch {}
     }
-    loadClip(APPLAUSE);
+    CORRECT_CLIPS.forEach(loadClip);
     loadClip(LAST_PLACE);
     loadClip(FIRST_PLACE);
     prefetchNextWrong();
@@ -172,8 +193,9 @@ function tone(freq, dur, type = 'sine', vol = 0.25, delay = 0) {
 export const sounds = {
   correct() {
     sounds.stopFeedback();
+    const src = pullCorrect();
     // Falls back to the synthesized chime if the clip can't play
-    playClip(APPLAUSE, {
+    playClip(src, {
       feedback: true,
       onFail: () => {
         tone(523, 0.12, 'sine', 0.3);
