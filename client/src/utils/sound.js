@@ -21,6 +21,8 @@ const WRONG_CLIPS = [
   ...[
     'jesus-1', 'iweee', 'eeeeeh', 'hahahaha', 'have-mercy-upon-us', 'dururu',
     'haha-good-bye', 'mind-their-business', 'mubs', 'laughing-men', 'jehova',
+    'chaii-chai', 'ehhh2', 'famous-baby-laugh', 'i-wonder',
+    'katonda-wange', 'man-laughs-on-stage', 'ohh-no-no', 'suffer-is-real',
   ].map((name) => `/sounds/wrong/${name}.mp3`),
 ];
 
